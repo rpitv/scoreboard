@@ -922,8 +922,8 @@ $(document).ready(function() {
 	});
 	
 	//TEMPORARY FOR SANITY PURPOSES sets to football
-	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
-	$(".hockey").fadeIn();
+	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").hide();
+	$(".hockey").show();
 	$("#toggleSettings").trigger("click");
 	
 	//END TEMPORARY FOR SANITY PURPOSES
@@ -943,7 +943,7 @@ $(document).ready(function() {
     $("#transitionControl #down").click(scoreboardDown);
     $("#setClock").click(setClock);
     $("#autoSync").change(changeAutosync);
-	$(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
+$(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
 	$(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(function(){ytgUpdate(this);});
 	$("#customYTG").change(function(){ytgCustom(this);});
 	$("#displayDownDistance, #clearDownDistance").click(function(){ddDisplay(this);});

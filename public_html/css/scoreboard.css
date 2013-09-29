@@ -15,8 +15,7 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
-*/
- 
+ */
 @charset "utf-8";
 @font-face {
     font-family: gothamNarrow;
@@ -26,7 +25,7 @@ body {
     background: #aaa url(images/ExavideoSemitransparent.png) repeat;
     text-align: center;
     font-family: gothamNarrow;
-	overflow-y: scroll;
+    overflow-y: scroll;
 }
 .penalty_queue {
     float: left;
@@ -68,7 +67,7 @@ body {
 }
 .bttn:hover {
     border: 2px solid black;
-	color: #fff;
+    color: #fff;
     background: #999;
     cursor: pointer;
 }
@@ -81,36 +80,36 @@ body {
     width: 40%;
 }
 .bttn.downs{
-	width:19.3%;
-	margin: 3px 0px;
+    width:19.3%;
+    margin: 3px 0px;
 }
 .bttn.ytg{
-	width: 5.7%;
-	margin: 3px 0px;
-	padding: 4px 2px;
+    width: 5.7%;
+    margin: 3px 0px;
+    padding: 4px 2px;
 }
 .bttn.addSubYTG{
-	width: 8%;
-	margin: 3px 0;
-	padding: 4px 2px;
+    width: 8%;
+    margin: 3px 0;
+    padding: 4px 2px;
 }
 .bttn.pointsBttn{
-	margin: 0;
-	float: right;
-	padding-top: 1px;
-	padding-bottom: 1px;
-	min-width: 1.5em;
-	max-width: 2em;
+    margin: 0;
+    float: right;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    min-width: 1.5em;
+    max-width: 2em;
 }
 #announceControl .bttn {
     width: 18%;
 }
 #announce:hover {
-	color: black;
+    color: black;
     background: yellow;
 }
 #status:hover {
-	color: black;
+    color: black;
     background: #eee;
 }
 #toggleClock {
@@ -183,35 +182,35 @@ body {
 #settings {
     padding: 10px;
     margin: 10px auto;
-	margin-top: 0;
+    margin-top: 0;
     width: auto;
     background: #eee;
     border: 1px solid #f00;
 }
 .settingsBox{
-	border: 3px solid orange;
+    border: 3px solid orange;
 }
 .settingInputs{
-	display:block;
+    display:block;
 }
 .settingInputs input{
-	align:center;
+    align:center;
 }
 #teamSettings input[type="text"], #gameSettings input[type="text"] {
-	text-align:right;
-	width:4em;
+    text-align:right;
+    width:4em;
 }
 #settings label{
-	float:right;
+    float:right;
 }
 #toggleSettings{
 }
 .teamControlBox {
-	display: inline-block;
-	width: 300px;
-	height: auto;
-	background: #aaa;
-	border: 2px solid black;
+    display: inline-block;
+    width: 300px;
+    height: auto;
+    background: #aaa;
+    border: 2px solid black;
 }
 .downDistance{
 	font-size: 25px;

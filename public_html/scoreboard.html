@@ -27,9 +27,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
         <script type="text/javascript" src="js/jquery-ui-1.10.1.custom.min.js"></script>
         <script type="text/javascript" src="js/scoreboard.js"></script>
     </head>
-    
     <body>
-
         <div id="main">
             <!-- global state/control -->
 			
@@ -43,7 +41,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 			
 			<div id="centerPanel" style="display: inline-block; width: 420px;">
 				<div id="gameSettings" class="innerBox settingsBox" style="display:list-item; list-style:none;">
-					<label class="settingInputs">Sport
+					<label class="settingInputs" for="gameType">Sport
 						<select id="gameType" ><!--are hard coded now, but will be pulled from json with game options-->
 							<option value="baseball">Baseball</option>
 							<option value="basketball">Basketball</option>
@@ -58,24 +56,65 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 							<option value="volleyball">Volleyball</option>
 						</select>
 					</label>
-					<label class="settingInputs">Periods
-						<input type="text" disabled="disabled" id="periodSetting"></input>
-					</label>
-					<label class="settingInputs">Period Length
-						<input type="text" disabled="disabled" id="periodLength"></input>
-					</label>
-					<label class="settingInputs">Timeouts
-						<input type="text" disabled="disabled" id="timeouts"></input>
-					</label>
-					<label class="settingInputs">Overtime Periods
-						<input type="text" disabled="disabled" disabled="disabled" id="otPeriodSetting"></input>
-					</label>
-					<label class="settingInputs">Overtime Length
-						<input type="text" disabled="disabled" id="otPeriodLength"></input>
-					</label>
-					<label class="settingInputs">Shootout
-						<input type="checkbox" disabled="disabled" id="shootoutSetting"></input>
-					</label>
+                    <label class="settingInputs">Tenths
+                            <input type="checkbox" id="tenthsToggle"></input>
+                    </label>
+                    <label>Timing
+                        <label class="settingInputs">Time
+                            <input type="checkbox" id="timeToggle"></input>
+                        </label>
+                        <label class="settingInputs">Period
+                            <input type="checkbox" id="periodToggle"></input>
+                        </label>
+                        <label class="settingInputs">Period Length
+                            <input type="text" id="periodLength"></input>
+                        </label>
+                        <label class="settingInputs">Qty Periods
+                            <input type="text" id="periodQty"></input>
+                        </label>
+                        <label class="settingInputs">OT
+                            <input type="checkbox" id="otToggle"></input>
+                        </label>
+                        <label class="settingInputs">OT Time
+                            <input type="checkbox" id="otTimeToggle"></input>
+                        </label>
+                        <label class="settingInputs">OT Period Length
+                            <input type="text" id="otPeriodLength"></input>
+                        </label>
+                        <label class="settingInputs">OT Qty Periods
+                            <input type="text" id="otPeriodQty"></input>
+                        </label>
+                        <label class="settingInputs">Shootout
+                            <input type="checkbox" id="shootoutToggle"></input>
+                        </label>
+                        <label class="settingInputs">SO Rounds
+                            <input type="text" id="shootoutRounds"></input>
+                        </label>
+                        <label class="settingInputs">SO Additional Rounds
+                            <input type="text" id="periodSetting"></input>
+                        </label>
+                        <label class="settingInputs">Periods
+                            <input type="text" id="periodSetting"></input>
+                        </label>
+                        <label class="settingInputs">Periods
+                            <input type="text" id="periodSetting"></input>
+                        </label>
+                        <label class="settingInputs">Periods
+                            <input type="text" id="periodSetting"></input>
+                        </label>
+                        <label class="settingInputs">Periods
+                            <input type="text" id="periodSetting"></input>
+                        </label>
+                        <label class="settingInputs">Periods
+                            <input type="text" id="periodSetting"></input>
+                        </label>
+                        <label class="settingInputs">Periods
+                            <input type="text" id="periodSetting"></input>
+                        </label>
+                        <label class="settingInputs">Periods
+                            <input type="text" id="periodSetting"></input>
+                        </label>
+                    </label>
 				</div>
 
 				<!-- Settings panel toggle button -->
@@ -141,32 +180,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 						<div class="bttn addSubYTG" id="plus5YTG" value="5">+5</div>
 						<div class="bttn addSubYTG" id="plus10YTG" value="10">+10</div>
 						<div class="bttn addSubYTG" id="plus15YTG" value="15">+15</div>
-						</br><!-- CONSIDER DELETING IF PLUS/MINUS INTERFACE WORKS
-						<div class="bttn ytg" id="1YTG" value="1">1</div>
-						<div class="bttn ytg" id="2YTG" value="2">2</div>
-						<div class="bttn ytg" id="3YTG" value="3">3</div>
-						<div class="bttn ytg" id="4YTG" value="4">4</div>
-						<div class="bttn ytg" id="5YTG" value="5">5</div>
-						<div class="bttn ytg" id="6YTG" value="6">6</div>
-						<div class="bttn ytg" id="7YTG" value="7">7</div>
-						<div class="bttn ytg" id="8YTG" value="8">8</div>
-						<div class="bttn ytg" id="9YTG" value="9">9</div>
-						<div class="bttn ytg" id="10YTG" value="10">10</div>
 						</br>
-						
-						<div class="bttn ytg" id="11YTG" value="11">11</div>
-						<div class="bttn ytg" id="12YTG" value="12">12</div>
-						<div class="bttn ytg" id="13YTG" value="13">13</div>
-						<div class="bttn ytg" id="14YTG" value="14">14</div>
-						<div class="bttn ytg" id="15YTG" value="15">15</div>
-						<div class="bttn ytg" id="16YTG" value="16">16</div>
-						<div class="bttn ytg" id="17YTG" value="17">17</div>
-						<div class="bttn ytg" id="18YTG" value="18">18</div>
-						<div class="bttn ytg" id="19YTG" value="19">19</div>
-						<div class="bttn ytg" id="20YTG" value="20">20</div>
-						</br>
-						
-						<div class="bttn ytg" id="25YTG" value="25">25</div>-->
 						<div class="bttn ytgSpecial" id="goalYTG" value="Goal">Goal</div>
 						<div class="bttn ytgSpecial" id="inchesYTG" value="Inches">Inches</div>
 						<span>
@@ -329,7 +343,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
             </div>
                        <div class=""  style="">
                 <label>
-                    <input type="text" id="statusColor" value=""><span>StatusColor</span></input>
+                    <input type="text" id="statusColor" value=""><span>Color</span></input>
                 </label>
             </div>
 			<div class="ck-bttn football">
