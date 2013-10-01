@@ -90,29 +90,45 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                         <label class="settingInputs">SO Rounds
                             <input type="text" id="shootoutRounds"></input>
                         </label>
-                        <label class="settingInputs">SO Additional Rounds
-                            <input type="text" id="periodSetting"></input>
+                        <label class="settingInputs" title="Choose whether timeouts are displayed in the scoreboard SVG">Display Timeouts
+                            <input type="checkbox" id="timeoutsDisplaySVG"></input>
                         </label>
-                        <label class="settingInputs">Periods
-                            <input type="text" id="periodSetting"></input>
+                        <label class="settingInputs">Timeouts
+                            <input type="checkbox" id="timeoutsToggle"></input>
                         </label>
-                        <label class="settingInputs">Periods
-                            <input type="text" id="periodSetting"></input>
+                        <label class="settingInputs">TO Reset by Period
+                            <input type="checkbox" id="timeoutsResetToggle"></input>
                         </label>
-                        <label class="settingInputs">Periods
-                            <input type="text" id="periodSetting"></input>
+                        <label class="settingInputs">TO Set Period of Reset
+                            <input type="text" id="timeoutsResetPeriod"></input>
                         </label>
-                        <label class="settingInputs">Periods
-                            <input type="text" id="periodSetting"></input>
+                        <label class="settingInputs">OT Timeouts
+                            <input type="checkbox" id="timeoutsOTToggle"></input>
                         </label>
-                        <label class="settingInputs">Periods
-                            <input type="text" id="periodSetting"></input>
+                        <label class="settingInputs">OT TO Reset by Period
+                            <input type="checkbox" id="timeoutsOTResetToggle"></input>
                         </label>
-                        <label class="settingInputs">Periods
-                            <input type="text" id="periodSetting"></input>
+                        <label class="settingInputs">OT TO Set Period of Reset
+                            <input type="text" id="timeoutsOTResetPeriod"></input>
                         </label>
-                        <label class="settingInputs">Periods
-                            <input type="text" id="periodSetting"></input>
+						<label class="settingInputs">Penalties
+                            <input type="checkbox" id="penaltiesToggle"></input>
+                        </label>
+                        <label class="settingInputs">Single Penalty Name
+                            <input type="text" id="penaltiesSingleName"></input>
+                        </label>
+						<label class="settingInputs">Multiple Penalty Name
+                            <input type="text" id="penaltiesMultipleName"></input>
+                        </label>
+                        <!-- Which conditions to consider (teamsize - penaltyQueueLength vs. same)
+						<label class="settingInputs">Player vs. Player
+                            <input type="checkbox" id="periodSetting"></input>
+                        </label>-->
+						<label class="settingInputs">Team Size
+                            <input type="text" id="teamSize"></input>
+                        </label>
+                        <label class="settingInputs">Penalty Queue Max Length
+                            <input type="text" id="penaltiesQueueMaxDepth"></input>
                         </label>
                     </label>
 				</div>

@@ -756,6 +756,14 @@ jQuery.fn.putTeamData = function() {
     putJson($(this).data('url'), json);
 }
 
+function putSettings( ) {
+	
+}
+
+function getSettings(){
+
+}
+
 function announceStatusTextInput() {
     return $("#announceControl #textInput").val();
 }
