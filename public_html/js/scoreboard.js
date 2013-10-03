@@ -736,6 +736,7 @@ jQuery.fn.getTeamData = function() {
         $(thiz).data("roster", data.autocompletePlayers);
         $(thiz).penaltyDialog().unserializePenaltiesJson(data.penalties);
 		
+		//move this out of this function
 		$(thiz).parent().css( "border", "5px solid "+data.bgcolor); // Set team colors on panel
 		$(thiz).parent().find("span.teamName").css( "color", data.bgcolor);
 		$(thiz).parent().find("span.teamName").html(data.name); // Set team names on panel
@@ -745,6 +746,7 @@ jQuery.fn.getTeamData = function() {
 // putTeamData
 // Synchronize team data back to the server.
 jQuery.fn.putTeamData = function() {
+	//move this elsewhere (to scoreboard template?)
 	// Check for Score/SOG being blanked
 	// If so, reset value to 0 instead
 	if ($(this).find("#score").val() <= 0) {
@@ -756,13 +758,16 @@ jQuery.fn.putTeamData = function() {
     putJson($(this).data('url'), json);
 }
 
-function putSettings( ) {
-	
-}
-
 function getSettings(){
 
 }
+
+function putSettings( ) {
+	var json = $("#settings").serializeInputsJson();
+	putJson("/url", json);
+}
+
+
 
 function announceStatusTextInput() {
     return $("#announceControl #textInput").val();
@@ -843,13 +848,15 @@ $(document).ready(function() {
     updatePreviewTimeout( );
     getAutosync( );
 
+	//
+	$("#gameSettings").change(putSettings);
+
     $(".teamControl").buildTeamControl();
     // set up team URLs and load initial data
     $("#awayTeamControl").data('url','team/0');
     $("#awayTeamControl").getTeamData();
     $("#homeTeamControl").data('url','team/1');
     $("#homeTeamControl").getTeamData();
-
     $(".dialog").dialog({
         autoOpen: false,
         modal: true,
@@ -932,7 +939,7 @@ $(document).ready(function() {
 	//TEMPORARY FOR SANITY PURPOSES sets to football
 	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").hide();
 	$(".hockey").show();
-	$("#toggleSettings").trigger("click");
+	//$("#toggleSettings").trigger("click");
 	
 	//END TEMPORARY FOR SANITY PURPOSES
 	
