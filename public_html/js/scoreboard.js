@@ -19,43 +19,7 @@
 
 
 "use strict";
-//to be moved to json game settings
-var autocompletePenalties = [
-	"Boarding",
-	"Butt-ending",
-	"Charging",
-	"Body Checking",
-	"Clipping",
-	"Cross Checking",
-	"Delay of Game",
-	"Diving",
-	"Elbowing",
-	"Hand Pass",
-	"Face Mask",
-	"Embellishment",
-	"Fighting",
-	"Head-butting",
-	"High-Sticking",
-	"Late Hit",
-	"Hit From Behind",
-	"Holding",
-	"Hooking",
-	"Instigating",
-	"Interference",
-	"Kicking",
-	"Kneeing",
-	"Illegal Player",
-	"Obstruction",
-	"Roughing",
-	"Slashing",
-	"Slew-Footing",
-	"Spearing",
-	"Spitting",
-	"Taunting",
-	"Tripping",
-	"Unsportsmanlike Conduct",
-];
-
+var autocompletePenalties = [];
 var clockState = { };
 var lastStopTimeElapsed = 0;
 var overtime_length = 5*60*10;
@@ -763,8 +727,8 @@ function getSettings(){
 }
 
 function putSettings( ) {
-	var json = $("#settings").serializeInputsJson();
-	putJson("/url", json);
+	var json = $("#gameSettings").serializeInputsJson();
+	putJson("scoreboardSettings", json);
 }
 
 
@@ -848,7 +812,7 @@ $(document).ready(function() {
     updatePreviewTimeout( );
     getAutosync( );
 
-	//
+    
 	$("#gameSettings").change(putSettings);
 
     $(".teamControl").buildTeamControl();
@@ -862,7 +826,7 @@ $(document).ready(function() {
         modal: true,
         resizable: false,
     });
-        
+    
     //create function and move when done
 	//TOGGLE GAME/TEAM SETTINGS
 	$("#toggleSettings").click(function() {
@@ -872,7 +836,7 @@ $(document).ready(function() {
 		if($("#toggleSettingsText").html() == "Hide Settings"){
 			$("#toggleSettingsText").html("Show Settings");
 			// Reload Team Data
-			
+			//This needs to be handled outside of this function
 			$("#awayTeamControl").data('url','team/0');
 			$("#awayTeamControl").getTeamData();
 			$("#homeTeamControl").data('url','team/1');
@@ -883,7 +847,8 @@ $(document).ready(function() {
 	});
 
 	//GENERATE LIST OF SCHOOLS FOR AUTOCOMPLETE FROM JSON
-	var schoolList = Array();
+    
+	var schoolList = [];
 	jQuery.getJSON("js/teamlist.json", function(teamlist) {
 		$.each(teamlist.teams, function(k, v) {
 			schoolList[k] = v.name;
@@ -928,6 +893,13 @@ $(document).ready(function() {
 		});
 	});	
 	
+    
+    $("#gameType").val("").autocomplete
+    
+    
+    
+    
+    
 	//GAME TYPE SELECTOR
 	$("#gameType").change(function(){
 		$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
@@ -958,19 +930,9 @@ $(document).ready(function() {
     $("#transitionControl #down").click(scoreboardDown);
     $("#setClock").click(setClock);
     $("#autoSync").change(changeAutosync);
-$(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
-	$(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(function(){ytgUpdate(this);});
-	$("#customYTG").change(function(){ytgCustom(this);});
-	$("#displayDownDistance, #clearDownDistance").click(function(){ddDisplay(this);});
+    $(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
+    $(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(function(){ytgUpdate(this);});
+    $("#customYTG").change(function(){ytgCustom(this);});
+    $("#displayDownDistance, #clearDownDistance").click(function(){ddDisplay(this);});
 
-  
-  //Temporary code to get flag working
-  $("#globalFlag").click( function(){
-    $("#textInput").val($(this).attr("status"));
-    $("#textInputColor").val($(this).attr("color"));
-    postStatusWithColor();
-  });
-
-  
-  
 });

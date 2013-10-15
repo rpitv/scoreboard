@@ -50,15 +50,32 @@ class GameClock
     def initialize(preset)
         # Clock value, in tenths of seconds
         @value = 0
-        @last_start = nil
-        # 15 minutes, in tenths of seconds
+        @last_start = nil        
+        @period = 1
+        
         @period_length = preset.period_length
         @overtime_length = preset.overtime_length
-        @period_end = @period_length
-        @period = 1
-        @num_periods = preset.num_periods
+        @num_periods = preset.num_periods    
+        
+    end
+    
+    def period_end
+        if @period <= @num_periods
+            @period_length * @period
+        else
+            @period_length * @num_periods + @overtime_length * (@period - @num_periods)
+        end
     end
 
+    def load_settings(preset)
+        current_time_remaining = period_remaining
+        STDERR.puts "current_time_remaining #{current_time_remaining}"
+        @period_length = preset.period_length
+        @overtime_length = preset.overtime_length
+        @num_periods = preset.num_periods
+        
+        self.period_remaining = current_time_remaining
+    end
 
     def time_elapsed
         if @last_start
@@ -68,8 +85,8 @@ class GameClock
             value_now = @value + (elapsed * 10).to_i
 
             # we won't go past the end of a period without an explicit restart
-            if value_now > @period_end
-                value_now = @period_end
+            if value_now > period_end
+                value_now = period_end
                 @value = value_now
                 @last_start = nil
             end
@@ -79,7 +96,7 @@ class GameClock
             @value
         end
     end
-
+    
     def period_advance
         pl = @period_length
         if @period+1 > @num_periods
@@ -90,29 +107,18 @@ class GameClock
         #end
     end
 
-    def reset_period_remaining(tenths)
-        @value = @period_end - tenths
-    end
-
     def reset_time(remaining, newperiod)
         if newperiod <= @num_periods
             # normal period
             @value = @period_length - remaining + @period_length*(newperiod-1)
-            @period_end = @period_length*(newperiod)
         else
             # overtime
             @value = @overtime_length*(newperiod-@num_periods) - remaining + @period_length*@num_periods
-            @period_end = @period_length*@num_periods + @overtime_length*(newperiod-@num_periods)
         end
         if @last_start != nil
             @last_start = Time.now
         end
         @period = newperiod
-    end
-
-    def overtime_length=(new_otlen)
-        @overtime_length = new_otlen
-        reset_time(period_remaining(), @period)
     end
 
     attr_reader :period
@@ -123,11 +129,6 @@ class GameClock
         if @value == @period_end
             # FIXME: handle overtimes correctly...
             @period += 1
-            if (@period > @num_periods)
-                @period_end += @overtime_length
-            else
-                @period_end += @period_length
-            end
         end
 
         if @last_start == nil
@@ -149,11 +150,14 @@ class GameClock
     end
 
     def period_remaining=(tenths)
-        @period_end = time_elapsed + tenths
+        @value = period_end - tenths
+        if running?
+            @last_start = Time.now
+        end
     end
 
     def period_remaining
-        @period_end - time_elapsed
+        period_end - time_elapsed
     end
 end
 
@@ -413,26 +417,13 @@ class ClockHelper
 end
 
 def parse_clock(time_str)
-	frac = 0
-	if time_str =~ /(.*)\.(\d+)/
-		frac = (("0." + $2).to_f * 1000).to_i
-		time_str = $1
-	end
-
-	whole = -1
-	if time_str =~ /(\d+):(\d+)/
-		whole = ($1.to_i) * 60 + ($2.to_i)
-	elsif time_str =~ /(\d+)/
-		whole = ($1.to_i)
-		whole = (whole / 100) * 60 + (whole % 100)
-	end
-    #time = whole * 1000 + frac
-    time = (whole * 1000 + frac) / 100
-
-    if time < 0
-        return nil
+    if time_str =~ /^((\d+)?:)?([0-5]\d(\.\d)?)$/
+        seconds = $3.to_f
+        minutes = $2.to_i
+        minutes * 600 + (seconds * 10).to_i
+    else
+        fail "invalid clock value"
     end
-    return time
 end
 
 class ScoreboardApp < Patchbay
@@ -639,7 +630,27 @@ class ScoreboardApp < Patchbay
         @status_color = incoming_json['color'] || 'white'
         render :json => ''
     end
-
+    
+    put '/scoreboardSettings' do
+        @gameSettings = incoming_json
+        STDERR.puts @gameSettings.inspect
+        
+        number_of_periods = @gameSettings['periodQty'].to_i
+        begin
+            period_length = parse_clock(@gameSettings['periodLength'])
+            overtime_length = parse_clock(@gameSettings['otPeriodLength'])
+        rescue
+            render :status => 400
+            return
+        end
+        
+        new_clock_settings = ClockSettings.new(period_length, overtime_length, number_of_periods)
+        @clock.load_settings(new_clock_settings)
+        
+        STDERR.puts "number_of_periods=#{number_of_periods}"
+        render :json => ''
+    end
+    
     put '/downdist' do 
         @downdist = incoming_json['message']
         @status = @downdist
@@ -941,7 +952,7 @@ def start_rs232_sync_thread(app)
                         STDERR.puts "tenths: #{tenths}"
 
                         if tenths >= 0 and app.autosync_enabled
-                            app.clock.reset_period_remaining(tenths)
+                            app.clock.period_remaining = tenths
                         end
                     end
                     last_control = byte.ord
