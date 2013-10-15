@@ -206,12 +206,17 @@ body {
 #toggleSettings{
 }
 .teamControlBox {
-    display: inline-block;
-    width: 300px;
-    height: auto;
-    background: #aaa;
-    border: 2px solid black;
+    display:inline-block;
+    width:300px;
+    height:auto;
+    background:#aaa;
+    border:2px solid black;
 }
 .downDistance{
-	font-size: 25px;
+	font-size:25px;
+}
+.teamColorPicker{
+    height:15px;
+    width:15px;
+    border:1px solid #fff;
 }

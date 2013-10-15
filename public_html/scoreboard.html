@@ -41,21 +41,10 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 			
 			<div id="centerPanel" style="display: inline-block; width: 420px;">
 				<div id="gameSettings" class="innerBox settingsBox" style="display:list-item; list-style:none;">
-					<label class="settingInputs" for="gameType">Sport
-						<select id="gameType" ><!--are hard coded now, but will be pulled from json with game options-->
-							<option value="baseball">Baseball</option>
-							<option value="basketball">Basketball</option>
-							<option value="broomball">Broomball</option>
-							<option value="hockey">Field Hockey</option>
-							<option value="football">Football</option>
-							<option value="hockey">Hockey</option>
-							<option value="rugby">Rugby</option>
-							<option value="soccer">Soccer</option>
-							<option value="baseball">Softball</option>
-							<option value="lacrosse">Lacrosse</option> 
-							<option value="volleyball">Volleyball</option>
-						</select>
+					<label class="settingInputs">Sport
+						<input type="text" id="gameType" onclick="$(this).select();" />
 					</label>
+					<input type="text" id="sportClassName" title="Holds class name value for each sport" style="display:none" />
                     <label class="settingInputs">Tenths
                             <input type="checkbox" id="tenthsToggle"></input>
                     </label>
@@ -83,7 +72,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                         <label class="settingInputs">OT Qty Periods
                             <input type="text" id="otPeriodQty"></input>
                         </label>
-                        <label class="settingInputs">Shootout
+                        <span style="display:none"><label class="settingInputs">Shootout
                             <input type="checkbox" id="shootoutToggle"></input>
                         </label>
                         <label class="settingInputs">SO Rounds
@@ -128,7 +117,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
                         </label>
                         <label class="settingInputs">Penalty Queue Max Length
                             <input type="text" id="penaltiesQueueMaxDepth"></input>
-                        </label>
+                        </label></span>
 				</div>
 
 				<!-- Settings panel toggle button -->
@@ -245,10 +234,14 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 				<label class="settingInputs">Abbreviation
 					<input type="text" id="name"></input>
 				</label>
-				<label class="settingInputs">Primary Color
+				<label class="settingInputs">Main Color
 					<input type="text" id="bgcolor"></input>
 				</label>
-				<label class="settingInputs">Secondary Color
+                <canvas class="teamColorPicker" id="teamColor1"></canvas>
+                <canvas class="teamColorPicker" id="teamColor2"></canvas>
+                <canvas class="teamColorPicker" id="teamColorWhite"></canvas>
+                <canvas class="teamColorPicker" id="teamColorBlack"></canvas>
+				<label class="settingInputs">2nd Color
 					<input type="text" id="fgcolor"></input>
 				</label>
 				<label class="settingInputs">Nickname

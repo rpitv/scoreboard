@@ -25,6 +25,9 @@ var lastStopTimeElapsed = 0;
 var overtime_length = 5*60*10;
 var down = "1st";
 var ytg = 10;
+var schoolList = [];
+var sportList = [];
+
 
 function getText(sourceurl, callback) {
     jQuery.ajax({
@@ -686,8 +689,13 @@ jQuery.fn.serializeInputsJson = function() {
 // take all properties of the object and try to set field values 
 jQuery.fn.unserializeInputsJson = function(data) {
     for (var prop in data) {
-        $(this).find("input#"+prop).val(data[prop]);
+        $(this).find("input#"+prop+":text,select").val(data[prop]);
         $(this).find("select#"+prop).val(data[prop]);
+        if (data[prop]) {
+            $(this).find("input#"+prop+":checkbox").attr('checked','checked');
+        } else {
+            $(this).find("input#"+prop+":checkbox").removeAttr('checked');
+        }
     }
 }
 
@@ -807,6 +815,43 @@ function getAutosync() {
         }
     });
 }
+
+function showHideSettings() {
+    $("#gameSettings").toggle("blind", 1000);
+    $("#awayTeamControl").find("#teamSettings").toggle("blind", 1000);
+    $("#homeTeamControl").find("#teamSettings").toggle("blind", 1000);
+    if($("#toggleSettingsText").html() == "Hide Settings"){
+        $("#toggleSettingsText").html("Show Settings");
+        // Reload Team Data
+        //This needs to be handled outside of this function
+        $("#awayTeamControl").data('url','team/0');
+        $("#awayTeamControl").getTeamData();
+        $("#homeTeamControl").data('url','team/1');
+        $("#homeTeamControl").getTeamData();
+    }else{
+        $("#toggleSettingsText").html("Hide Settings");
+    }
+}
+
+function generateSportList() {
+    $.getJSON("js/sports.json", function(list){
+        $.each(list.sport, function (k,v){
+            sportList[k] = v.gameType;
+        });
+    });
+}
+
+function getSettingsPresets(event, ui) {
+    //some implementation of unserializeJson should go here
+    $.getJSON("js/sports.json", function(list){
+        $.each(list.sports, function (k,v){
+            if (v.gameType == ui.item.value){
+                alert(v.periodQty);
+            }
+        });
+    });
+}
+
 $(document).ready(function() {
     updateClockTimeout( );
     updatePreviewTimeout( );
@@ -827,28 +872,10 @@ $(document).ready(function() {
         resizable: false,
     });
     
-    //create function and move when done
-	//TOGGLE GAME/TEAM SETTINGS
-	$("#toggleSettings").click(function() {
-		$("#gameSettings").toggle("blind", 1000);
-		$("#awayTeamControl").find("#teamSettings").toggle("blind", 1000);
-		$("#homeTeamControl").find("#teamSettings").toggle("blind", 1000);
-		if($("#toggleSettingsText").html() == "Hide Settings"){
-			$("#toggleSettingsText").html("Show Settings");
-			// Reload Team Data
-			//This needs to be handled outside of this function
-			$("#awayTeamControl").data('url','team/0');
-			$("#awayTeamControl").getTeamData();
-			$("#homeTeamControl").data('url','team/1');
-			$("#homeTeamControl").getTeamData();
-		}else{
-			$("#toggleSettingsText").html("Hide Settings");
-		}
-	});
+    //TOGGLE GAME/TEAM SETTINGS
+	$("#toggleSettings").click(showHideSettings);
 
 	//GENERATE LIST OF SCHOOLS FOR AUTOCOMPLETE FROM JSON
-    
-	var schoolList = [];
 	jQuery.getJSON("js/teamlist.json", function(teamlist) {
 		$.each(teamlist.teams, function(k, v) {
 			schoolList[k] = v.name;
@@ -857,8 +884,8 @@ $(document).ready(function() {
 			autoFocus:true,
 			source: schoolList,
 			select: function(event, ui){
-				 $.getJSON('js/teamlist.json', function(teamlist) {
-					$.each(teamlist.teams, function(k, v) {
+				 $.getJSON('js/teamlist.json', function(list) {
+					$.each(list.teams, function(k, v) {
 						if(v.name == ui.item.value){
 							$("#awayTeamControl").find("#name").val(v.abbreviation);
 							$("#awayTeamControl").find("#bgcolor").val(v.color1);
@@ -876,8 +903,8 @@ $(document).ready(function() {
 			autoFocus:true,
 			source: schoolList,
 			select: function(event, ui){
-				 $.getJSON('js/teamlist.json', function(teamlist) {
-					$.each(teamlist.teams, function(k, v) {
+				 $.getJSON('js/teamlist.json', function(list) {
+					$.each(list.teams, function(k, v) {
 						if(v.name == ui.item.value){
 							$("#homeTeamControl").find("#name").val(v.abbreviation);
 							$("#homeTeamControl").find("#bgcolor").val(v.color1);
@@ -894,7 +921,20 @@ $(document).ready(function() {
 	});	
 	
     
-    $("#gameType").val("").autocomplete
+    //what's the best way to combine the two calls to file (even if they are cached)
+    $("#gameType").click(generateSportList).autocomplete({
+        autoFocus: true,
+        source: sportList,
+        select: function(event, ui) { //getSettingsPresets(event, ui)
+            $.getJSON("js/sports.json", function(list){
+                $.each(list.sport, function (k,v){
+                    if (v.gameType == ui.item.value){
+                        $("#gameSettings").unserializeInputsJson(v);
+                    }
+                });
+            });
+        }
+    });
     
     
     
@@ -902,10 +942,11 @@ $(document).ready(function() {
     
 	//GAME TYPE SELECTOR
 	$("#gameType").change(function(){
-		$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
-		var currentSport = $("#gameType :selected").val();
+		//gameType list needs to be generated from sportList
+        $(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
+		var currentSport = $("sportClassName").val();
 		$('.' + currentSport).fadeIn();
-		document.title = ('Exaboard - ' + $("#gameType :selected").html());
+		document.title = ('Exaboard - ' + $("#gameType").val());
 	});
 	
 	//TEMPORARY FOR SANITY PURPOSES sets to football
