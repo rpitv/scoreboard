@@ -668,6 +668,10 @@ class ScoreboardApp < Patchbay
         render :svg => @view.render_template
     end
 
+    get '/view_status' do
+        render :json => { :is_up => @view.is_up? }.to_json
+    end
+
     def view=(view)
         @view = view
         @view.announce = AnnounceHelper.new(@announces)
@@ -902,6 +906,10 @@ class ScoreboardView
 
     def render_template
         @template.result(binding)
+    end
+
+    def is_up?
+        @global_dissolve.value > 0.01
     end
 
     def galpha
