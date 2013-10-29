@@ -29,6 +29,8 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
     </head>
     <body>
         <div id="main">
+			<div id="scoreboardPreview" class="control"></div>
+
             <!-- global state/control -->
 			
 			<!-- AWAY TEAM CONTROL -->
@@ -40,22 +42,17 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
 			
 			<div id="centerPanel" style="display: inline-block; width: 420px;">
-				<div id="gameSettings" class="innerBox settingsBox" style="display:list-item; list-style:none;">
+				<div id="gameSettings" class="innerBox settingsBox">
 					<label class="settingInputs">Sport
 						<input type="text" id="gameType" onclick="$(this).select();" />
 					</label>
 					<input type="text" id="sportClassName" title="Holds class name value for each sport" style="display:none" />
                     <label class="settingInputs">Tenths
-                            <input type="checkbox" id="tenthsToggle"></input>
+                            <input type="checkbox" disabled="disabled" id="tenthsToggle"></input>
                     </label>
-                        <label class="settingInputs">Time
-                            <input type="checkbox" id="timeToggle"></input>
-                        </label>
-                        <label class="settingInputs">Period
-                            <input type="checkbox" id="periodToggle"></input>
-                        </label>
-                        <label class="settingInputs">Period Length
-                            <input type="text" id="periodLength"></input>
+                        <label class="settingInputs">Time<input type="checkbox" id="timeToggle" /></label>
+                        <label class="settingInputs">Period<input type="checkbox" id="periodToggle"></input></label>
+                        <label class="settingInputs">Period Length<input type="text" id="periodLength"></input>
                         </label>
                         <label class="settingInputs">Qty Periods
                             <input type="text" id="periodQty"></input>
@@ -121,8 +118,8 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 				</div>
 
 				<!-- Settings panel toggle button -->
-				<div id="toggleSettings" class="bttn" style="diplay:list-item; width: 7em;" value="Test">
-					<span id="toggleSettingsText">Hide Settings</span>
+				<div id="toggleSettings" class="bttn" style="diplay:list-item; width: 7em;">
+					<span id="toggleSettingsText">Show Settings</span>
 				</div>
 				<!-- Clock Control Panel -->
 				<div id="clockControl" class="control basketball broomball football hockey lacrosse soccer">
@@ -162,7 +159,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 						</span>
 						<div class="bttn" id="displayDownDistance" value="1">Display</div>
 						<div class="bttn" id="clearDownDistance" value="0">Clear</div>
-						<div class="bttn" id="globalFlag" status="Flag" color="yellow" style="border-color:yellow">Flag</div>
+						<!--<div class="bttn" id="globalFlag" status="Flag" color="yellow" style="border-color:yellow">Flag</div>-->
             </br>
 						
 						<div class="bttn firstAnd10" id="firstAnd10">1st &amp; 10</div>
@@ -207,10 +204,10 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
         <div id="announceControl" class="control">Announce
             <br />
             <input type="text" id="textInput" />
-        <div id="colorControl" class="control">Colour
+		<div id="colorControl" class="control">
+		
             <br />
-            <input disabled="disabled" type="text" id="textInputColor" />
-
+            <input style="display:none;" disabled="disabled" type="text" id="textInputColor" />
             <br />
             <div id="announce" class="bttn" style="width: 223px;">Announce</div>
             <div id="status" class="bttn" style="width: 223px;">Status</div>
@@ -218,13 +215,24 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
             <div id="nextAnnounce" class="bttn" style="width: 464px;">Next Announce / Clear</div>
         </div>
         <div id="transitionControl" class="control">
-            <div id="up" class="bttn" style="border: 2px solid red;">UP</div>
-            <div id="down" class="bttn">DOWN</div><span id="debugField"></span>
+			<div class="ck-bttn">
+                <label>
+                    <input type="checkbox" class="statusBttn transitionControl" id="scoreboardViewUp" status="up" ><span>UP</span>
+
+                    </input>
+                </label>
+            </div>
+			<div class="ck-bttn">
+                <label>
+                    <input type="checkbox" class="statusBttn transitionControl" id="scoreboardViewDown" status="down" ><span>DOWN</span>
+
+                    </input>
+                </label>
+            </div>
+            <!--<div id="scoreboardViewUp" class="bttn">UP</div>
+            <div id="scoreboardViewDown" class="bttn">DOWN</div><span id="debugField"></span>-->
         </div>
         <div style="clear:left"></div>
-        <div id="preview" class="control">
-            <div id="previewDiv"></div>
-        </div>
      
         <div style="display: none" id="teamProto">
 			<div id="teamSettings" class="innerBox settingsBox">
@@ -236,20 +244,25 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 				</label>
 				<label class="settingInputs">Main Color
 					<input type="text" id="bgcolor"></input>
+					                <div class="teamColorPicker" id="teamColor1"></div>
+                <div class="teamColorPicker" id="teamColor2"></div>
+                <div class="teamColorPicker" id="teamColorWhite"></div>
+                <div class="teamColorPicker" id="teamColorBlack"></div>
 				</label>
-                <canvas class="teamColorPicker" id="teamColor1"></canvas>
-                <canvas class="teamColorPicker" id="teamColor2"></canvas>
-                <canvas class="teamColorPicker" id="teamColorWhite"></canvas>
-                <canvas class="teamColorPicker" id="teamColorBlack"></canvas>
+
 				<label class="settingInputs">2nd Color
 					<input type="text" id="fgcolor"></input>
 				</label>
+				<!--temp hide this until it does something-->
+				<span style="display:none">
 				<label class="settingInputs">Nickname
 					<input type="text" disabled="disabled" id="nickname"></input>
 				</label>
 				<label class="settingInputs">Logo
 					<input type="text" disabled="disabled" id="logo"></input>
 				</label>
+				</span>
+				<!--end hidden-->
 			</div>
             <div class="innerBox baseball basketball broomball football hockey lacrosse rugby soccer volleyball" id="scoreSet">Score
                 <input type="text" id="score" style="width: 5em; text-align: right" onclick="this.select();"/>
@@ -261,10 +274,9 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 				<div class="bttn pointsBttn plusScore football" value="6" >+6</div>
 
                 </div>
-			<div class="innerBox broomball hockey lacrosse soccer" id="sogSet">SOG
+			<!--<div class="innerBox broomball hockey lacrosse soccer" id="sogSet">SOG
                 <input type="text" id="shotsOnGoal" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div  id="sogPlusOne" class="bttn pointsBttn">+1</div>
-            </div>
+            </div>-->
             <div class="innerBox lacrosse" id="gbSet">Ground Balls
                 <input type="text" id="groundBalls" style="width: 5em; text-align: right" onclick="this.select();"/>
                 <div  id="gbPlusOne" class="bttn pointsBttn">+1</div>

@@ -22,7 +22,7 @@
     src: url('GothamNarrow.otf');
 }
 body {
-    background: #aaa url(images/ExavideoSemitransparent.png) repeat;
+    background: #aaa url(ExavideoSemitransparent.png) repeat;
     text-align: center;
     font-family: gothamNarrow;
     overflow-y: scroll;
@@ -137,8 +137,8 @@ body {
     background: #ccc;
     border: 1px solid black;
 }
-#preview {
-    margin: 0 0 0 -200px;
+#scoreboardPreview {
+    margin: -90px 0 0 -200px;
 }
 .ck-bttn {
     margin:4px;
@@ -173,7 +173,7 @@ body {
 }
 .ck-bttn label input {
     position:absolute;
-    top:-20px;
+    left:-9999px;
 }
 .ck-bttn input:checked + span {
     background:#c60;
@@ -189,6 +189,7 @@ body {
 }
 .settingsBox{
     border: 3px solid orange;
+	display:none;
 }
 .settingInputs{
     display:block;
@@ -202,8 +203,6 @@ body {
 }
 #settings label{
     float:right;
-}
-#toggleSettings{
 }
 .teamControlBox {
     display:inline-block;
@@ -219,4 +218,5 @@ body {
     height:15px;
     width:15px;
     border:1px solid #fff;
+	display: inline-block;
 }

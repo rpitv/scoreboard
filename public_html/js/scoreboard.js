@@ -146,9 +146,11 @@ function updateClock( ) {
         if (isRunning) {
             clockField.addClass("clock_running");
             clockField.removeClass("clock_stopped");
+			$("#toggleClock").css("border","2px solid #f00");
         } else {
             clockField.addClass("clock_stopped");
             clockField.removeClass("clock_running");
+			$("#toggleClock").css("border","2px solid #0f0");
         }
 
         clockField.text(formatTime(tenthsRemaining));
@@ -162,7 +164,7 @@ function updateClockTimeout( ) {
 }
 
 function updatePreviewTimeout( ) {
-    $('#preview #previewDiv').load('preview svg');
+    $('#scoreboardPreview').load('preview svg');
     setTimeout(updatePreviewTimeout, 500);
 }
 
@@ -583,11 +585,10 @@ function statusChange(thiz){
                 $(thiz).team().find("#statusColor").val($(thiz).attr("color"));
 	
 	//on uncheck, look for other checked statuses from both teams
-}else{
+	}else{
         $(thiz).team().find("#status").val("");
 		$(thiz).team().find("#status").val($(thiz).team().find(":checked").attr("status"));
 		$(thiz).team().find("#statusColor").val($(thiz).team().find(":checked").attr("color"));
-        
     }
 	$(thiz).team().putTeamData();
 }
@@ -739,6 +740,14 @@ function putSettings( ) {
 	putJson("scoreboardSettings", json);
 }
 
+function getScoreboardView(){
+	var scoreboardViewStatus;
+	getJson('view_status', function(data){
+		scoreboardViewStatus = data.is_up;
+		console.log(data.is_up);
+	});
+	return scoreboardViewStatus;
+}
 
 
 function announceStatusTextInput() {
@@ -852,13 +861,18 @@ function getSettingsPresets(event, ui) {
     });
 }
 
+function transitionalControlCheck(thiz){
+	$("#scoreboardViewUp").attr("checked", getScoreboardView());
+	$("#scoreboardViewDown").attr("checked", !getScoreboardView());
+
+}
+
+
+
 $(document).ready(function() {
     updateClockTimeout( );
     updatePreviewTimeout( );
     getAutosync( );
-
-    
-	$("#gameSettings").change(putSettings);
 
     $(".teamControl").buildTeamControl();
     // set up team URLs and load initial data
@@ -871,9 +885,19 @@ $(document).ready(function() {
         modal: true,
         resizable: false,
     });
+	
+	$("#gameSettings").change(putSettings);
+
+	//bind spacebar to clock toggle
+	$(document).keydown(function(e){
+		if(e.keyCode == 32 && $(document.activeElement).filter("input").length != 1){
+			toggleClock();
+		}
+	});
     
     //TOGGLE GAME/TEAM SETTINGS
 	$("#toggleSettings").click(showHideSettings);
+	
 
 	//GENERATE LIST OF SCHOOLS FOR AUTOCOMPLETE FROM JSON
 	jQuery.getJSON("js/teamlist.json", function(teamlist) {
@@ -930,32 +954,29 @@ $(document).ready(function() {
                 $.each(list.sport, function (k,v){
                     if (v.gameType == ui.item.value){
                         $("#gameSettings").unserializeInputsJson(v);
+                        var currentSport = $("#sportClassName").val();
+                        $(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
+                        $('.' + currentSport).fadeIn();
+                        document.title = ('Exaboard - ' + $("#gameType").val());
+
                     }
                 });
             });
         }
     });
-    
-    
-    
-    
-    
+       
 	//GAME TYPE SELECTOR
 	$("#gameType").change(function(){
 		//gameType list needs to be generated from sportList
-        $(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
 		var currentSport = $("sportClassName").val();
 		$('.' + currentSport).fadeIn();
 		document.title = ('Exaboard - ' + $("#gameType").val());
 	});
 	
-	//TEMPORARY FOR SANITY PURPOSES sets to football
+	//sets to hockey
+	//this will be rectified in future when getSettings() is working
 	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").hide();
 	$(".hockey").show();
-	//$("#toggleSettings").trigger("click");
-	
-	//END TEMPORARY FOR SANITY PURPOSES
-	
 	
     $("#toggleClock").click(toggleClock);
     $("#upSec").click( function() { adjustClock.call(this, 1000); } );
@@ -967,8 +988,9 @@ $(document).ready(function() {
     $("#announceControl #status").click(postStatus);
     $("#announceControl #clearStatus").click(clearStatus);
     $("#announceControl #nextAnnounce").click(nextAnnounce);
-    $("#transitionControl #up").click(scoreboardUp);
-    $("#transitionControl #down").click(scoreboardDown);
+    $("#scoreboardViewUp").click(scoreboardUp);
+    $("#scoreboardViewDown").click(scoreboardDown);
+	$(".transitionControl").click(function(){transitionalControlCheck(this)});
     $("#setClock").click(setClock);
     $("#autoSync").change(changeAutosync);
     $(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
