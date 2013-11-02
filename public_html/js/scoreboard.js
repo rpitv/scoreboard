@@ -497,7 +497,7 @@ jQuery.fn.penaltyQueueEnd = function() {
 
     if (penalty_end < time || count == 0) {
         return 0;
-    } else {
+    } else{
         return penalty_end;
     }
 }
@@ -513,9 +513,26 @@ jQuery.fn.penaltyLength = function() {
 // clearPenalties
 // Clear all penalties on a team.
 function clearPenalties() {
-    $(this).team().penaltyDialog()
-        .find(".penalty_queue .penaltyData").remove();
-    $(this).team().putTeamData();
+	$(this).team().putTeamData();
+	$(this).dialog({
+	resizable: false,
+	modal: true,
+	buttons: {
+		"Delete All Penalties": function(){
+			$(this).find("#clearPenalties").click(function(){
+					$(this).penaltyDialog().find(".penalty_queue .penaltyData").remove();
+			});
+			$(this).dialog("close");
+		},
+		"Delete or Edit Single Penalty": function(){
+			$(this).find("#editPenalties").click(editPenalties);
+			$(this).dialog("close");
+		},
+		Cancel: function(){
+			$(this).dialog("close");
+		}
+	  }
+	});
 }
 
 // editPenalties
@@ -888,9 +905,9 @@ $(document).ready(function() {
 	
 	$("#gameSettings").change(putSettings);
 
-	//bind spacebar to clock toggle
+	//bind enter to clock toggle
 	$(document).keydown(function(e){
-		if(e.keyCode == 32 && $(document.activeElement).filter("input").length != 1){
+		if(e.keyCode == 13 && $(document.activeElement).filter("input").length != 1){
 			toggleClock();
 		}
 	});
@@ -958,7 +975,6 @@ $(document).ready(function() {
                         $(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
                         $('.' + currentSport).fadeIn();
                         document.title = ('Exaboard - ' + $("#gameType").val());
-
                     }
                 });
             });
@@ -976,7 +992,7 @@ $(document).ready(function() {
 	//sets to hockey
 	//this will be rectified in future when getSettings() is working
 	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").hide();
-	$(".hockey").show();
+	$(".football").show();
 	
     $("#toggleClock").click(toggleClock);
     $("#upSec").click( function() { adjustClock.call(this, 1000); } );
