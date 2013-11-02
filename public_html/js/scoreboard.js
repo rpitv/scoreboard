@@ -961,35 +961,27 @@ $(document).ready(function() {
 		});
 	});	
 	
-    
-    //what's the best way to combine the two calls to file (even if they are cached)
-    $("#gameType").click(generateSportList).autocomplete({
-        autoFocus: true,
-        source: sportList,
-        select: function(event, ui) { //getSettingsPresets(event, ui)
-            $.getJSON("js/sports.json", function(list){
-                $.each(list.sport, function (k,v){
-                    if (v.gameType == ui.item.value){
-                        $("#gameSettings").unserializeInputsJson(v);
-                        var currentSport = $("#sportClassName").val();
-                        $(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
-                        $('.' + currentSport).fadeIn();
-                        document.title = ('Exaboard - ' + $("#gameType").val());
-                    }
-                });
-            });
-        }
-    });
-       
-	//GAME TYPE SELECTOR
-	$("#gameType").change(function(){
-		//gameType list needs to be generated from sportList
-		var currentSport = $("sportClassName").val();
-		$('.' + currentSport).fadeIn();
-		document.title = ('Exaboard - ' + $("#gameType").val());
-	});
+		$("#gameType").click(generateSportList).autocomplete({
+			autoFocus: true,
+			source: sportList,
+			select: function(event, ui) {
+				$.getJSON("js/sports.json", function(list){
+					$.each(list.sport, function (k,v){
+						if (v.gameType == ui.item.value){
+							$("#gameSettings").unserializeInputsJson(v);
+							putSettings();
+							
+							var currentSport = $("#sportClassName").val();
+							$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
+							$('.' + currentSport).fadeIn();
+							document.title = ('Exaboard - ' + $("#gameType").val());
+						}
+					});
+				});
+			}
+		});
 	
-	//sets to hockey
+	//sets to a specific gametype
 	//this will be rectified in future when getSettings() is working
 	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").hide();
 	$(".football").show();
