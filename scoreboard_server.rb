@@ -805,22 +805,26 @@ class LinearAnimation
     end
 
     def in(frames)
-        @frame = 0
-        @total_frames = frames
-        @direction = IN
+        if @total_frames == 0 and @value < 0.5
+            @frame = 0
+            @total_frames = frames
+            @direction = IN
 
-        if block_given?
-            @transition_done_block = Proc.new { yield }
+            if block_given?
+                @transition_done_block = Proc.new { yield }
+            end
         end
     end
 
     def out(frames)
-        @frame = 0
-        @total_frames = frames
-        @direction = OUT
+        if @total_frames == 0 and @value > 0.5
+            @frame = 0
+            @total_frames = frames
+            @direction = OUT
 
-        if block_given?
-            @transition_done_block = Proc.new { yield }
+            if block_given?
+                @transition_done_block = Proc.new { yield }
+            end
         end
     end
 
