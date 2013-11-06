@@ -762,8 +762,12 @@ function getScoreboardView(){
 	getJson('view_status', function(data){
 		scoreboardViewStatus = data.is_up;
 		console.log(data.is_up);
+		setTimeout(function(){
+			console.log("not scoreboard status is" + !data.is_up);
+			$("#scoreboardViewUp").attr("checked", data.is_up);
+			$("#scoreboardViewDown").attr("checked", !data.is_up);
+		}, 1000);
 	});
-	return scoreboardViewStatus;
 }
 
 
@@ -878,14 +882,6 @@ function getSettingsPresets(event, ui) {
     });
 }
 
-function transitionalControlCheck(thiz){
-	$("#scoreboardViewUp").attr("checked", getScoreboardView());
-	$("#scoreboardViewDown").attr("checked", !getScoreboardView());
-
-}
-
-
-
 $(document).ready(function() {
     updateClockTimeout( );
     updatePreviewTimeout( );
@@ -998,7 +994,7 @@ $(document).ready(function() {
     $("#announceControl #nextAnnounce").click(nextAnnounce);
     $("#scoreboardViewUp").click(scoreboardUp);
     $("#scoreboardViewDown").click(scoreboardDown);
-	$(".transitionControl").click(function(){transitionalControlCheck(this)});
+	$(".transitionControl").click(getScoreboardView);
     $("#setClock").click(setClock);
     $("#autoSync").change(changeAutosync);
     $(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
