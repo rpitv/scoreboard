@@ -1054,7 +1054,7 @@ def start_eversan_sync_thread(app)
     end
 end
 
-start_rs232_sync_thread(app)
+start_drycontact_sync_thread(app)
 
 dirty_level = 1
 

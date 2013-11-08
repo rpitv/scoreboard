@@ -175,7 +175,7 @@ body {
     position:absolute;
     left:-9999px;
 }
-.ck-bttn input:checked + span {
+.ck-bttn input:checked  +span{
     background:#c60;
     color:#fff;
 }

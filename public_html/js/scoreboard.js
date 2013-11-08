@@ -757,19 +757,23 @@ function putSettings( ) {
 	putJson("scoreboardSettings", json);
 }
 
-function getScoreboardView(){
-	var scoreboardViewStatus;
-	getJson('view_status', function(data){
-		scoreboardViewStatus = data.is_up;
-		console.log(data.is_up);
-		setTimeout(function(){
-			console.log("not scoreboard status is" + !data.is_up);
-			$("#scoreboardViewUp").attr("checked", data.is_up);
-			$("#scoreboardViewDown").attr("checked", !data.is_up);
-		}, 1000);
-	});
-}
+function transitionScoreboard(thiz){
+	if ($(thiz).attr("status") == "up"){
+		scoreboardUp();
+		$(thiz).attr("status", "down");//.html("<span>DOWN</span>");
+	}
+	if ($(thiz).attr("status") == "down"){
+		scoreboardDown();
+		$(thiz).attr("status", "up");//.html("<span>UP</span>");
+	}
+	//sets display status on page load and keeps it honest during operation
+	setTimeout(function(){
+		getJson('view_status', function(data){
+			$("#transitionControl").attr("checked", data.is_up);
+		});
+	},1100);
 
+}
 
 function announceStatusTextInput() {
     return $("#announceControl #textInput").val();
@@ -900,13 +904,17 @@ $(document).ready(function() {
     });
 	
 	$("#gameSettings").change(putSettings);
+	transitionScoreboard(this);
 
 	//bind enter to clock toggle
 	$(document).keydown(function(e){
 		if(e.keyCode == 13 && $(document.activeElement).filter("input").length != 1){
 			toggleClock();
+		}if(e.keyCode == 32 && $(document.activeElement).filter("input").length != 1){
+			$("#transitionControl").trigger("click");
 		}
 	});
+	
     
     //TOGGLE GAME/TEAM SETTINGS
 	$("#toggleSettings").click(showHideSettings);
@@ -980,8 +988,8 @@ $(document).ready(function() {
 	//sets to a specific gametype
 	//this will be rectified in future when getSettings() is working
 	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").hide();
-	$(".football").show();
-	
+	$(".hockey").show();
+
     $("#toggleClock").click(toggleClock);
     $("#upSec").click( function() { adjustClock.call(this, 1000); } );
     $("#dnSec").click( function() { adjustClock.call(this, -1000); } );
@@ -992,9 +1000,9 @@ $(document).ready(function() {
     $("#announceControl #status").click(postStatus);
     $("#announceControl #clearStatus").click(clearStatus);
     $("#announceControl #nextAnnounce").click(nextAnnounce);
-    $("#scoreboardViewUp").click(scoreboardUp);
-    $("#scoreboardViewDown").click(scoreboardDown);
-	$(".transitionControl").click(getScoreboardView);
+    //$("#scoreboardViewUp").click(scoreboardUp);
+    //$("#scoreboardViewDown").click(scoreboardDown);
+	$("#transitionControl").click(function(){transitionScoreboard(this);});
     $("#setClock").click(setClock);
     $("#autoSync").change(changeAutosync);
     $(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
