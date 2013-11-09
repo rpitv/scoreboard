@@ -513,8 +513,10 @@ jQuery.fn.penaltyLength = function() {
 // clearPenalties
 // Clear all penalties on a team.
 function clearPenalties() {
+	$(this).team().penaltyDialog().find(".penalty_queue .penaltyData").remove();
 	$(this).team().putTeamData();
-	$(this).dialog({
+	
+	/*$(this).dialog({
 	resizable: false,
 	modal: true,
 	buttons: {
@@ -532,7 +534,7 @@ function clearPenalties() {
 			$(this).dialog("close");
 		}
 	  }
-	});
+	});*/
 }
 
 // editPenalties
@@ -867,12 +869,32 @@ function showHideSettings() {
     }
 }
 
-function generateSportList() {
-    $.getJSON("js/sports.json", function(list){
-        $.each(list.sport, function (k,v){
-            sportList[k] = v.gameType;
-        });
-    });
+function generateSportList(thiz) {
+	$(thiz).autocomplete({
+		create: function(event, ui){
+			$.getJSON("js/sports.json", function(list){
+				$.each(list.sport, function (k,v){
+					sportList[k] = v.gameType;
+				});
+			});
+		},
+		autoFocus: true,
+		source: sportList,
+		select: function(event, ui) {
+			$.getJSON("js/sports.json", function(list){
+				$.each(list.sport, function (k,v){
+					if (v.gameType == ui.item.value){
+						$("#gameSettings").unserializeInputsJson(v);
+						putSettings();
+						var currentSport = $("#sportClassName").val();
+						$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
+						$('.' + currentSport).fadeIn();
+						document.title = ('Exaboard - ' + $("#gameType").val());
+					}
+				});
+			});
+		}
+	}); 
 }
 
 function getSettingsPresets(event, ui) {
@@ -914,7 +936,6 @@ $(document).ready(function() {
 			$("#transitionControl").trigger("click");
 		}
 	});
-	
     
     //TOGGLE GAME/TEAM SETTINGS
 	$("#toggleSettings").click(showHideSettings);
@@ -965,25 +986,7 @@ $(document).ready(function() {
 		});
 	});	
 	
-		$("#gameType").click(generateSportList).autocomplete({
-			autoFocus: true,
-			source: sportList,
-			select: function(event, ui) {
-				$.getJSON("js/sports.json", function(list){
-					$.each(list.sport, function (k,v){
-						if (v.gameType == ui.item.value){
-							$("#gameSettings").unserializeInputsJson(v);
-							putSettings();
-							
-							var currentSport = $("#sportClassName").val();
-							$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
-							$('.' + currentSport).fadeIn();
-							document.title = ('Exaboard - ' + $("#gameType").val());
-						}
-					});
-				});
-			}
-		});
+		$("#gameType").click(function(){generateSportList(this)});
 	
 	//sets to a specific gametype
 	//this will be rectified in future when getSettings() is working
@@ -1000,8 +1003,6 @@ $(document).ready(function() {
     $("#announceControl #status").click(postStatus);
     $("#announceControl #clearStatus").click(clearStatus);
     $("#announceControl #nextAnnounce").click(nextAnnounce);
-    //$("#scoreboardViewUp").click(scoreboardUp);
-    //$("#scoreboardViewDown").click(scoreboardDown);
 	$("#transitionControl").click(function(){transitionScoreboard(this);});
     $("#setClock").click(setClock);
     $("#autoSync").change(changeAutosync);
