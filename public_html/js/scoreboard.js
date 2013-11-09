@@ -936,6 +936,8 @@ $(document).ready(function() {
 			$("#transitionControl").trigger("click");
 		}
 	});
+	//causes checkboxes to lose focus after clicked to avoid binding conflicts.
+	$(":checkbox").change(function(){$(this).blur();});
     
     //TOGGLE GAME/TEAM SETTINGS
 	$("#toggleSettings").click(showHideSettings);
