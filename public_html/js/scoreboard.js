@@ -856,8 +856,8 @@ function showHideSettings() {
     $("#gameSettings").toggle("blind", 1000);
     $("#awayTeamControl").find("#teamSettings").toggle("blind", 1000);
     $("#homeTeamControl").find("#teamSettings").toggle("blind", 1000);
-    if($("#toggleSettingsText").html() == "Hide Settings"){
-        $("#toggleSettingsText").html("Show Settings");
+    if($("#toggleSettingsText").html() == "Hide <u>S</u>ettings"){
+        $("#toggleSettingsText").html("Show <u>S</u>ettings");
         // Reload Team Data
         //This needs to be handled outside of this function
         $("#awayTeamControl").data('url','team/0');
@@ -865,7 +865,7 @@ function showHideSettings() {
         $("#homeTeamControl").data('url','team/1');
         $("#homeTeamControl").getTeamData();
     }else{
-        $("#toggleSettingsText").html("Hide Settings");
+        $("#toggleSettingsText").html("Hide <u>S</u>ettings");
     }
 }
 
@@ -934,6 +934,8 @@ $(document).ready(function() {
 			toggleClock();
 		}if(e.keyCode == 32 && $(document.activeElement).filter("input").length != 1){
 			$("#transitionControl").trigger("click");
+		}if(e.keyCode == 83 && $(document.activeElement).filter("input").length != 1){
+			showHideSettings();
 		}
 	});
 	//causes checkboxes to lose focus after clicked to avoid binding conflicts.
@@ -988,7 +990,7 @@ $(document).ready(function() {
 		});
 	});	
 	
-		$("#gameType").click(function(){generateSportList(this)});
+	$("#gameType").click(function(){generateSportList(this)});
 	
 	//sets to a specific gametype
 	//this will be rectified in future when getSettings() is working
