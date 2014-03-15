@@ -944,11 +944,14 @@ Thread.new { app.run(:Host => '::1', :Port => 3002) }
 def start_rs232_sync_thread(app)
     Thread.new do
         begin
+            logfile_name = Time.now.strftime("rs232_log_%Y%m%d_%H%M%S")
+            logfile = File.open(logfile_name, "w")
             sp = SerialPort.new('/dev/ttyS0', 19200)
             string = ''
             last_control = -1
             while true
                 byte = sp.read(1)
+                logfile.write(byte)
 
                 if byte.ord < 0x10
                     # parse (string, last_control)
@@ -969,6 +972,7 @@ def start_rs232_sync_thread(app)
                     end
                     last_control = byte.ord
                     string = ''
+                    logfile.flush
                 else
                     string << byte
                 end
