@@ -448,7 +448,9 @@ class ScoreboardApp < Patchbay
         @status = ''
         @status_color = 'white'
         @downdist = ''
-        @autosync_enabled = false
+        @autosync_clock = false
+        @autosync_score = false
+        @autosync_other = false
     end
 
     attr_reader :status, :status_color
@@ -599,19 +601,21 @@ class ScoreboardApp < Patchbay
 
     get '/autosync' do
         render :json => {
-            'enabled' => @autosync_enabled
+            'clock' => @autosync_clock,
+            'score' => @autosync_score,
+            'other' => @autosync_other
         }.to_json
     end
 
     put '/autosync' do
-        if incoming_json['enabled']
-            @autosync_enabled = true
-        else
-            @autosync_enabled = false
-        end
+        @autosync_clock = incoming_json['clock']
+        @autosync_score = incoming_json['score']
+        @autosync_other = incoming_json['other']
 
         render :json => {
-            'enabled' => @autosync_enabled
+            'clock' => @autosync_clock,
+            'score' => @autosync_score,
+            'other' => @autosync_other
         }.to_json
     end
 
@@ -688,7 +692,7 @@ class ScoreboardApp < Patchbay
 
     self.files_dir = 'public_html'
 
-    attr_reader :clock, :autosync_enabled
+    attr_reader :clock, :autosync_clock, :autosync_score, :autosync_other
 
     def sync_score(hscore, vscore)
         if hscore == @teams[1]['score'].to_i + 1
@@ -966,7 +970,7 @@ def start_rs232_sync_thread(app)
 
                         STDERR.puts "tenths: #{tenths}"
 
-                        if tenths >= 0 and app.autosync_enabled
+                        if tenths >= 0 and app.autosync_clock
                             app.clock.period_remaining = tenths
                         end
                     end
@@ -1001,7 +1005,7 @@ def start_drycontact_sync_thread(app)
 
         while true
             if sp.cts != last_cts
-                if app.autosync_enabled
+                if app.autosync_clock
                     if sp.cts == 1
                         # start the clock
                         app.clock.start
@@ -1030,8 +1034,10 @@ def parse_eversan_digit_string(string, app)
         period = $6.to_i
 
 	clock_value = minutes * 600 + seconds * 10 + tenths
-        if app.autosync_enabled
+        if app.autosync_clock
             app.clock.reset_time(clock_value, period)
+        end
+        if app.autosync_score
             app.sync_score(hscore, vscore)
         end
     end

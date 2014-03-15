@@ -140,11 +140,21 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 					</div>
 					<br/>
 					<div id="periodAdvance" class="bttn">Period Advance</div>
-					<label for="autoSync">
-						<div id="autoSyncBttn" class="bttn">
-							<input type="checkbox" id="autoSync">Enable Auto-Sync</input>
-						</div>
-					</label>
+                                        <div class="ck-bttn">
+                                            <label>
+                                                <input type="checkbox" id="syncClock"><span>Sync Clock</span></input>
+                                            </label>
+                                        </div>
+                                        <div class="ck-bttn">
+                                            <label>
+                                                <input type="checkbox" id="syncScore"><span>Sync Score</span></input>
+                                            </label>
+                                        </div>
+                                        <div class="ck-bttn">
+                                            <label>
+                                                <input type="checkbox" id="syncOther"><span>Sync Other</span></input>
+                                            </label>
+                                        </div>
 					<div class="innerBox" id="clockSet">Time
 						<input id="time_str" type="text" style="width:8em" />Period
 						<input id="period" type="text" style="width:3em" />

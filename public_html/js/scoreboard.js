@@ -835,20 +835,18 @@ function periodAdvance(dummy) {
 }
 
 function changeAutosync() {
-    if ($("#autoSync").is(':checked')) {
-        putJson('autosync', { 'enabled' : true });
-    } else {
-        putJson('autosync', { 'enabled' : false });
-    }
+    putJson('autosync', {
+        'clock' : $('#syncClock').is(':checked'),
+        'score' : $('#syncScore').is(':checked'),
+        'other' : $('#syncOther').is(':checked')
+    });
 }
 
 function getAutosync() {
     getJson('autosync', function(data) {
-        if (data.enabled) {
-            $("#autoSync").prop('checked',true);
-        } else {
-            $("#autoSync").prop('checked',false);
-        }
+        $('#syncClock').prop('checked', data.clock);
+        $('#syncScore').prop('checked', data.score);
+        $('#syncOther').prop('checked', data.other);
     });
 }
 
@@ -1009,7 +1007,7 @@ $(document).ready(function() {
     $("#announceControl #nextAnnounce").click(nextAnnounce);
 	$("#transitionControl").click(function(){transitionScoreboard(this);});
     $("#setClock").click(setClock);
-    $("#autoSync").change(changeAutosync);
+    $("#syncClock,#syncScore,#syncOther").change(changeAutosync);
     $(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
     $(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(function(){ytgUpdate(this);});
     $("#customYTG").change(function(){ytgCustom(this);});
