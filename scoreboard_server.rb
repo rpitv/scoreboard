@@ -325,7 +325,6 @@ class AnnounceHelper
     end
 
     def next
-        STDERR.puts "going to next announce!"
         @frames = 0
         if @announce.length > 0
             @announce.shift
@@ -448,6 +447,10 @@ class ScoreboardApp < Patchbay
         @status = ''
         @status_color = 'white'
         @downdist = ''
+        # use reasonable defaults here so we don't end up getting
+        # 1st and <blank>
+        @down = '1st'
+        @distance = 10
         @autosync_clock = false
         @autosync_score = false
         @autosync_other = false
@@ -694,17 +697,29 @@ class ScoreboardApp < Patchbay
 
     attr_reader :clock, :autosync_clock, :autosync_score, :autosync_other
 
-    def sync_score(hscore, vscore)
-        if hscore == @teams[1]['score'].to_i + 1
+    def sync_hscore(hscore)
+        if hscore > @teams[1]['score'].to_i
             command_queue << { "goal_scored_by" => "/teams/1" }
         end
+        @teams[1]['score'] = hscore
+    end
 
-        if vscore == @teams[0]['score'].to_i + 1
+    def sync_vscore(vscore)
+        if vscore > @teams[0]['score'].to_i
             command_queue << { "goal_scored_by" => "/teams/0" }
         end
 
-        @teams[1]['score'] = hscore
         @teams[0]['score'] = vscore
+    end
+
+    def sync_down(down)
+        @down = down
+        @downdist = "#{@down} & #{@distance}"
+    end
+
+    def sync_distance(distance)
+        @distance = distance
+        @downdist = "#{@down} & #{@distance}"
     end
 
 protected
@@ -945,40 +960,132 @@ app.view = ScoreboardView.new('assets/rpitv_scoreboard.svg.erb')
 Thin::Logging.silent = true
 Thread.new { app.run(:Host => '::1', :Port => 3002) }
 
-def start_rs232_sync_thread(app)
+# Functions to parse the packets that can be received
+# on a Daktronics RTD feed (at least the ones we care about)
+module DakPackets
+    # 0042100000: main game clock for football and hockey
+    def self.packet_0042100000(app, payload)
+        tenths = -1
+
+        # try to parse payload as time in minutes:seconds
+        # or seconds.tenths
+        if (payload =~ /^(([ \d]\d):(\d\d))/)
+                tenths = $2.to_i * 600 + $3.to_i * 10
+        elsif (payload =~ /^(([ \d]\d).(\d))/)
+                tenths = $2.to_i * 10 + $3.to_i
+        else
+                puts "0042100000: don't understand clock format"
+        end
+
+        STDERR.puts "tenths: #{tenths}"
+
+        # if autosync is enabled, set game clock
+        if tenths >= 0 and app.autosync_clock
+            app.clock.period_remaining = tenths
+        end
+    end
+
+    # 0042100107: home team score for football and hockey
+    def self.packet_0042100107(app, payload)
+        if (payload =~ /^\s*(\d+)$/ and app.autosync_score)
+            home_score = $1.to_i  
+            app.sync_hscore(home_score)
+        end
+    end
+
+    # 0042100111: guest team score for football and hockey
+    def self.packet_0042100111(app, payload)
+        if (payload =~ /^\s*(\d+)$/ and app.autosync_score)
+            guest_score = $1.to_i  
+            app.sync_vscore(guest_score)
+        end
+    end
+    
+    # 0042100221: down (1st, 2nd, 3rd, 4th)
+    def self.packet_0042100221(app, payload)
+        if (payload =~ /(1st|2nd|3rd|4th)/i and app.autosync_other)
+	    STDERR.puts "#{$1} down"
+            app.sync_down($1) 
+        end
+    end
+    
+    # 0042100224: yards to go
+    def self.packet_0042100224(app, payload)
+        if (payload =~ /(\d+)/ and app.autosync_other)
+	    STDERR.puts "#{$1} to go"
+            app.sync_distance($1.to_i)
+        end
+    end
+
+    # 0042100200: play clock
+    def self.packet_0042100200(app, payload)
+        if (payload =~ /(\d+):(\d+)/ and app.autosync_other)
+            STDERR.puts "play: #{$1}:#{$2}"
+        else
+            STDERR.puts "play clock payload: #{payload}"
+        end
+    end
+
+    # 0042100209: home possession
+    def self.packet_0042100209(app, payload)
+        if payload =~ /([<>])/
+            STDERR.puts "HOME team GAINED possession (#{$1})"
+        else
+            STDERR.puts "HOME team LOST possession"
+        end
+    end
+
+    def self.packet_0042100215(app, payload)
+        if payload =~ /POSS/
+            STDERR.puts "GUEST team GAINED possession"
+        else
+            STDERR.puts "GUEST team LOST possession"
+        end
+    end
+end
+
+def process_dak_packet(app, buf)
+    cksum_range = buf[0..-3]
+    cksum = buf[-2..-1].hex
+    our_cksum = 0
+
+    cksum_range.each_byte do |byte|
+        our_cksum += byte
+    end
+
+    if (cksum != our_cksum % 256)
+        STDERR.puts "warning: invalid checksum on this packet (ours #{our_cksum}, theirs #{cksum})"
+    end
+
+    address = buf[9..18]
+
+    if (address =~ /^(\d+)$/ && DakPackets.respond_to?("packet_#{$1}"))
+        DakPackets.send("packet_#{$1}", app, buf[20..-4])
+    else
+        STDERR.puts ""
+        STDERR.puts "--- UNKNOWN PACKET (#{address}) ENCOUNTERED ---"
+        STDERR.puts ""
+    end
+    
+end
+
+def start_dak_rs232_sync_thread(app)
     Thread.new do
         begin
             logfile_name = Time.now.strftime("rs232_log_%Y%m%d_%H%M%S")
             logfile = File.open(logfile_name, "w")
             sp = SerialPort.new('/dev/ttyS0', 19200)
-            string = ''
-            last_control = -1
+            packet = ''
             while true
                 byte = sp.read(1)
                 logfile.write(byte)
 
-                if byte.ord < 0x10
-                    # parse (string, last_control)
-                    if last_control == 2
-                        tenths = -1
-
-                        if (string =~ /^(\d\d)\.(\d)/)
-                            tenths = $1.to_i * 10 + $2.to_i
-                        elsif (string =~ /^(\s\d|\d\d):(\d\d)[^:]/)
-                            tenths = $1.to_i * 600 + $2.to_i * 10
-                        end
-
-                        STDERR.puts "tenths: #{tenths}"
-
-                        if tenths >= 0 and app.autosync_clock
-                            app.clock.period_remaining = tenths
-                        end
-                    end
-                    last_control = byte.ord
-                    string = ''
-                    logfile.flush
+                if byte.ord == 0x16
+                    packet = ''
+                elsif byte.ord == 0x17
+                    process_dak_packet(app, packet)
                 else
-                    string << byte
+                    packet << byte
                 end
             end
         rescue Exception => e
@@ -1038,7 +1145,8 @@ def parse_eversan_digit_string(string, app)
             app.clock.reset_time(clock_value, period)
         end
         if app.autosync_score
-            app.sync_score(hscore, vscore)
+            app.sync_hscore(hscore)
+            app.sync_vscore(vscore)
         end
     end
 end
@@ -1064,7 +1172,7 @@ def start_eversan_sync_thread(app)
     end
 end
 
-start_rs232_sync_thread(app)
+start_dak_rs232_sync_thread(app)
 
 dirty_level = 1
 
