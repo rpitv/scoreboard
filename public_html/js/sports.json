@@ -176,6 +176,34 @@
         "timeoutsToggle":"true",
         "penaltiesList": [
         ]
-	}
+	},
+        {
+        "gameType":"NCAA Men's Lacrosse",
+        "sportClassName":"lacrosse",
+        "otPeriodLength":"4:00.0",
+        "otPeriodQty":"1",
+        "otTimeToggle":"true",
+        "otToggle":"true",
+        "penaltiesMultipleName":"",
+        "penaltiesQueueMaxDepth":"2",
+        "penaltiesSingleName":"Man Up",
+        "penaltiesToggle":"true",
+        "periodLength": "15:00.0",
+        "periodQty":"4",
+        "periodToggle":"true",
+        "shootoutRounds":"",
+        "shootoutToggle":"false",
+        "teamSize":"xx",
+        "timeToggle":"true",
+        "timeoutsDisplaySVG":"false",
+        "timeoutsOTResetPeriod":"",
+        "timeoutsOTResetToggle":"false",
+        "timeoutsOTToggle":"false",
+        "timeoutsResetPeriod":"",
+        "timeoutsResetToggle":"false",
+        "timeoutsToggle":"false",
+        "penaltiesList": [
+        ]
+    }
 ]
 }
