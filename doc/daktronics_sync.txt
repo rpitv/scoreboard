@@ -1,0 +1,12 @@
+Daktronics RTD Sync Info
+
+All Sport 5000 consoles have RS-232 and current-loop data outputs 
+at 19200 baud 8N1. These outputs are accessible on the 25 pin connector
+at the back of the console. RS232 TX is at pin 2, RX at pin 3, and ground
+at pin 7. Current loop is positive on 22 and negative on 7. It's helpful
+to make up a breakout box with these pins that passes all other pins through.
+
+To use the RTD feed with this program, bring the signal from the console
+into the computer on any serial port. Right now, start_dak_rs232_sync_thread
+has the port hard-coded, so you need to edit that to point it at the right
+port.
