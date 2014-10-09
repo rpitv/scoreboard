@@ -1,4 +1,35 @@
+##
+# This class implements a parser for the Daktronics RTD protocol.
+#
+# The RTD protocol transmits various data items in a packetized format.
+# Each packet begins with a 0x16 byte and ends with a 2-byte checksum
+# followed by a 0x17 byte. This data is transmitted serially, 19200 bps
+# 8N1, over RS232 and current loop interfaces from the Daktronics console.
+# The checksum is simply the modulo-256 sum of all bytes, starting with the 
+# first byte following the 0x16 byte and ending with the last byte before
+# the checksum itself. The checksum is transmitted as two ASCII hexadecimal
+# digits instead of a single byte.
+# 
+# Bytes 9 through 18 of the payload are a string that uniquely identifies
+# the data item being transmitted. This is typically 00421xxxxx
+# where xxxxx is the "item number" listed in the All Sport 5000 Series
+# Enhanced RTD Reference Manual published by Daktronics Inc., MINUS ONE.
+# This document, Daktronics document number ED12483, may be found at 
+# http://www.daktronics.com/Web%20Documents/Customer-Service-Manuals/ED-12483.pdf
+#
+# This parser operates in three stages. The top level breaks the serial stream
+# apart into packets, which are processed by process_dak_packet(). 
+# process_dak_packet() validates the checksum, then looks for a 
+# +packet_xxxxxxxxxx_ method, where xxxxxxxxxx is the data item identifier 
+# string from bytes 9-18 of the packet. These functions are responsible for 
+# interpreting the packet payload and calling the appropriate sync function
+# on app.
 class DaktronicsRtdSync
+    ##
+    # Initialize the RTD parser, which will report data back to +app+.
+    #
+    # +options+ is a hash of options including the following:
+    # [+'port'+']       serial port to use
     def initialize(app, options)
         @app = app
         @stop_thread = false
@@ -9,6 +40,8 @@ class DaktronicsRtdSync
         @thread = Thread.new { run_thread }
     end
 
+    ##
+    # Shut down the RTD parser and free the serial port
     def shutdown
         STDERR.puts "Daktronics RTD sync thread shutting down"
         @stop_thread = true
@@ -17,11 +50,14 @@ class DaktronicsRtdSync
         STDERR.puts "Daktronics RTD sync thread terminated"
     end
 
+    ##
+    # Return the types of data supplied by the parser
     def capabilities
         ['clock', 'score', 'downdist', 'playclock']
     end
 
-    # 0042100000: main game clock for football and hockey
+    ##
+    # Parse main game clock (item 1)
     def packet_0042100000(payload)
         tenths = -1
 
@@ -42,7 +78,8 @@ class DaktronicsRtdSync
         end
     end
 
-    # 0042100107: home team score for football and hockey
+    ##
+    # Parse home team score (item 108)
     def packet_0042100107(payload)
         if (payload =~ /^\s*(\d+)$/)
             home_score = $1.to_i  
@@ -50,7 +87,8 @@ class DaktronicsRtdSync
         end
     end
 
-    # 0042100111: guest team score for football and hockey
+    ##
+    # Parse visiting team score (item 112)
     def packet_0042100111(payload)
         if (payload =~ /^\s*(\d+)$/)
             guest_score = $1.to_i  
@@ -58,7 +96,8 @@ class DaktronicsRtdSync
         end
     end
     
-    # 0042100221: down (1st, 2nd, 3rd, 4th)
+    ##
+    # Parse football down (item 222)
     def packet_0042100221(payload)
         if (payload =~ /(1st|2nd|3rd|4th)/i)
 	    STDERR.puts "#{$1} down"
@@ -66,7 +105,8 @@ class DaktronicsRtdSync
         end
     end
     
-    # 0042100224: yards to go
+    ##
+    # Parse yards to go (item 225)
     def packet_0042100224(payload)
         if (payload =~ /(\d+)/)
 	    STDERR.puts "#{$1} to go"
@@ -74,16 +114,27 @@ class DaktronicsRtdSync
         end
     end
 
-    # 0042100200: play clock
+    ##
+    # Parse play clock (item 201)
+    #
+    # Daktronics documentation is not quite correct for this item.
+    # The documentation indicates that the play clock is in mm:ss
+    # format; however, the actual data transmitted appears to be
+    # just a number of seconds.
     def packet_0042100200(payload)
-        if (payload =~ /(\d+):(\d+)/)
-            STDERR.puts "play: #{$1}:#{$2}"
-        else
-            STDERR.puts "play clock payload: #{payload}"
+        if (payload =~ /(\d+)/)
+            STDERR.puts "play: #{$1}"
         end
     end
 
-    # 0042100209: home possession
+    ##
+    # Parse home possession (item 209)
+    #
+    # Daktronics documentation appears to be incorrect for this item.
+    # The documentation suggests that this item should contain a 
+    # less-than sign to indicate home-team possession, and a blank
+    # space otherwise. But it seems that it may contain a less-than or
+    # greater-than sign depending on which team has possession.
     def packet_0042100209(payload)
         if payload =~ /([<>])/
             STDERR.puts "HOME team GAINED possession (#{$1})"
@@ -92,7 +143,14 @@ class DaktronicsRtdSync
         end
     end
 
-    def packet_0042100215(payload)
+    ##
+    # Parse guest possession (item 215)
+    # 
+    # Daktronics documentation indicates that this field should contain
+    # a greater-than sign to indicate guest-team possession, and a blank
+    # space otherwise. However, testing with an actual console indicates
+    # that this may not be correct.
+    def packet_0042100214(payload)
         if payload =~ /([<>])/
             STDERR.puts "GUEST team GAINED possession (#{$1})"
         else
@@ -100,6 +158,13 @@ class DaktronicsRtdSync
         end
     end
 
+    ##
+    # Process Daktronics RTD packet.
+    #
+    # This routine receives in +buf+ the string of bytes between 0x16 and 
+    # 0x17 bytes, not including those bytes. It validates the packet checksum,
+    # then calls the appropriate packet parser with the payload. If the packet
+    # is of unknown type, the item number field is printed.
     def process_dak_packet(buf)
         cksum_range = buf[0..-3]
         cksum = buf[-2..-1].hex
@@ -124,6 +189,13 @@ class DaktronicsRtdSync
         end
     end
 
+    ##
+    # Main parser loop. 
+    #
+    # This routine attempts to read bytes from the serial port and reassemble
+    # them into packets, looking for 0x16 and 0x17 delimiter bytes. When a 
+    # complete packet is received, it is passed to +process_dak_packet+ for
+    # further processing and parsing.
     def run_thread
         begin
             STDERR.puts "Daktronics RTD sync thread starting"
