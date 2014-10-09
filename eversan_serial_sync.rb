@@ -10,9 +10,11 @@ class EversanSerialSync
     end
 
     def shutdown
+        STDERR.puts "Eversan serial sync thread shutting down"
         @stop_thread = true
         @thread.join
         @sp.close
+        STDERR.puts "Eversan serial sync thread terminated"
     end
 
     def capabilities
@@ -39,17 +41,18 @@ class EversanSerialSync
 
     def run_thread
         begin
+            STDERR.puts "Eversan serial sync thread starting"
             digit_string = ''
             digits = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
             while not @stop_thread
-                ch = sp.read(1)
-                if ch == ""
-                    # do nothing, read timed out
-                elsif digits.include?(ch)
-                    digit_string += ch
-                else
-                    parse_digit_string(digit_string, app)
-                    digit_string = ''
+                ch = @sp.read(1)
+                if ch
+                    if digits.include?(ch)
+                        digit_string += ch
+                    else
+                        parse_digit_string(digit_string, app)
+                        digit_string = ''
+                    end
                 end
             end
         rescue Exception => e

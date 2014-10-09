@@ -22,6 +22,9 @@ require 'erubis'
 require 'thin'
 require 'serialport'
 
+require './daktronics_rtd_sync'
+require './eversan_serial_sync'
+
 class ClockSettings
     def initialize(period_length, overtime_length, num_periods)
         @period_length = period_length
@@ -684,7 +687,6 @@ class ScoreboardApp < Patchbay
         ALLOWED_SYNC_TYPES = {
             'DaktronicsRtdSync' => DaktronicsRtdSync,
             'EversanSerialSync' => EversanSerialSync,
-            'None' => nil
         }
         msg = incoming_json
         if msg.has_key?('type')
@@ -698,8 +700,11 @@ class ScoreboardApp < Patchbay
             if type
                 @sync_thread = type.new(self, msg)
                 render :json => incoming_json
+            elsif msg['type'] == 'None'
+                @sync_thread = nil
+                render :json => incoming_json
             else
-                # the requested type isn't available
+                # requested type was unavailable
                 render :status => 400
             end
         else

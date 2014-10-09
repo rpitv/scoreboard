@@ -10,9 +10,11 @@ class DaktronicsRtdSync
     end
 
     def shutdown
+        STDERR.puts "Daktronics RTD sync thread shutting down"
         @stop_thread = true
         @thread.join
         @sp.close
+        STDERR.puts "Daktronics RTD sync thread terminated"
     end
 
     def capabilities
@@ -124,6 +126,7 @@ class DaktronicsRtdSync
 
     def run_thread
         begin
+            STDERR.puts "Daktronics RTD sync thread starting"
             logfile_name = Time.now.strftime("rs232_log_%Y%m%d_%H%M%S")
             logfile = File.open(logfile_name, "w")
             packet = ''
@@ -132,14 +135,14 @@ class DaktronicsRtdSync
                 byte = @sp.read(1)
                 logfile.write(byte)
 
-                if byte == ""
-                    # do nothing, read timed out
-                elsif byte.ord == 0x16
-                    packet = ''
-                elsif byte.ord == 0x17
-                    process_dak_packet(app, packet)
-                else
-                    packet << byte
+                if byte
+                    if byte.ord == 0x16
+                        packet = ''
+                    elsif byte.ord == 0x17
+                        process_dak_packet(app, packet)
+                    else
+                        packet << byte
+                    end
                 end
             end
         rescue Exception => e
