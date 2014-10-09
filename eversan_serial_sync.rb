@@ -1,4 +1,30 @@
+##
+# Parser for Eversan serial data stream
+#
+# This class implements a parser for the serial data stream available from
+# some Eversan scoreboard consoles. This data stream is transmitted as RS-422
+# at a non-standard baud rate, so some external hardware is needed to make 
+# the data useful. Some consoles have the RS-422 port installed but are
+# missing the driver chip. For these units, jumper wires may be installed 
+# in place of the driver chip, making the port into a TTL-level serial output.
+# An AVR C program is provided in hw_interface/eversan.c; this program
+# translates the Eversan serial output to standard 115200bps 8N1 serial
+# when run on appropriate hardware.
+#
+# The Eversan protocol is fairly simple: a string of digits is periodically
+# transmitted. These digits correspond to the digits displayed in various
+# locations on the scoreboard. The Eversan scoreboard that this code was 
+# developed for was a simple model, displaying time, period, and score,
+# so that's all it's able to sync. Given the protocol's simplicity, it 
+# shouldn't be too difficult to extend this to work with more complex models.
 class EversanSerialSync
+    ##
+    # Initialize the Eversan serial stream parser.
+    #
+    # The parser will report its data to +app+. +options+ is a hash
+    # of options, including:
+    #
+    # [+'port'+]        serial port to use
     def initialize(app, options)
         @app = app
         @stop_thread = false
@@ -9,6 +35,8 @@ class EversanSerialSync
         @thread = Thread.new { run_thread }
     end
 
+    ##
+    # Shut down the Eversan parser and free the serial port.
     def shutdown
         STDERR.puts "Eversan serial sync thread shutting down"
         @stop_thread = true
@@ -17,10 +45,15 @@ class EversanSerialSync
         STDERR.puts "Eversan serial sync thread terminated"
     end
 
+    ##
+    # Return the types of data that can be supplied by the parser.
     def capabilities
         ['clock', 'score']
     end
 
+    ##
+    # Parse the string of digits sent by the scoreboard, and send the data
+    # to the app.
     def parse_digit_string(string)
         if string =~ /(\d{2})(\d{2})(\d)(\d{2})(\d{2})(\d)$/
             minutes = $1.to_i
@@ -39,6 +72,10 @@ class EversanSerialSync
         end
     end
 
+    ##
+    # Read from the serial port, building a string of digits until a delimiter
+    # is received. Then call +parse_digit_string+ to extract game data from
+    # the received string.
     def run_thread
         begin
             STDERR.puts "Eversan serial sync thread starting"
