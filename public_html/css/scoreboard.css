@@ -21,10 +21,14 @@
     font-family: gothamNarrow;
     src: url('GothamNarrow.otf');
 }
+@font-face {
+	font-family: montserrat;
+	src: url('Montserrat-Regular.ttf');
+}
 body {
     background: #aaa url(ExavideoSemitransparent.png) repeat;
     text-align: center;
-    font-family: gothamNarrow;
+    font-family: gothamNarrow, montserrat;
     overflow-y: scroll;
 }
 .penalty_queue {
