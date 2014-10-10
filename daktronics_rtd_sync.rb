@@ -122,7 +122,7 @@ class DaktronicsRtdSync
     def packet_0042100221(payload)
         if (payload =~ /(1st|2nd|3rd|4th)/i)
 	    STDERR.puts "#{$1} down"
-            @app.sync_down($1) 
+            @app.sync_down($1.downcase) 
         end
     end
     
