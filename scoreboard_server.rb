@@ -22,418 +22,17 @@ require 'erubis'
 require 'thin'
 require 'serialport'
 
-require './daktronics_rtd_sync'
-require './eversan_serial_sync'
-
-class ClockSettings
-    def initialize(period_length, overtime_length, num_periods)
-        @period_length = period_length
-        @num_periods = num_periods
-        @overtime_length = overtime_length
-    end
-
-    attr_reader :period_length
-    attr_reader :overtime_length
-    attr_reader :num_periods
-end
-
-def minutes(x)
-    x*60*10
-end
-
-CLOCK_HOCKEY_REGULAR_SEASON = ClockSettings.new(minutes(20), minutes(5), 3)
-CLOCK_HOCKEY_POSTSEASON = ClockSettings.new(minutes(20), minutes(20), 3)
-CLOCK_FOOTBALL = ClockSettings.new(minutes(15), 0, 4)
-CLOCK_LACROSSE = ClockSettings.new(minutes(30), minutes(4), 2)
-
-# FIXME: need a way to change this more easily than manually editing this file
-CLOCK_MODE = CLOCK_HOCKEY_REGULAR_SEASON
-
-class GameClock
-    def initialize(preset)
-        # Clock value, in tenths of seconds
-        @value = 0
-        @last_start = nil        
-        @period = 1
-        
-        @period_length = preset.period_length
-        @overtime_length = preset.overtime_length
-        @num_periods = preset.num_periods    
-        
-    end
-    
-    def period_end
-        if @period <= @num_periods
-            @period_length * @period
-        else
-            @period_length * @num_periods + @overtime_length * (@period - @num_periods)
-        end
-    end
-
-    def load_settings(preset)
-        current_time_remaining = period_remaining
-        STDERR.puts "current_time_remaining #{current_time_remaining}"
-        @period_length = preset.period_length
-        @overtime_length = preset.overtime_length
-        @num_periods = preset.num_periods
-        
-        self.period_remaining = current_time_remaining
-    end
-
-    def time_elapsed
-        if @last_start
-            elapsed = Time.now - @last_start
-            # compute the elapsed time in tenths of seconds
-
-            value_now = @value + (elapsed * 10).to_i
-
-            # we won't go past the end of a period without an explicit restart
-            if value_now > period_end
-                value_now = period_end
-                @value = value_now
-                @last_start = nil
-            end
-
-            value_now
-        else
-            @value
-        end
-    end
-    
-    def period_advance
-        pl = @period_length
-        if @period+1 > @num_periods
-            pl = @overtime_length
-        end
-        #if time_elapsed == @period_end
-            reset_time(pl, @period+1)
-        #end
-    end
-
-    def reset_time(remaining, newperiod)
-        if newperiod <= @num_periods
-            # normal period
-            @value = @period_length - remaining + @period_length*(newperiod-1)
-        else
-            # overtime
-            @value = @overtime_length*(newperiod-@num_periods) - remaining + @period_length*@num_periods
-        end
-        if @last_start != nil
-            @last_start = Time.now
-        end
-        @period = newperiod
-    end
-
-    attr_reader :period
-    attr_reader :num_periods
-    attr_reader :overtime_length
-
-    def start
-        if @value == @period_end
-            # FIXME: handle overtimes correctly...
-            @period += 1
-        end
-
-        if @last_start == nil
-           @last_start = Time.now 
-        end
-    end
-
-    def stop
-        @value = time_elapsed
-        @last_start = nil
-    end
-
-    def running?
-        if @last_start
-            true
-        else
-            false
-        end
-    end
-
-    def period_remaining=(tenths)
-        @value = period_end - tenths
-        if running?
-            @last_start = Time.now
-        end
-    end
-
-    def period_remaining
-        period_end - time_elapsed
-    end
-end
-
-# the base data structure everything uses is a JSON format object.
-# These are here to provide easier access to that data from views.
-class TeamHelper
-    attr_accessor :flag
-
-    def initialize(team_data, clock)
-        @team_data = team_data
-        @clock = clock
-    end
-
-    def name
-        if @team_data['possession']
-            "\xe2\x80\xa2" + @team_data['name']
-        else
-            @team_data['name']
-        end
-    end
-
-    def fgcolor
-        @team_data['fgcolor']
-    end
-
-    def bgcolor
-        @team_data['bgcolor']
-    end
-
-    def color
-        bgcolor
-    end
-    
-    def score
-        @team_data['score']
-    end
-
-    def shots
-        @team_data['shotsOnGoal']
-    end
-
-    def timeouts
-        @team_data['timeoutsLeft'].to_i
-    end
-
-    def called_timeout
-        @team_data['timeoutNowInUse']
-    end
-
-    def penalties
-        PenaltyHelper.new(@team_data['penalties'], @clock)
-    end
-
-    def strength
-        penalties.strength
-    end
-
-    def empty_net
-        @team_data['emptyNet'] and @team_data['emptyNet'] != 'false'
-    end
-
-    def delayed_penalty
-        @team_data['delayedPenalty'] and @team_data['delayedPenalty'] != 'false'
-    end
-
-    def fontWidth
-        @team_data['fontWidth']
-    end
-
-    def status
-        @team_data['status']
-    end
-
-    def status_color
-        if @team_data['statusColor'] && @team_data['statusColor'] != ''
-            @team_data['statusColor']
-        else
-            'yellow'
-        end
-    end
-end
-
-class PenaltyHelper
-    def initialize(penalty_data, clock)
-        @penalty_data = penalty_data
-        @clock = clock
-    end
-
-    def strength
-        s = 5
-        @penalty_data['activeQueues'].each_with_index do |queue, i|
-            qstart = @penalty_data['activeQueueStarts'][i].to_i
-            qlength = queue_length(queue)
-            if qlength > 0 and @clock.time_elapsed < qstart + qlength
-                s -= 1
-            end
-        end
-
-        s
-    end
-
-    def time_to_strength_change
-        result = -1
-
-        @penalty_data['activeQueues'].each_with_index do |queue, i|
-            time_remaining_on_queue = -1
-            if queue.length > 0
-                qstart = @penalty_data['activeQueueStarts'][i].to_i
-                qlength = queue_length(queue)
-                qend = qstart + qlength
-                time_remaining_on_queue = qend - @clock.time_elapsed
-            end
-
-            if time_remaining_on_queue > 0
-                if time_remaining_on_queue < result or result == -1
-                    result = time_remaining_on_queue 
-                end
-            end
-        end
-
-        if result == -1
-            result = 0
-        end
-
-        result
-    end
-
-protected
-    def queue_length(q)
-        time = 0
-        q.each do |penalty|
-            time += penalty['time'].to_i
-        end
-        
-        time
-    end
-
-end
-
-class AnnounceHelper
-    def initialize(announce_array)
-        @announce = announce_array
-        @announce_handled = false 
-        @frames = 0
-    end
-
-    def bring_up
-        if @announce_handled
-            if @announce.length == 0
-                @announce_handled = false
-            end
-            false
-        else
-            if @announce.length > 0
-                @announce_handled = true
-                true
-            else
-                false
-            end
-        end
-    end
-
-    def is_up
-        @announce.length > 0
-    end
-
-    def next
-        @frames = 0
-        if @announce.length > 0
-            @announce.shift
-        else
-            nil
-        end
-    end
-
-    def message
-        if @announce.length > 0
-            @announce[0]
-        else
-            ''
-        end
-    end
-
-    attr_accessor :frames
-end
-
-class StatusHelper
-    def initialize(app)
-        @app = app
-        @status_up = false
-    end
-
-    def text
-        @app.status
-    end
-
-    def color
-        @app.status_color
-    end
-
-    def bring_up
-        if @app.status != '' && !@status_up
-            @status_up = true
-            true
-        else
-            false
-        end
-    end
-
-    def bring_down
-        if @app.status == '' && @status_up
-            @status_up = false
-            true
-        else
-            false
-        end
-    end
-
-    def is_up
-        @app.status != '' 
-    end
-end
-
-class ClockHelper
-    def initialize(clock)
-        @clock = clock
-    end
-
-    def time
-        tenths = @clock.period_remaining
-
-        seconds = tenths / 10
-        tenths = tenths % 10
-
-        minutes = seconds / 60
-        seconds = seconds % 60
-
-        if @clock.overtime_length == 0 && @clock.period > @clock.num_periods
-            ''
-        elsif minutes > 0
-            format '%d:%02d', minutes, seconds
-        else
-            format ':%02d.%d', seconds, tenths
-        end
-    end
-
-    def period
-        if @clock.period <= @clock.num_periods
-            @clock.period.to_s
-        elsif @clock.period == @clock.num_periods + 1
-            'OT'
-        else
-            (@clock.period - @clock.num_periods).to_s + 'OT'
-        end
-    end
-end
-
-def parse_clock(time_str)
-    if time_str =~ /^((\d+)?:)?([0-5]\d(\.\d)?)$/
-        seconds = $3.to_f
-        minutes = $2.to_i
-        minutes * 600 + (seconds * 10).to_i
-    else
-        fail "invalid clock value"
-    end
-end
+require_relative './daktronics_rtd_sync'
+require_relative './eversan_serial_sync'
+require_relative './scoreboard_helpers'
+require_relative './game_clock'
 
 class ScoreboardApp < Patchbay
     def initialize
         super
 
         @DATAFILE_NAME='scoreboard_state.dat'
-        @clock = GameClock.new(CLOCK_MODE)
+        @clock = GameClock.new
         if File.exists?(@DATAFILE_NAME)
             begin
                 @teams = load_data
@@ -555,7 +154,7 @@ class ScoreboardApp < Patchbay
         time_str = incoming_json['time_str']
         period = incoming_json['period'].to_i
         period = @clock.period if period <= 0
-        time = parse_clock(time_str)
+        time = GameClock.parse_clock(time_str)
         if (time)
             @clock.reset_time(time, period)
         end
@@ -648,14 +247,14 @@ class ScoreboardApp < Patchbay
         
         number_of_periods = @gameSettings['periodQty'].to_i
         begin
-            period_length = parse_clock(@gameSettings['periodLength'])
-            overtime_length = parse_clock(@gameSettings['otPeriodLength'])
+            period_length = GameClock.parse_clock(@gameSettings['periodLength'])
+            overtime_length = GameClock.parse_clock(@gameSettings['otPeriodLength'])
         rescue
             render :status => 400
             return
         end
         
-        new_clock_settings = ClockSettings.new(period_length, overtime_length, number_of_periods)
+        new_clock_settings = GameClock::Settings.new(period_length, overtime_length, number_of_periods)
         @clock.load_settings(new_clock_settings)
         
         STDERR.puts "number_of_periods=#{number_of_periods}"
@@ -683,11 +282,15 @@ class ScoreboardApp < Patchbay
         render :json => { :is_up => @view.is_up? }.to_json
     end
 
+	##
+	# Set sync feed parsing mode.
     put '/sync_mode' do
-        ALLOWED_SYNC_TYPES = {
+		# we will match the requested mode against this list
+        allowed_sync_types = {
             'DaktronicsRtdSync' => DaktronicsRtdSync,
             'EversanSerialSync' => EversanSerialSync,
         }
+
         msg = incoming_json
         if msg.has_key?('type')
             # shutdown any existing sync thread
@@ -697,11 +300,13 @@ class ScoreboardApp < Patchbay
             end
 
             # create new sync thread from parameters
-            type = ALLOWED_SYNC_TYPES[msg['type']] || nil
+            type = allowed_sync_types[msg['type']] || nil
             if type
+				# create a new thread of the given type
                 @sync_thread = type.new(self, msg)
                 render :json => incoming_json
             elsif msg['type'] == 'None'
+				# nothing was selected, so don't create new thread
                 render :json => incoming_json
             else
                 # requested type was unavailable
@@ -712,6 +317,8 @@ class ScoreboardApp < Patchbay
         end
     end
 
+	##
+	# Set the template to be used for rendering the scoreboard.
     def view=(view)
         @view = view
         @view.announce = AnnounceHelper.new(@announces)
@@ -722,6 +329,8 @@ class ScoreboardApp < Patchbay
         @view.command_queue = command_queue
     end
 
+	##
+	# Get the current template.
     def view
         @view
     end
@@ -730,6 +339,8 @@ class ScoreboardApp < Patchbay
 
     attr_reader :clock, :autosync_clock, :autosync_score, :autosync_other
 
+	##
+	# Set the current home team score. Typically used by sync feed parsers.
     def sync_hscore(hscore)
         if @sync_score
             if hscore > @teams[1]['score'].to_i
@@ -739,6 +350,8 @@ class ScoreboardApp < Patchbay
         end
     end
 
+	##
+	# Set the current guest team score. Typically used by sync feed parsers.
     def sync_vscore(vscore)
         if @sync_score
             if vscore > @teams[0]['score'].to_i
@@ -749,6 +362,8 @@ class ScoreboardApp < Patchbay
         end
     end
 
+	##
+	# Set the current down (football). Typically used by sync feed parsers.
     def sync_down(down)
         if @autosync_other
             @down = down
@@ -756,6 +371,9 @@ class ScoreboardApp < Patchbay
         end
     end
 
+	##
+	# Set the current distance to go (football). 
+	# Typically used by sync feed parsers.
     def sync_distance(distance)
         if @autosync_other
             @distance = distance
@@ -763,12 +381,16 @@ class ScoreboardApp < Patchbay
         end
     end
 
+	##
+	# Set the current time remaining. Typically used by sync feed parsers.
     def sync_clock_time_remaining(tenths)
         if @autosync_clock
             @clock.period_remaining = tenths
         end
     end
 
+	##
+	# Set the current time period. Typically used by sync feed parsers.
     def sync_clock_period(period)
         if @autosync_clock
             @clock.reset_time(@clock.period_remaining, period)
@@ -776,6 +398,8 @@ class ScoreboardApp < Patchbay
     end
 
 protected
+	##
+	# Parse HTTP request body JSON into a Ruby object
     def incoming_json
         unless params[:incoming_json]
             inp = environment['rack.input']
@@ -786,61 +410,33 @@ protected
         params[:incoming_json]
     end
 
+	##
+	# Save current team states to file. This does not yet save the clock 
+	# or any other settings.
     def save_data
         File.open(@DATAFILE_NAME, 'w') do |f|
             f.write @teams.to_json
         end
     end
 
+	##
+	# Load team state from file.
+	# This simply reads the file and returns the data. It does not 
+	# alter the current state.
     def load_data
         File.open(@DATAFILE_NAME, 'r') do |f|
             JSON.parse f.read
         end
     end
 
+	##
+	# Get the view command queue.
     def command_queue
         @command_queue ||= []
         @command_queue
     end
 end
 
-module TimeHelpers
-    # truncate tenths
-    def format_time_without_tenths(time)
-        seconds = time / 10
-        minutes = seconds / 60
-        seconds = seconds % 60
-
-        format "%d:%02d", minutes, seconds
-    end
-
-    # round up to next second
-    def format_time_without_tenths_round(time)
-        seconds = (time + 9) / 10
-        minutes = seconds / 60
-        seconds = seconds % 60
-
-        format "%d:%02d", minutes, seconds
-    end
-
-    def format_time_with_tenths_conditional(time)
-        tenths = time % 10
-        seconds = time / 10
-        
-        minutes = seconds / 60
-        seconds = seconds % 60
-
-        if minutes == 0
-            format ":%02d.%d", seconds, tenths
-        else
-            format "%d:%02d", minutes, seconds
-        end
-    end
-end
-
-module ViewHelpers
-    include TimeHelpers
-end
 
 class LinearAnimation
     IN = 0
