@@ -39,6 +39,24 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
 			
 			<div id="centerPanel" style="display: inline-block; width: 420px;">
+				<div id="syncSettings" class="innerBox settingsBox">
+					<label class="settingInputs">
+						Sync Mode
+						<select id="syncMode" name="type">
+							<option value="None">None</option>
+							<option value="DaktronicsRtdSync">Daktronics RTD Serial</option>
+							<option value="EversanSerialSync">Eversan Serial</option>
+						</select>
+					</label>
+
+					<label class="settingInputs">
+						Port <input type="text" id="syncPort" name="port" />
+					</label>
+
+					<label class="settingInputs">
+						Baud <input type="text" id="syncBaud" name="baud" />
+					</label>
+				</div>
 				<div id="gameSettings" class="innerBox settingsBox">
 					<label class="settingInputs">Sport
 						<input type="text" id="gameType" onclick="$(this).select();" />

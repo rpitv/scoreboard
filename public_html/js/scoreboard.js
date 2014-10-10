@@ -705,6 +705,20 @@ jQuery.fn.serializeInputsJson = function() {
     return result;
 }
 
+// serializeInputsJsonByName
+// get values of all input fields within the matched elements as JSON
+jQuery.fn.serializeInputsJsonByName = function() {
+    var result = { };
+    $(this).find("input:text,select").each(function(i,e) {
+        result[$(e).attr('name')] = $(e).val();
+    });
+    $(this).find("input:checkbox").each(function(i,e) {
+        result[$(e).attr('name')] = $(e).is(':checked');
+    });
+    return result;
+}
+
+
 // unserializeInputsJson
 // take all properties of the object and try to set field values 
 jQuery.fn.unserializeInputsJson = function(data) {
@@ -851,9 +865,8 @@ function getAutosync() {
 }
 
 function showHideSettings() {
-    $("#gameSettings").toggle("blind", 1000);
-    $("#awayTeamControl").find("#teamSettings").toggle("blind", 1000);
-    $("#homeTeamControl").find("#teamSettings").toggle("blind", 1000);
+	$(".settingsBox").toggle("blind", 1000);
+
     if($("#toggleSettingsText").html() == "Hide <u>S</u>ettings"){
         $("#toggleSettingsText").html("Show <u>S</u>ettings");
         // Reload Team Data
@@ -904,6 +917,19 @@ function getSettingsPresets(event, ui) {
             }
         });
     });
+}
+
+function changeSyncSettings() {
+	var json = $("#syncSettings").serializeInputsJsonByName();
+	if (json['baud'].trim() == "") {
+		delete json['baud'];
+	}
+
+	if (json['port'].trim() == "") {
+		delete json['port'];
+	}
+
+	putJson("sync_mode", json);
 }
 
 $(document).ready(function() {
@@ -1012,5 +1038,6 @@ $(document).ready(function() {
     $(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(function(){ytgUpdate(this);});
     $("#customYTG").change(function(){ytgCustom(this);});
     $("#displayDownDistance, #clearDownDistance").click(function(){ddDisplay(this);});
+	$("#syncSettings").find("select, input").change(changeSyncSettings);
 
 });
