@@ -17,7 +17,13 @@
 # developed for was a simple model, displaying time, period, and score,
 # so that's all it's able to sync. Given the protocol's simplicity, it 
 # shouldn't be too difficult to extend this to work with more complex models.
+
+require_relative './serial_sync_helper'
+
 class EversanSerialSync
+
+    include SerialSyncHelper
+
     ##
     # Initialize the Eversan serial stream parser.
     #
@@ -29,8 +35,7 @@ class EversanSerialSync
         @app = app
         @stop_thread = false
 
-        # FIXME: we are passing potentially untrusted data to this constructor
-        @sp = SerialPort.new(options['port'] || '/dev/ttyS0', 115200)
+        @sp = open_port(options, 115200)
         @sp.read_timeout = 500
         @thread = Thread.new { run_thread }
     end

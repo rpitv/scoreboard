@@ -24,7 +24,13 @@
 # string from bytes 9-18 of the packet. These functions are responsible for 
 # interpreting the packet payload and calling the appropriate sync function
 # on app.
+
+require_relative './serial_sync_helper'
+
 class DaktronicsRtdSync
+
+    include SerialSyncHelper
+
     ##
     # Initialize the RTD parser, which will report data back to +app+.
     #
@@ -34,8 +40,7 @@ class DaktronicsRtdSync
         @app = app
         @stop_thread = false
 
-        # FIXME: we are passing potentially untrusted data to this constructor
-        @sp = SerialPort.new(options['port'] || '/dev/ttyS0', 19200)
+        @sp = open_port(options, 19200)
         @sp.read_timeout = 500
         @thread = Thread.new { run_thread }
     end
