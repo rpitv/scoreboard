@@ -693,6 +693,7 @@ class ScoreboardApp < Patchbay
             # shutdown any existing sync thread
             if @sync_thread
                 @sync_thread.shutdown
+                @sync_thread = nil
             end
 
             # create new sync thread from parameters
@@ -701,7 +702,6 @@ class ScoreboardApp < Patchbay
                 @sync_thread = type.new(self, msg)
                 render :json => incoming_json
             elsif msg['type'] == 'None'
-                @sync_thread = nil
                 render :json => incoming_json
             else
                 # requested type was unavailable
