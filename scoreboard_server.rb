@@ -98,7 +98,6 @@ class ScoreboardApp < Patchbay
                 ],
 
                 'emptyNet' => false,
-                'delayedPenalty' => false,
                 'possession' => false,
                 'fontWidth' => 0,
                 'status' => '',
@@ -120,7 +119,6 @@ class ScoreboardApp < Patchbay
                 'autocompletePlayers' => [
                 ],
                 'emptyNet' => false,
-                'delayedPenalty' => false,
                 'possession' => false,
                 'fontWidth' => 0,
                 'status' => '',
