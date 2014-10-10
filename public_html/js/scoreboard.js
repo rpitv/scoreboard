@@ -167,23 +167,38 @@ jQuery.fn.buildTeamControl = function() {
 		$(elem).html($("#teamProto").html());
 
 		// hang onto this because jQuery will move it later
-		$(elem).data("penaltyDialog", $(elem).find("#penalty_queue_dialog"));
+		$(elem).data(
+			"penaltyDialog", 
+			$(elem).find("#penalty_queue_dialog")
+		);
+
 		$(elem).find("#penalty_queue_dialog").data("team", $(elem));
 		
-		$(elem).find(".plusScore").click(function(){addPoints.call(this, $(this).attr("value"))}); 
+		$(elem).find(".plusScore").click(function() {
+			addPoints.call(this, $(this).attr("value"));
+		}); 
 
 		$(elem).find("#shotOnGoal").click(shotTaken);
 		$(elem).find("#possession").click(possessionChange);		
 		
-		$(elem).find(".penaltyBttn").click(function(){newPenalty.call(this, $(this).attr("value"));});
+		$(elem).find(".penaltyBttn").click(function() { 
+			newPenalty.call(this, $(this).attr("value"));
+		});
 
 		$(elem).find("#clearPenalties").click(clearPenalties);
-		$(this).team().penaltyDialog().find("#clearAllPenalties").click(clearPenalties);
+		
+		$(this).team()
+			.penaltyDialog()
+			.find("#clearAllPenalties")
+			.click(clearPenalties);
+
 		$(elem).find("#editPenalties").click(editPenalties);
 		
-		$(elem).find(".statusBttn").click(function(){statusChange(this);});
+		$(elem).find(".statusBttn").click(statusChange);
 		
-		$(elem).find("input,select").blur(function() { $(this).team().putTeamData() });
+		$(elem).find("input,select").blur(function() { 
+			$(this).team().putTeamData(); 
+		});
 
 		$(elem).find(".penalty_list").sortable({ 
 			connectWith: $(elem).find(".penalty_list"),
@@ -563,29 +578,30 @@ function shotTaken() {
 	);
 	$(this).team().putTeamData();
 }
-function statusChange(thiz){
+
+function statusChange() {
 	// Clear all statuses
-	if ($(thiz).attr("status") == "" ){
-		$(thiz).team().find("#status").val("");
-		$(thiz).team().find("#statusColor").val("");
-		$(thiz).team().find(".statusBttn:checked").attr("checked", false);
+	if ($(this).attr("status") == "" ){
+		$(this).team().find("#status").val("");
+		$(this).team().find("#statusColor").val("");
+		$(this).team().find(".statusBttn:checked").attr("checked", false);
 	}
 	// Put up status of newly checked
-	if ($(thiz).is(":checked")){
-		$(thiz).team().find("#status").val($(thiz).attr("status"));
-				$(thiz).team().find("#statusColor").val($(thiz).attr("color"));
+	if ($(this).is(":checked")){
+		$(this).team().find("#status").val($(this).attr("status"));
+				$(this).team().find("#statusColor").val($(this).attr("color"));
 	
 	// on uncheck, look for other checked statuses from both teams
 	} else {
-		$(thiz).team().find("#status").val("");
-		$(thiz).team().find("#status").val($(thiz).team().find(":checked").attr("status"));
-		$(thiz).team().find("#statusColor").val($(thiz).team().find(":checked").attr("color"));
+		$(this).team().find("#status").val("");
+		$(this).team().find("#status").val($(this).team().find(":checked").attr("status"));
+		$(this).team().find("#statusColor").val($(this).team().find(":checked").attr("color"));
 	}
-	$(thiz).team().putTeamData();
+	$(this).team().putTeamData();
 }
 
-function downUpdate(thiz){
-	if($(thiz).attr("id") == "nextDown"){
+function downUpdate() {
+	if ($(this).attr("id") == "nextDown") {
 		if (down == "1st") { 
 			down = "2nd"; 
 		} else if (down == "2nd") {
@@ -596,21 +612,21 @@ function downUpdate(thiz){
 			down = "1st"; 
 			ytg = 10;
 		}
-	} else if ($(thiz).attr("id") == "firstAnd10") {
+	} else if ($(this).attr("id") == "firstAnd10") {
 		down = "1st";
 		ytg = 10;
 	} else {
-		down = $(thiz).attr("value");
+		down = $(this).attr("value");
 	}
 	$("#downNumber").html(down);
 	$("#ytgNumber").html(ytg);
 }
 
-function ytgUpdate(thiz) {
+function ytgUpdate() {
 	var addSubYTG = 0;
-	addSubYTG = $(thiz).attr("value");
+	addSubYTG = $(this).attr("value");
 	
-	if ($(thiz).attr("class") == "bttn addSubYTG") {
+	if ($(this).attr("class") == "bttn addSubYTG") {
 		if (ytg == "Goal") {
 			// catches nth & Goal case; no change should be made
 		} else if (ytg == "Inches" && addSubYTG > 0) {
@@ -632,19 +648,19 @@ function ytgUpdate(thiz) {
 	$("#ytgNumber").html(ytg);
 }
 
-function ytgCustom(thiz){
-	if ($(thiz).val() != "") { //prevents blank ytg
-		ytg = parseInt($(thiz).val());
+function ytgCustom() {
+	if ($(this).val() != "") { //prevents blank ytg
+		ytg = parseInt($(this).val());
 	}
 	$("#downNumber").html(down);
 	$("#ytgNumber").html(ytg);
 }
 
-function ddDisplay(thiz){
-	if ($(thiz).attr("value") == 1) {
-		$("#textInput").val(down +" & "+ytg);
+function ddDisplay() {
+	if ($(this).attr("value") == 1) {
+		$("#textInput").val(down + " & " + ytg);
 		postStatus();
-	} else if ($(thiz).attr("value") == 0) {
+	} else if ($(this).attr("value") == 0) {
 		clearStatus();
 	}
 }
@@ -743,14 +759,14 @@ function putSettings( ) {
 	putJson("scoreboardSettings", json);
 }
 
-function transitionScoreboard(thiz){
-	if ($(thiz).attr("status") == "up"){
+function transitionScoreboard() {
+	if ($(this).attr("status") == "up"){
 		scoreboardUp();
-		$(thiz).attr("status", "down");//.html("<span>DOWN</span>");
+		$(this).attr("status", "down");//.html("<span>DOWN</span>");
 	}
-	if ($(thiz).attr("status") == "down"){
+	if ($(this).attr("status") == "down"){
 		scoreboardDown();
-		$(thiz).attr("status", "up");//.html("<span>UP</span>");
+		$(this).attr("status", "up");//.html("<span>UP</span>");
 	}
 	// sets display status on page load and keeps it honest during operation
 	setTimeout(function(){
@@ -850,8 +866,8 @@ function showHideSettings() {
 	}
 }
 
-function generateSportList(thiz) {
-	$(thiz).autocomplete({
+function generateSportList() {
+	$(this).autocomplete({
 		create: function(event, ui){
 			$.getJSON("js/sports.json", function(list){
 				$.each(list.sport, function (k,v){
@@ -920,7 +936,7 @@ $(document).ready(function() {
 	});
 	
 	$("#gameSettings").change(putSettings);
-	transitionScoreboard(this);
+	transitionScoreboard.call(this);
 
 
 	// bind enter to clock toggle
@@ -991,7 +1007,7 @@ $(document).ready(function() {
 		});
 	});	
 	
-	$("#gameType").click(function(){generateSportList(this)});
+	$("#gameType").click(generateSportList);
 	
 	//sets to a specific gametype
 	//this will be rectified in future when getSettings() is working
@@ -1004,17 +1020,20 @@ $(document).ready(function() {
 	$("#upTenth").click( function() { adjustClock.call(this, 100); } );
 	$("#dnTenth").click( function() { adjustClock.call(this, -100); } );
 	$("#periodAdvance").click(periodAdvance);
+	$("#setClock").click(setClock);
+	$("#syncClock,#syncScore,#syncOther").change(changeAutosync);
+	
 	$("#announceControl #announce").click(postAnnounce);
 	$("#announceControl #status").click(postStatus);
 	$("#announceControl #clearStatus").click(clearStatus);
 	$("#announceControl #nextAnnounce").click(nextAnnounce);
-	$("#transitionControl").click(function(){transitionScoreboard(this);});
-	$("#setClock").click(setClock);
-	$("#syncClock,#syncScore,#syncOther").change(changeAutosync);
-	$(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
-	$(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(function(){ytgUpdate(this);});
-	$("#customYTG").change(function(){ytgCustom(this);});
-	$("#displayDownDistance, #clearDownDistance").click(function(){ddDisplay(this);});
+
+	$("#transitionControl").click(transitionScoreboard);
+	
+	$(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(downUpdate);
+	$(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(ytgUpdate);
+	$("#customYTG").change(ytgCustom);
+	$("#displayDownDistance, #clearDownDistance").click(ddDisplay);
 	$("#syncSettings").find("select, input").change(changeSyncSettings);
 
 });
