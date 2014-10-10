@@ -30,454 +30,446 @@ var sportList = [];
 
 
 function getText(sourceurl, callback) {
-    jQuery.ajax({
-        url: sourceurl,
-        dataType: "text",
-        error: function(jqxhr, textStatus) {
-            console.log("Communication failure: " + textStatus);
-        },
-        success: function(data) {
-            callback(data);
-        }
-    });
+	jQuery.ajax({
+		url: sourceurl,
+		dataType: "text",
+		error: function(jqxhr, textStatus) {
+			console.log("Communication failure: " + textStatus);
+		},
+		success: function(data) {
+			callback(data);
+		}
+	});
 }
 
 
 function getJson(sourceurl, callback) {
-    jQuery.ajax({
-        url: sourceurl,
-        dataType: "json",
-        error: function(jqxhr, textStatus) {
-            console.log("Communication failure: " + textStatus);
-        },
-        success: function(data) {
-            callback(data);
-        }
-    });
+	jQuery.ajax({
+		url: sourceurl,
+		dataType: "json",
+		error: function(jqxhr, textStatus) {
+			console.log("Communication failure: " + textStatus);
+		},
+		success: function(data) {
+			callback(data);
+		}
+	});
 }
 
 function putJson(desturl, obj) {
-    jQuery.ajax({
-        type: "PUT",
-        url: desturl,
-        contentType: "application/json",
-        data: JSON.stringify(obj),
-        error: function(jqxhr, textStatus) {
-            //alert("Communication error: " + textStatus);  
-        }
-    });
+	jQuery.ajax({
+		type: "PUT",
+		url: desturl,
+		contentType: "application/json",
+		data: JSON.stringify(obj),
+	});
 }
 
 function postJson(desturl, obj) {
-    jQuery.ajax({
-        type: "POST",
-        url: desturl,
-        contentType: "application/json",
-        data: JSON.stringify(obj),
-        error: function(jqxhr, textStatus) {
-            //alert("Communication error: " + textStatus);  
-        }
-    });
+	jQuery.ajax({
+		type: "POST",
+		url: desturl,
+		contentType: "application/json",
+		data: JSON.stringify(obj),
+	});
 }
 
 function fieldsetToJson(fieldset) {
-    var fields = fieldset.serializeArray();
-    var result = { };
-    $.each(fields, function(i, field) {
-        result[field.name] = field.value;
-    });
+	var fields = fieldset.serializeArray();
+	var result = { };
+	$.each(fields, function(i, field) {
+		result[field.name] = field.value;
+	});
 
-    return result;
+	return result;
 }
 
 function isInt(x) {
-    var y = parseInt(x, 10);
-    if (isNaN(y)) {
-        return false;
-    }
+	var y = parseInt(x, 10);
+	if (isNaN(y)) {
+		return false;
+	}
 
-    return (x == y && x.toString() == y.toString());
+	return (x == y && x.toString() == y.toString());
 }
 
 function intOrZero(x) {
-    if (isInt(x)) {
-        return parseInt(x, 10);
-    } else {
-        return 0;
-    }
+	if (isInt(x)) {
+		return parseInt(x, 10);
+	} else {
+		return 0;
+	}
 }
 
 function startClock(dummy) {
-    // save the time for penalties
-    lastStopTimeElapsed = clockState.time_elapsed;
-    putJson('clock/running', { 'run' : true }); 
+	// save the time for penalties
+	lastStopTimeElapsed = clockState.time_elapsed;
+	putJson('clock/running', { 'run' : true }); 
 }
 
 function stopClock(dummy) {
-    putJson('clock/running', { 'run' : false });
+	putJson('clock/running', { 'run' : false });
 }
 
 function formatTime(tenthsClock) {
-    var tenths = tenthsClock % 10;
-    var seconds = Math.floor(tenthsClock / 10);
-    var minutes = Math.floor(seconds / 60);
-    seconds = seconds % 60;
+	var tenths = tenthsClock % 10;
+	var seconds = Math.floor(tenthsClock / 10);
+	var minutes = Math.floor(seconds / 60);
+	seconds = seconds % 60;
 
-    var result = minutes + ":";
-    if (seconds < 10) {
-        result += "0";
-    } 
-    result += seconds;
-    result += "." + tenths;
-    return result;
+	var result = minutes + ":";
+	if (seconds < 10) {
+		result += "0";
+	} 
+	result += seconds;
+	result += "." + tenths;
+	return result;
 }
 
 function updateClock( ) {
-    getJson('clock', function(data) {
-        clockState = data;
+	getJson('clock', function(data) {
+		clockState = data;
 
-        var tenthsRemaining = data.period_remaining;
-        var period = data.period;
-        var isRunning = data.running;
+		var tenthsRemaining = data.period_remaining;
+		var period = data.period;
+		var isRunning = data.running;
 
-        var clockField = $("#clockControl").find("#clock");
-        var periodField = $("#clockControl").find("#period");
+		var clockField = $("#clockControl").find("#clock");
+		var periodField = $("#clockControl").find("#period");
 
-        if (isRunning) {
-            clockField.addClass("clock_running");
-            clockField.removeClass("clock_stopped");
+		if (isRunning) {
+			clockField.addClass("clock_running");
+			clockField.removeClass("clock_stopped");
 			$("#toggleClock").css("border","2px solid #f00");
-        } else {
-            clockField.addClass("clock_stopped");
-            clockField.removeClass("clock_running");
+		} else {
+			clockField.addClass("clock_stopped");
+			clockField.removeClass("clock_running");
 			$("#toggleClock").css("border","2px solid #0f0");
-        }
+		}
 
-        clockField.text(formatTime(tenthsRemaining));
-        periodField.text(period);
-    });
+		clockField.text(formatTime(tenthsRemaining));
+		periodField.text(period);
+	});
 }
 
 function updateClockTimeout( ) {
-    updateClock( );
-    setTimeout(updateClockTimeout, 100);
+	updateClock( );
+	setTimeout(updateClockTimeout, 100);
 }
 
 function updatePreviewTimeout( ) {
-    $('#scoreboardPreview').load('preview svg');
-    setTimeout(updatePreviewTimeout, 500);
+	$('#scoreboardPreview').load('preview svg');
+	setTimeout(updatePreviewTimeout, 500);
 }
 
 jQuery.fn.buildTeamControl = function() {
-    $(this).each(function(index, elem) {
-        $(elem).html($("#teamProto").html());
+	$(this).each(function(index, elem) {
+		$(elem).html($("#teamProto").html());
 
-        // hang onto this because jQuery will move it later
-        $(elem).data("penaltyDialog", $(elem).find("#penalty_queue_dialog"));
-        $(elem).find("#penalty_queue_dialog").data("team", $(elem));
+		// hang onto this because jQuery will move it later
+		$(elem).data("penaltyDialog", $(elem).find("#penalty_queue_dialog"));
+		$(elem).find("#penalty_queue_dialog").data("team", $(elem));
 		
 		$(elem).find(".plusScore").click(function(){addPoints.call(this, $(this).attr("value"))}); 
 
-        $(elem).find("#shotOnGoal").click(shotTaken);
-//      $(elem).find("#takeTimeout").click(timeoutTaken);  
-        $(elem).find("#possession").click(possessionChange);        
-        
+		$(elem).find("#shotOnGoal").click(shotTaken);
+		$(elem).find("#possession").click(possessionChange);		
+		
 		$(elem).find(".penaltyBttn").click(function(){newPenalty.call(this, $(this).attr("value"));});
 
-        $(elem).find("#clearPenalties").click(clearPenalties);
-        $(this).team().penaltyDialog().find("#clearAllPenalties").click(clearPenalties);
-        $(elem).find("#editPenalties").click(editPenalties);
+		$(elem).find("#clearPenalties").click(clearPenalties);
+		$(this).team().penaltyDialog().find("#clearAllPenalties").click(clearPenalties);
+		$(elem).find("#editPenalties").click(editPenalties);
 		
-        $(elem).find(".statusBttn").click(function(){statusChange(this);});
+		$(elem).find(".statusBttn").click(function(){statusChange(this);});
 		
-        $(elem).find("input,select").blur(function() { $(this).team().putTeamData() });
+		$(elem).find("input,select").blur(function() { $(this).team().putTeamData() });
 
-        $(elem).find(".penalty_list").sortable({ 
-            connectWith: $(elem).find(".penalty_list"),
-            stop: function() { 
-                $(this).team().putTeamData(); 
-            }
-        });
-        $(elem).find(".penalty_queue").build_penalty_queue();
-    });
+		$(elem).find(".penalty_list").sortable({ 
+			connectWith: $(elem).find(".penalty_list"),
+			stop: function() { 
+				$(this).team().putTeamData(); 
+			}
+		});
+		$(elem).find(".penalty_queue").build_penalty_queue();
+	});
 }
 
 jQuery.fn.build_penalty_queue = function() {
-    $(this).each(function(index, elem) {
-        $(elem).find("#now").click(penaltyQueueStartNow);
-        $(elem).find("#last").click(penaltyQueueStartLastStop);
-    });
+	$(this).each(function(index, elem) {
+		$(elem).find("#now").click(penaltyQueueStartNow);
+		$(elem).find("#last").click(penaltyQueueStartLastStop);
+	});
 }
 
 jQuery.fn.team = function() {
-    var teamControl = $(this).closest(".teamControl");
+	var teamControl = $(this).closest(".teamControl");
 
-    if (teamControl.length == 0) {
-        return $(this).closest("#penalty_queue_dialog").data("team");
-    } else {
-        return teamControl;
-    }
+	if (teamControl.length == 0) {
+		return $(this).closest("#penalty_queue_dialog").data("team");
+	} else {
+		return teamControl;
+	}
 }
 
 jQuery.fn.penaltyQueue = function() {
-    return $(this).closest(".penalty_queue");
+	return $(this).closest(".penalty_queue");
 }
 
 jQuery.fn.penaltyDialog = function() {
-    return $(this).data("penaltyDialog");
+	return $(this).data("penaltyDialog");
 }
 
 jQuery.fn.newPenaltyDiv = function() {
-    var penaltyDiv = $(this).penaltyDialog().find("#penaltyProto").clone(true);
-    penaltyDiv.removeAttr('id');
-    penaltyDiv.find("#player").autocomplete({ 
-        source: $(this).data('roster'),
-        change: $(this).change()
-    });
-    penaltyDiv.find("#penalty").autocomplete({ 
-        source: autocompletePenalties,
-        change: $(this).change()
-    });
+	var penaltyDiv = $(this).penaltyDialog().find("#penaltyProto").clone(true);
+	penaltyDiv.removeAttr('id');
+	penaltyDiv.find("#player").autocomplete({ 
+		source: $(this).data('roster'),
+		change: $(this).change()
+	});
+	penaltyDiv.find("#penalty").autocomplete({ 
+		source: autocompletePenalties,
+		change: $(this).change()
+	});
 
-    penaltyDiv.find("#announcePenalty").click(function() { 
-        penaltyDiv.announcePenalty( );     
-    });
-    penaltyDiv.find("#deletePenalty").click(deleteSinglePenalty);
+	penaltyDiv.find("#announcePenalty").click(function() { 
+		penaltyDiv.announcePenalty( );	 
+	});
+	penaltyDiv.find("#deletePenalty").click(deleteSinglePenalty);
 
-    return penaltyDiv;
+	return penaltyDiv;
 }
 	
 
 // newPenalty
 // add a penalty to the team's penalty queue
 function newPenalty(time) {
-    var penaltyDiv = $(this).team().newPenaltyDiv();
+	var penaltyDiv = $(this).team().newPenaltyDiv();
 
-    // set up penalty time correctly (creative selector abuse)
-    penaltyDiv.find('select#time').val(time);
+	// set up penalty time correctly (creative selector abuse)
+	penaltyDiv.find('select#time').val(time);
 
-    // load announce strings
-    penaltyDiv.find('input#player').val($(this).team().find('#penaltyPlayer').val());
-    penaltyDiv.find('input#penalty').val($(this).team().find('#penaltyPenalty').val());
-    $(this).team().find('#penaltyPlayer').val('')
-    $(this).team().find('#penaltyPenalty').val('')
+	// load announce strings
+	penaltyDiv.find('input#player').val($(this).team().find('#penaltyPlayer').val());
+	penaltyDiv.find('input#penalty').val($(this).team().find('#penaltyPenalty').val());
+	$(this).team().find('#penaltyPlayer').val('')
+	$(this).team().find('#penaltyPenalty').val('')
 
-    // add to the shorter of the two penalty queues
-    $(this).team().queuePenalty(penaltyDiv);
+	// add to the shorter of the two penalty queues
+	$(this).team().queuePenalty(penaltyDiv);
 
-    // sync team data
-    $(this).team().putTeamData();
+	// sync team data
+	$(this).team().putTeamData();
 }
 
 // queuePenalty
 jQuery.fn.queuePenalty = function(penalty_div) {
-    var penaltyQueues = $(this).penaltyDialog().find(".penalty_queue");
-    
-    var min_queue_end = -1;
-    var queue_with_min_end = 0;
+	var penaltyQueues = $(this).penaltyDialog().find(".penalty_queue");
+	
+	var min_queue_end = -1;
+	var queue_with_min_end = 0;
 
-    // find which queue has the shortest length
-    penaltyQueues.each(function(i, q) {
-        // flush expired penalties from queue
-        $(q).penaltyQueueFlush( );
+	// find which queue has the shortest length
+	penaltyQueues.each(function(i, q) {
+		// flush expired penalties from queue
+		$(q).penaltyQueueFlush( );
 
-        var qend = $(q).penaltyQueueEnd();
-        if (qend < min_queue_end || min_queue_end == -1) {
-            min_queue_end = qend;
-            queue_with_min_end = i;
-        }
-    });
+		var qend = $(q).penaltyQueueEnd();
+		if (qend < min_queue_end || min_queue_end == -1) {
+			min_queue_end = qend;
+			queue_with_min_end = i;
+		}
+	});
 
-    // queue the penalty
-    var queue = penaltyQueues[queue_with_min_end]
-    if ($(queue).penaltyQueueEnd() == 0) {
-        // start penalty queue now if it had no penalties or just expired ones
-        $(queue).penaltyQueueClear();
-        $(queue).penaltyQueueStartNow();
-    }
+	// queue the penalty
+	var queue = penaltyQueues[queue_with_min_end]
+	if ($(queue).penaltyQueueEnd() == 0) {
+		// start penalty queue now if it had no penalties or just expired ones
+		$(queue).penaltyQueueClear();
+		$(queue).penaltyQueueStartNow();
+	}
 
-    $(queue).find(".penalty_list").append(penalty_div);
+	$(queue).find(".penalty_list").append(penalty_div);
 }
 
 jQuery.fn.penaltyQueueFlush = function( ) {
-    var penalty_end = $(this).find("#start").timeval();
-    $(this).find(".penaltyData").each(function(i, p) {
-        penalty_end = penalty_end + $(p).penaltyLength();
-        console.log("penalty_end=" + penalty_end);
-        console.log("time elapsed="+clockState.time_elapsed);
-        if (penalty_end < clockState.time_elapsed) {
-            console.log("flushing penalty??");
-            // delete this expired penalty
-            $(p).remove();
-            // adjust queue start
-            $(this).find("#start").timeval(penalty_end);
-        }
-    });
+	var penalty_end = $(this).find("#start").timeval();
+	$(this).find(".penaltyData").each(function(i, p) {
+		penalty_end = penalty_end + $(p).penaltyLength();
+		console.log("penalty_end=" + penalty_end);
+		console.log("time elapsed="+clockState.time_elapsed);
+		if (penalty_end < clockState.time_elapsed) {
+			console.log("flushing penalty??");
+			// delete this expired penalty
+			$(p).remove();
+			// adjust queue start
+			$(this).find("#start").timeval(penalty_end);
+		}
+	});
 }
 
 jQuery.fn.serializePenaltiesJson = function() {
-    var json = { }
-    json.activeQueueStarts = $(this).find(".penalty_queue").map(
-        function(i,e) {
-            return [$(e).find("#start").timeval()];
-        }
-    ).get();
-    json.activeQueues = $(this).find(".penalty_queue").map(
-        function(i,e) {
-            return [$(e).serializePenaltyListJson()];
-        }
-    ).get();
+	var json = { }
+	json.activeQueueStarts = $(this).find(".penalty_queue").map(
+		function(i,e) {
+			return [$(e).find("#start").timeval()];
+		}
+	).get();
+	json.activeQueues = $(this).find(".penalty_queue").map(
+		function(i,e) {
+			return [$(e).serializePenaltyListJson()];
+		}
+	).get();
 
-    return json;
+	return json;
 }
 
 jQuery.fn.serializePenaltyListJson = function() {
-    var json = this.find(".penaltyData").map(function(i,e) {
-        return [$(e).serializeInputsJson()];
-    }).get();
+	var json = this.find(".penaltyData").map(function(i,e) {
+		return [$(e).serializeInputsJson()];
+	}).get();
 
-    return json;
+	return json;
 }
 
 jQuery.fn.announcePenalty = function( ) {
-    var player = this.find("#player").val( );
-    var penalty = this.find("#penalty").val( );
-    var team = this.team( );
+	var player = this.find("#player").val( );
+	var penalty = this.find("#penalty").val( );
+	var team = this.team( );
 
-    var announces = [ team.find('#name').val( ) + ' PENALTY', player, penalty ];
-    postJson('announce', { messages : announces });
+	var announces = [ team.find('#name').val( ) + ' PENALTY', player, penalty ];
+	postJson('announce', { messages : announces });
 }
 
 jQuery.fn.unserializePenaltiesJson = function(data) {
-    this.find(".penalty_queue").each(function(i,e) {
-        if (i < data.activeQueueStarts.length) {
-            $(e).find("#start").timeval(data.activeQueueStarts[i]);
-        }
+	this.find(".penalty_queue").each(function(i,e) {
+		if (i < data.activeQueueStarts.length) {
+			$(e).find("#start").timeval(data.activeQueueStarts[i]);
+		}
 
-        if (i < data.activeQueues.length) {
-            $(e).unserializePenaltyListJson(data.activeQueues[i]);
-        }
-    });
+		if (i < data.activeQueues.length) {
+			$(e).unserializePenaltyListJson(data.activeQueues[i]);
+		}
+	});
 }
 
 jQuery.fn.unserializePenaltyListJson = function(data) {
-    var thiz = this;
-    $(this).penaltyQueueClear( );
-    jQuery.each(data, function(i,e) {        
-        var penaltyDiv = $(thiz).team().newPenaltyDiv();
-        penaltyDiv.unserializeInputsJson(e);
-        $(thiz).find(".penalty_list").append(penaltyDiv);
-    });
+	var thiz = this;
+	$(this).penaltyQueueClear( );
+	jQuery.each(data, function(i,e) {		
+		var penaltyDiv = $(thiz).team().newPenaltyDiv();
+		penaltyDiv.unserializeInputsJson(e);
+		$(thiz).find(".penalty_list").append(penaltyDiv);
+	});
 }
 
 
 // Clear the penalty queue.
 jQuery.fn.penaltyQueueClear = function() {
-    $(this).find(".penaltyData").remove();
+	$(this).find(".penaltyData").remove();
 }
 
 // Set the penalty queue's start time to now.
 jQuery.fn.penaltyQueueStartNow = function() {
-    $(this).find("#start").timeval(clockState.time_elapsed);
-    $(this).team().putTeamData();
+	$(this).find("#start").timeval(clockState.time_elapsed);
+	$(this).team().putTeamData();
 }
 
 jQuery.fn.timeval = function(tv) {
-    /* FIXME: allow for 20 min playoff overtimes */
-//  var overtime_length = 5*60*10;
-    var period_length = 20*60*10;
-    var n_periods = 3;
+	/* FIXME: allow for 20 min playoff overtimes */
+	var period_length = 20*60*10;
+	var n_periods = 3;
 
-    if (typeof tv === 'number') {
-        // set value
-        var period = 0;
-        var overtime = 0;
+	if (typeof tv === 'number') {
+		// set value
+		var period = 0;
+		var overtime = 0;
 
-        console.log('parsing timeval ' + tv);
+		console.log('parsing timeval ' + tv);
 
-        while (tv >= period_length && period < n_periods) {
-            tv -= period_length;
-            period++;
-        }
+		while (tv >= period_length && period < n_periods) {
+			tv -= period_length;
+			period++;
+		}
 
-        console.log('period ' + period);
+		console.log('period ' + period);
 
-        while (period == n_periods && tv >= overtime_length) {
-            tv -= overtime_length;
-            overtime++;
-        }
+		while (period == n_periods && tv >= overtime_length) {
+			tv -= overtime_length;
+			overtime++;
+		}
 
-        console.log('overtime ' + overtime + ' length ' + overtime_length);
+		console.log('overtime ' + overtime + ' length ' + overtime_length);
 
-        var c_length;
+		var c_length;
 
-        period = period + overtime;
+		period = period + overtime;
 
-        if (period >= n_periods) {
-            c_length = overtime_length;
-        } else {
-            c_length = period_length;
-        }
-        
-        tv = c_length - tv;
+		if (period >= n_periods) {
+			c_length = overtime_length;
+		} else {
+			c_length = period_length;
+		}
+		
+		tv = c_length - tv;
 
-        console.log('tv ' + tv)
+		console.log('tv ' + tv)
 
-        this.val(formatTime(tv) + ' ' + (period+1));
-    } else {
-        // parse value
-        var val = this.val( );
-        var re = /((\d+):)?(\d+)(.(\d+))? (\d)/
-        var result = re.exec(val);
+		this.val(formatTime(tv) + ' ' + (period+1));
+	} else {
+		// parse value
+		var val = this.val( );
+		var re = /((\d+):)?(\d+)(.(\d+))? (\d)/
+		var result = re.exec(val);
 
-        if (result) {
-            var minutes = result[2];
-            var seconds = result[3];
-            var tenths = result[5];
-            var period = result[6];
-            var parsed = 0;
-            var period_num = 0;
-            var overtime_num = 0;
-            var c_length = period_length;
+		if (result) {
+			var minutes = result[2];
+			var seconds = result[3];
+			var tenths = result[5];
+			var period = result[6];
+			var parsed = 0;
+			var period_num = 0;
+			var overtime_num = 0;
+			var c_length = period_length;
 
-            if (typeof minutes !== 'undefined') {
-                parsed = parsed + parseInt(minutes, 10) * 600;
-            }
+			if (typeof minutes !== 'undefined') {
+				parsed = parsed + parseInt(minutes, 10) * 600;
+			}
 
-            if (typeof seconds !== 'undefined') {
-                parsed = parsed + parseInt(seconds, 10) * 10;
-            }
+			if (typeof seconds !== 'undefined') {
+				parsed = parsed + parseInt(seconds, 10) * 10;
+			}
 
-            if (typeof tenths !== 'undefined') {
-                parsed = parsed + parseInt(tenths, 10);
-            }
+			if (typeof tenths !== 'undefined') {
+				parsed = parsed + parseInt(tenths, 10);
+			}
 
 
-            if (typeof period !== 'undefined') {
-                period_num = parseInt(period, 10) - 1;
-            } else {
-                /* period_num = current period */
-            }
+			if (typeof period !== 'undefined') {
+				period_num = parseInt(period, 10) - 1;
+			} else {
+				/* period_num = current period */
+			}
 
-            /* adjust for overtime */
-            if (period_num >= 3) {
-                overtime_num = period_num - 3;
-                period_num = 3;
-                c_length = overtime_length;
-            }
+			/* adjust for overtime */
+			if (period_num >= 3) {
+				overtime_num = period_num - 3;
+				period_num = 3;
+				c_length = overtime_length;
+			}
 
-            /* convert from time remaining to time elapsed */
-            if (parsed > c_length) {
-                parsed = c_length; 
-            }
-            parsed = c_length - parsed;
-            
-            parsed += period_num * period_length;
-            parsed += overtime_num * overtime_length;
+			/* convert from time remaining to time elapsed */
+			if (parsed > c_length) {
+				parsed = c_length; 
+			}
+			parsed = c_length - parsed;
+			
+			parsed += period_num * period_length;
+			parsed += overtime_num * overtime_length;
 
-            return parsed;
-        }
-    }
+			return parsed;
+		}
+	}
 }
 
 
@@ -485,28 +477,28 @@ jQuery.fn.timeval = function(tv) {
 // e.g. $("#homeTeam #pq1").penaltyQueueEnd()
 // Return zero if no penalties are on the queue or they are all expired.
 jQuery.fn.penaltyQueueEnd = function() {
-    var total = 0;
-    var time = clockState.time_elapsed;
-    var penalty_end = intOrZero($(this).find("#start").timeval());
-    var count = 0;
+	var total = 0;
+	var time = clockState.time_elapsed;
+	var penalty_end = intOrZero($(this).find("#start").timeval());
+	var count = 0;
 
-    $(this).find(".penaltyData").each(function(i,e) {
-        penalty_end = penalty_end + $(e).penaltyLength();
-        count++;
-    });
+	$(this).find(".penaltyData").each(function(i,e) {
+		penalty_end = penalty_end + $(e).penaltyLength();
+		count++;
+	});
 
-    if (penalty_end < time || count == 0) {
-        return 0;
-    } else{
-        return penalty_end;
-    }
+	if (penalty_end < time || count == 0) {
+		return 0;
+	} else {
+		return penalty_end;
+	}
 }
 
 // penaltyLength
 // Find the length of a penalty...
 // e.g. $("find_some_penalty_div").penaltyLength()
 jQuery.fn.penaltyLength = function() {
-    return parseInt($(this).find("select option:selected").val(), 10);
+	return parseInt($(this).find("select option:selected").val(), 10);
 }
 
 
@@ -515,238 +507,216 @@ jQuery.fn.penaltyLength = function() {
 function clearPenalties() {
 	$(this).team().penaltyDialog().find(".penalty_queue .penaltyData").remove();
 	$(this).team().putTeamData();
-	
-	/*$(this).dialog({
-	resizable: false,
-	modal: true,
-	buttons: {
-		"Delete All Penalties": function(){
-			$(this).find("#clearPenalties").click(function(){
-					$(this).penaltyDialog().find(".penalty_queue .penaltyData").remove();
-			});
-			$(this).dialog("close");
-		},
-		"Delete or Edit Single Penalty": function(){
-			$(this).find("#editPenalties").click(editPenalties);
-			$(this).dialog("close");
-		},
-		Cancel: function(){
-			$(this).dialog("close");
-		}
-	  }
-	});*/
 }
 
 // editPenalties
 // Bring up penalty queue dialog box for a team.
 function editPenalties() {
-    $(this).team().penaltyDialog().dialog('option', 'width', 700);
-    $(this).team().penaltyDialog().dialog('open');
+	$(this).team().penaltyDialog().dialog('option', 'width', 700);
+	$(this).team().penaltyDialog().dialog('open');
 }
 
 // penaltyQueueStartNow
 // Start the penalty queue now.
 function penaltyQueueStartNow() {
-    $(this).penaltyQueue().penaltyQueueStartNow();
+	$(this).penaltyQueue().penaltyQueueStartNow();
 }
 
 // penaltyQueueStartLastStop
 // Set penalty queue start time to last play stoppage
 function penaltyQueueStartLastStop() {
-    $(this).penaltyQueue().find("#start").timeval(lastStopTimeElapsed);
+	$(this).penaltyQueue().find("#start").timeval(lastStopTimeElapsed);
 }
 
 function deleteSinglePenalty() {
-    var pd = $(this).parents(".penaltyData");
-    var tc = pd.team();
-    pd.remove();
-    tc.putTeamData();
+	var pd = $(this).parents(".penaltyData");
+	var tc = pd.team();
+	pd.remove();
+	tc.putTeamData();
 }
 
 // goalScored
 // Stop clock and register a goal for the team.
 function goalScored() {
-    $(this).team().find("#score").val(
-        intOrZero($(this).team().find("#score").val()) + 1
-    );
-    $(this).team().putTeamData();
-    // trigger any kind of blinky goal animations (or whatever)
-    viewCommand({"goal_scored_by" : $(this).team().data('url')});
+	$(this).team().find("#score").val(
+		intOrZero($(this).team().find("#score").val()) + 1
+	);
+	$(this).team().putTeamData();
+	// trigger any kind of blinky goal animations (or whatever)
+	viewCommand({"goal_scored_by" : $(this).team().data('url')});
 }
 
 // addPoints
 // add points to a team's score
 function addPoints(points) {
-    $(this).team().find("#score").val(
-        intOrZero($(this).team().find("#score").val()) +  parseInt(points)
-    );
-    $(this).team().putTeamData();
-    // trigger any kind of blinky goal animations (or whatever)
-    viewCommand({"goal_scored_by" : $(this).team().data('url')});
+	$(this).team().find("#score").val(
+		intOrZero($(this).team().find("#score").val()) +  parseInt(points)
+	);
+	$(this).team().putTeamData();
+	// trigger any kind of blinky goal animations (or whatever)
+	viewCommand({"goal_scored_by" : $(this).team().data('url')});
 }
 
 function shotTaken() {
-    $(this).team().find("#shotsOnGoal").val(
-        intOrZero($(this).team().find("#shotsOnGoal").val()) + 1
-    );
-    $(this).team().putTeamData();
+	$(this).team().find("#shotsOnGoal").val(
+		intOrZero($(this).team().find("#shotsOnGoal").val()) + 1
+	);
+	$(this).team().putTeamData();
 }
 function statusChange(thiz){
-	//Clear all statuses
+	// Clear all statuses
 	if ($(thiz).attr("status") == "" ){
 		$(thiz).team().find("#status").val("");
 		$(thiz).team().find("#statusColor").val("");
 		$(thiz).team().find(".statusBttn:checked").attr("checked", false);
 	}
-	//Put up status of newly checked
+	// Put up status of newly checked
 	if ($(thiz).is(":checked")){
 		$(thiz).team().find("#status").val($(thiz).attr("status"));
-                $(thiz).team().find("#statusColor").val($(thiz).attr("color"));
+				$(thiz).team().find("#statusColor").val($(thiz).attr("color"));
 	
-	//on uncheck, look for other checked statuses from both teams
-	}else{
-        $(thiz).team().find("#status").val("");
+	// on uncheck, look for other checked statuses from both teams
+	} else {
+		$(thiz).team().find("#status").val("");
 		$(thiz).team().find("#status").val($(thiz).team().find(":checked").attr("status"));
 		$(thiz).team().find("#statusColor").val($(thiz).team().find(":checked").attr("color"));
-    }
+	}
 	$(thiz).team().putTeamData();
 }
 
 function downUpdate(thiz){
 	if($(thiz).attr("id") == "nextDown"){
-		if (down == "1st"){down = "2nd";}
-		else if (down == "2nd"){down = "3rd";}
-		else if (down == "3rd"){down = "4th";}
-		else if (down == "4th"){down = "1st"; ytg = 10;}
-	}else if($(thiz).attr("id") == "firstAnd10"){
+		if (down == "1st") { 
+			down = "2nd"; 
+		} else if (down == "2nd") {
+			down = "3rd";
+		} else if (down == "3rd") {
+			down = "4th";
+		} else if (down == "4th") {
+			down = "1st"; 
+			ytg = 10;
+		}
+	} else if ($(thiz).attr("id") == "firstAnd10") {
 		down = "1st";
 		ytg = 10;
-	}else{
+	} else {
 		down = $(thiz).attr("value");
 	}
 	$("#downNumber").html(down);
 	$("#ytgNumber").html(ytg);
 }
 
-function ytgUpdate(thiz){
+function ytgUpdate(thiz) {
 	var addSubYTG = 0;
 	addSubYTG = $(thiz).attr("value");
 	
-	if($(thiz).attr("class") == "bttn addSubYTG"){
-		if(ytg == "Goal"){
-			//catches nth & Goal case; no change should be made
-		}else if(ytg == "Inches" && addSubYTG > 0){
-			//catches nth & Inches; only increases value
+	if ($(thiz).attr("class") == "bttn addSubYTG") {
+		if (ytg == "Goal") {
+			// catches nth & Goal case; no change should be made
+		} else if (ytg == "Inches" && addSubYTG > 0) {
+			// catches nth & Inches; only increases value
 			ytg = parseInt(0);
 			ytg += parseInt(addSubYTG);		
-		}else if(ytg + parseInt(addSubYTG) > 0 && ytg + parseInt(addSubYTG) < 90){
-			//values cannot be below 1 and above 89 because that's how football works
+		} else if (ytg + parseInt(addSubYTG) > 0 && ytg + parseInt(addSubYTG) < 90) {
+			// values cannot be below 1 and above 89 because that's how football works
 			ytg += parseInt(addSubYTG);
 		}	
-	}else if(addSubYTG == "Goal" || addSubYTG == "Inches"){
+	} else if (addSubYTG == "Goal" || addSubYTG == "Inches") {
 		ytg = addSubYTG;
-	}else{
-		//logic if hardcoded buttons are used
+	} else {
+		// logic if hardcoded buttons are used
 		ytg = parseInt(addSubYTG);
 	}
+
 	$("#downNumber").html(down);
 	$("#ytgNumber").html(ytg);
 }
 
 function ytgCustom(thiz){
-	if($(thiz).val() != ""){            //prevents blank ytg
+	if ($(thiz).val() != "") { //prevents blank ytg
 		ytg = parseInt($(thiz).val());
 	}
 	$("#downNumber").html(down);
 	$("#ytgNumber").html(ytg);
-
 }
 
 function ddDisplay(thiz){
-	if($(thiz).attr("value") == 1){
+	if ($(thiz).attr("value") == 1) {
 		$("#textInput").val(down +" & "+ytg);
 		postStatus();
-	}else if($(thiz).attr("value") == 0){
+	} else if ($(thiz).attr("value") == 0) {
 		clearStatus();
 	}
 }
 
-/*function timeoutTaken() {
-    var tol = intOrZero($(this).team().find("#timeoutsLeft").val());
-    if (tol > 0) {
-        $(this).team().find("#timeoutsLeft").val(tol - 1);
-        $(this).team().putTeamData();
-        putJson('status', { message : "TIMEOUT " + $(this).team().find("#name").val() });
-    }
-}*/
-
 function possessionChange() {
-    var this_poss = $(this).team().find("#possession");
-    if (this_poss.is(':checked')) {
-        $(".teamControl").each( function(index) {
-            var other_poss = $(this).find("#possession");
-            if (other_poss.get(0) !== this_poss.get(0)) {
-                other_poss.prop('checked', false);
-                $(this).putTeamData();
-            }
-        } );
-    }
+	var this_poss = $(this).team().find("#possession");
+	if (this_poss.is(':checked')) {
+		$(".teamControl").each( function(index) {
+			var other_poss = $(this).find("#possession");
+			if (other_poss.get(0) !== this_poss.get(0)) {
+				other_poss.prop('checked', false);
+				$(this).putTeamData();
+			}
+		});
+	}
 }
+
 // serializeInputsJson
 // get values of all input fields within the matched elements as JSON
 jQuery.fn.serializeInputsJson = function() {
-    var result = { };
-    $(this).find("input:text,select").each(function(i,e) {
-        result[$(e).attr('id')] = $(e).val();
-    });
-    $(this).find("input:checkbox").each(function(i,e) {
-        result[$(e).attr('id')] = $(e).is(':checked');
-    });
-    return result;
+	var result = { };
+	$(this).find("input:text,select").each(function(i,e) {
+		result[$(e).attr('id')] = $(e).val();
+	});
+	$(this).find("input:checkbox").each(function(i,e) {
+		result[$(e).attr('id')] = $(e).is(':checked');
+	});
+	return result;
 }
 
 // serializeInputsJsonByName
 // get values of all input fields within the matched elements as JSON
 jQuery.fn.serializeInputsJsonByName = function() {
-    var result = { };
-    $(this).find("input:text,select").each(function(i,e) {
-        result[$(e).attr('name')] = $(e).val();
-    });
-    $(this).find("input:checkbox").each(function(i,e) {
-        result[$(e).attr('name')] = $(e).is(':checked');
-    });
-    return result;
+	var result = { };
+	$(this).find("input:text,select").each(function(i,e) {
+		result[$(e).attr('name')] = $(e).val();
+	});
+	$(this).find("input:checkbox").each(function(i,e) {
+		result[$(e).attr('name')] = $(e).is(':checked');
+	});
+	return result;
 }
 
 
 // unserializeInputsJson
 // take all properties of the object and try to set field values 
 jQuery.fn.unserializeInputsJson = function(data) {
-    for (var prop in data) {
-        $(this).find("input#"+prop+":text,select").val(data[prop]);
-        $(this).find("select#"+prop).val(data[prop]);
-        if (data[prop]) {
-            $(this).find("input#"+prop+":checkbox").attr('checked','checked');
-        } else {
-            $(this).find("input#"+prop+":checkbox").removeAttr('checked');
-        }
-    }
+	for (var prop in data) {
+		$(this).find("input#" + prop + ":text,select").val(data[prop]);
+		$(this).find("select#" + prop).val(data[prop]);
+		if (data[prop]) {
+			$(this).find("input#" + prop + ":checkbox").attr('checked','checked');
+		} else {
+			$(this).find("input#" + prop + ":checkbox").removeAttr('checked');
+		}
+	}
 }
 
 jQuery.fn.getTeamData = function() {
-    var thiz = this; // javascript can be counter-intuitive...
-    getJson($(this).data('url'), function(data) {
-        $(thiz).unserializeInputsJson(data);
-        // important to set roster before we unserialize penalties
-        // else autocompletion might fail
-        $(thiz).data("roster", data.autocompletePlayers);
-        $(thiz).penaltyDialog().unserializePenaltiesJson(data.penalties);
+	var thiz = this; // javascript can be counter-intuitive...
+	getJson($(this).data('url'), function(data) {
+		$(thiz).unserializeInputsJson(data);
+		// important to set roster before we unserialize penalties
+		// else autocompletion might fail
+		$(thiz).data("roster", data.autocompletePlayers);
+		$(thiz).penaltyDialog().unserializePenaltiesJson(data.penalties);
 		
 		//move this out of this function
-		$(thiz).parent().css( "border", "5px solid "+data.bgcolor); // Set team colors on panel
-		$(thiz).parent().find("span.teamName").css( "color", data.bgcolor);
+		$(thiz).parent().css("border", "5px solid " + data.bgcolor); // Set team colors on panel
+		$(thiz).parent().find("span.teamName").css("color", data.bgcolor);
 		$(thiz).parent().find("span.teamName").html(data.name); // Set team names on panel
-    });
+	});
 }
 
 // putTeamData
@@ -759,9 +729,9 @@ jQuery.fn.putTeamData = function() {
 		$(this).find("#score").val(0);
 	}
 
-    var json = $(this).serializeInputsJson();
-    json['penalties'] = $(this).penaltyDialog().serializePenaltiesJson();
-    putJson($(this).data('url'), json);
+	var json = $(this).serializeInputsJson();
+	json['penalties'] = $(this).penaltyDialog().serializePenaltiesJson();
+	putJson($(this).data('url'), json);
 }
 
 function getSettings(){
@@ -782,58 +752,58 @@ function transitionScoreboard(thiz){
 		scoreboardDown();
 		$(thiz).attr("status", "up");//.html("<span>UP</span>");
 	}
-	//sets display status on page load and keeps it honest during operation
+	// sets display status on page load and keeps it honest during operation
 	setTimeout(function(){
 		getJson('view_status', function(data){
 			$("#transitionControl").attr("checked", data.is_up);
 		});
-	},1100);
+	}, 1100);
 
 }
 
 function announceStatusTextInput() {
-    return $("#announceControl #textInput").val();
+	return $("#announceControl #textInput").val();
 }
 
 function announceStatusColor() {
-    return $("#announceControl #textInputColor").val();
+	return $("#announceControl #textInputColor").val();
 }
 
 function postAnnounce() {
-    postJson('announce', { message : announceStatusTextInput() });     
+	postJson('announce', { message : announceStatusTextInput() });	 
 }
 
 function postStatus() {
-    putJson('status', { message : announceStatusTextInput() });
+	putJson('status', { message : announceStatusTextInput() });
 }
 
 function postStatusWithColor() {
-    putJson('status', { message : announceStatusTextInput(), color : announceStatusColor() });
+	putJson('status', { message : announceStatusTextInput(), color : announceStatusColor() });
 }
 
 function clearStatus() {
-    putJson('status', { message : "" });
+	putJson('status', { message : "" });
 	$("#textInput").val("");
 }
 
 function viewCommand(cmd) {
-    putJson('view_command', cmd);
+	putJson('view_command', cmd);
 }
 
 function scoreboardUp() {
-    viewCommand({'up':1});
+	viewCommand({'up':1});
 }
 
 function scoreboardDown() {
-    viewCommand({'down':1});
+	viewCommand({'down':1});
 }
 
 function nextAnnounce() {
-    viewCommand({'announce_next':1});
+	viewCommand({'announce_next':1});
 }
 
 function setClock() {
-    putJson('clock', $("#clockSet").serializeInputsJson());
+	putJson('clock', $("#clockSet").serializeInputsJson());
 }
 
 function toggleClock() {
@@ -841,43 +811,43 @@ function toggleClock() {
 }
 
 function adjustClock(time) {
-    putJson('clock/adjust', { 'time' : time });
+	putJson('clock/adjust', { 'time' : time });
 }
 
 function periodAdvance(dummy) {
-    putJson('clock/advance', {});
+	putJson('clock/advance', {});
 }
 
 function changeAutosync() {
-    putJson('autosync', {
-        'clock' : $('#syncClock').is(':checked'),
-        'score' : $('#syncScore').is(':checked'),
-        'other' : $('#syncOther').is(':checked')
-    });
+	putJson('autosync', {
+		'clock' : $('#syncClock').is(':checked'),
+		'score' : $('#syncScore').is(':checked'),
+		'other' : $('#syncOther').is(':checked')
+	});
 }
 
 function getAutosync() {
-    getJson('autosync', function(data) {
-        $('#syncClock').prop('checked', data.clock);
-        $('#syncScore').prop('checked', data.score);
-        $('#syncOther').prop('checked', data.other);
-    });
+	getJson('autosync', function(data) {
+		$('#syncClock').prop('checked', data.clock);
+		$('#syncScore').prop('checked', data.score);
+		$('#syncOther').prop('checked', data.other);
+	});
 }
 
 function showHideSettings() {
 	$(".settingsBox").toggle("blind", 1000);
 
-    if($("#toggleSettingsText").html() == "Hide <u>S</u>ettings"){
-        $("#toggleSettingsText").html("Show <u>S</u>ettings");
-        // Reload Team Data
-        //This needs to be handled outside of this function
-        $("#awayTeamControl").data('url','team/0');
-        $("#awayTeamControl").getTeamData();
-        $("#homeTeamControl").data('url','team/1');
-        $("#homeTeamControl").getTeamData();
-    }else{
-        $("#toggleSettingsText").html("Hide <u>S</u>ettings");
-    }
+	if ($("#toggleSettingsText").html() == "Hide <u>S</u>ettings") {
+		$("#toggleSettingsText").html("Show <u>S</u>ettings");
+		// Reload Team Data
+		//This needs to be handled outside of this function
+		$("#awayTeamControl").data('url','team/0');
+		$("#awayTeamControl").getTeamData();
+		$("#homeTeamControl").data('url','team/1');
+		$("#homeTeamControl").getTeamData();
+	} else {
+		$("#toggleSettingsText").html("Hide <u>S</u>ettings");
+	}
 }
 
 function generateSportList(thiz) {
@@ -909,14 +879,14 @@ function generateSportList(thiz) {
 }
 
 function getSettingsPresets(event, ui) {
-    //some implementation of unserializeJson should go here
-    $.getJSON("js/sports.json", function(list){
-        $.each(list.sports, function (k,v){
-            if (v.gameType == ui.item.value){
-                alert(v.periodQty);
-            }
-        });
-    });
+	//some implementation of unserializeJson should go here
+	$.getJSON("js/sports.json", function(list){
+		$.each(list.sports, function (k,v){
+			if (v.gameType == ui.item.value){
+				alert(v.periodQty);
+			}
+		});
+	});
 }
 
 function changeSyncSettings() {
@@ -933,54 +903,60 @@ function changeSyncSettings() {
 }
 
 $(document).ready(function() {
-    updateClockTimeout( );
-    updatePreviewTimeout( );
-    getAutosync( );
+	updateClockTimeout( );
+	updatePreviewTimeout( );
+	getAutosync( );
 
-    $(".teamControl").buildTeamControl();
-    // set up team URLs and load initial data
-    $("#awayTeamControl").data('url','team/0');
-    $("#awayTeamControl").getTeamData();
-    $("#homeTeamControl").data('url','team/1');
-    $("#homeTeamControl").getTeamData();
-    $(".dialog").dialog({
-        autoOpen: false,
-        modal: true,
-        resizable: false,
-    });
+	$(".teamControl").buildTeamControl();
+	// set up team URLs and load initial data
+	$("#awayTeamControl").data('url','team/0');
+	$("#awayTeamControl").getTeamData();
+	$("#homeTeamControl").data('url','team/1');
+	$("#homeTeamControl").getTeamData();
+	$(".dialog").dialog({
+		autoOpen: false,
+		modal: true,
+		resizable: false,
+	});
 	
 	$("#gameSettings").change(putSettings);
 	transitionScoreboard(this);
 
-	//bind enter to clock toggle
+
+	// bind enter to clock toggle
 	$(document).keydown(function(e){
-		if(e.keyCode == 13 && $(document.activeElement).filter("input").length != 1){
+		if (e.keyCode == 13 && $(document.activeElement).filter("input").length != 1) {
 			toggleClock();
-		}if(e.keyCode == 32 && $(document.activeElement).filter("input").length != 1){
+		}
+		
+		if (e.keyCode == 32 && $(document.activeElement).filter("input").length != 1) {
 			$("#transitionControl").trigger("click");
-		}if(e.keyCode == 83 && $(document.activeElement).filter("input").length != 1){
+		}
+		
+		if (e.keyCode == 83 && $(document.activeElement).filter("input").length != 1) {
 			showHideSettings();
 		}
 	});
-	//causes checkboxes to lose focus after clicked to avoid binding conflicts.
+
+	// causes checkboxes to lose focus after clicked to avoid binding conflicts.
 	$(":checkbox").change(function(){$(this).blur();});
-    
-    //TOGGLE GAME/TEAM SETTINGS
+	
+	// TOGGLE GAME/TEAM SETTINGS
 	$("#toggleSettings").click(showHideSettings);
 	
-
-	//GENERATE LIST OF SCHOOLS FOR AUTOCOMPLETE FROM JSON
+	// GENERATE LIST OF SCHOOLS FOR AUTOCOMPLETE FROM JSON
 	jQuery.getJSON("js/teamlist.json", function(teamlist) {
 		$.each(teamlist.teams, function(k, v) {
 			schoolList[k] = v.name;
 		});
+
 		$("#awayTeamControl").find("#teamSelect").val("").autocomplete({ 
 			autoFocus:true,
 			source: schoolList,
 			select: function(event, ui){
 				 $.getJSON('js/teamlist.json', function(list) {
 					$.each(list.teams, function(k, v) {
-						if(v.name == ui.item.value){
+						if (v.name == ui.item.value){
 							$("#awayTeamControl").find("#name").val(v.abbreviation);
 							$("#awayTeamControl").find("#bgcolor").val(v.color1);
 							$("#awayTeamControl").find("#fgcolor").val(v.color1);
@@ -989,17 +965,18 @@ $(document).ready(function() {
 						}
 					});
 				});
-					$("#awayTeamData").find("#name, #bgcolor, #fgcolor, #nickname, #logo, #teamSelect").trigger("blur");
-                    
+				$("#awayTeamData").find("#name, #bgcolor, #fgcolor, #nickname, #logo, #teamSelect").trigger("blur");
+					
 			}
 		});
+
 		$("#homeTeamControl").find("#teamSelect").val("").autocomplete({ 
 			autoFocus:true,
 			source: schoolList,
 			select: function(event, ui){
 				 $.getJSON('js/teamlist.json', function(list) {
 					$.each(list.teams, function(k, v) {
-						if(v.name == ui.item.value){
+						if (v.name == ui.item.value){
 							$("#homeTeamControl").find("#name").val(v.abbreviation);
 							$("#homeTeamControl").find("#bgcolor").val(v.color1);
 							$("#homeTeamControl").find("#fgcolor").val(v.color1);
@@ -1008,8 +985,8 @@ $(document).ready(function() {
 						}
 					});
 				});
-					$("#homeTeamData").find("#name, #bgcolor, #fgcolor, #nickname, #logo, #teamSelect").trigger("blur");
-                    
+				$("#homeTeamData").find("#name, #bgcolor, #fgcolor, #nickname, #logo, #teamSelect").trigger("blur");
+					
 			}
 		});
 	});	
@@ -1021,23 +998,23 @@ $(document).ready(function() {
 	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").hide();
 	$(".hockey").show();
 
-    $("#toggleClock").click(toggleClock);
-    $("#upSec").click( function() { adjustClock.call(this, 1000); } );
-    $("#dnSec").click( function() { adjustClock.call(this, -1000); } );
-    $("#upTenth").click( function() { adjustClock.call(this, 100); } );
-    $("#dnTenth").click( function() { adjustClock.call(this, -100); } );
-    $("#periodAdvance").click(periodAdvance);
-    $("#announceControl #announce").click(postAnnounce);
-    $("#announceControl #status").click(postStatus);
-    $("#announceControl #clearStatus").click(clearStatus);
-    $("#announceControl #nextAnnounce").click(nextAnnounce);
+	$("#toggleClock").click(toggleClock);
+	$("#upSec").click( function() { adjustClock.call(this, 1000); } );
+	$("#dnSec").click( function() { adjustClock.call(this, -1000); } );
+	$("#upTenth").click( function() { adjustClock.call(this, 100); } );
+	$("#dnTenth").click( function() { adjustClock.call(this, -100); } );
+	$("#periodAdvance").click(periodAdvance);
+	$("#announceControl #announce").click(postAnnounce);
+	$("#announceControl #status").click(postStatus);
+	$("#announceControl #clearStatus").click(clearStatus);
+	$("#announceControl #nextAnnounce").click(nextAnnounce);
 	$("#transitionControl").click(function(){transitionScoreboard(this);});
-    $("#setClock").click(setClock);
-    $("#syncClock,#syncScore,#syncOther").change(changeAutosync);
-    $(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
-    $(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(function(){ytgUpdate(this);});
-    $("#customYTG").change(function(){ytgCustom(this);});
-    $("#displayDownDistance, #clearDownDistance").click(function(){ddDisplay(this);});
+	$("#setClock").click(setClock);
+	$("#syncClock,#syncScore,#syncOther").change(changeAutosync);
+	$(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(function(){downUpdate(this);});
+	$(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(function(){ytgUpdate(this);});
+	$("#customYTG").change(function(){ytgCustom(this);});
+	$("#displayDownDistance, #clearDownDistance").click(function(){ddDisplay(this);});
 	$("#syncSettings").find("select, input").change(changeSyncSettings);
 
 });
