@@ -62,6 +62,7 @@ class DrycontactSync
 		@sp.rts = 1
 		@sp.dtr = 0
 		last_cts = 1
+		STDERR.puts "Dry contact sync thread starting"
 
 		while not @stop_thread
 			current_cts = @sp.cts
