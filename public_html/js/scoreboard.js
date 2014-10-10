@@ -23,8 +23,6 @@ var autocompletePenalties = [];
 var clockState = { };
 var lastStopTimeElapsed = 0;
 var overtime_length = 5*60*10;
-var down = "1st";
-var ytg = 10;
 var schoolList = [];
 var sportList = [];
 
@@ -600,7 +598,20 @@ function statusChange() {
 	$(this).team().putTeamData();
 }
 
+function getYTG() {
+	var ytg = $("#ytgNumber").html();
+	var parsed = parseInt(ytg);
+	if (isNaN(parsed)) {
+		return ytg;
+	} else {
+		return parsed;
+	}
+}
+
 function downUpdate() {
+	var down = $("#downNumber").text();
+	var ytg = getYTG();
+
 	if ($(this).attr("id") == "nextDown") {
 		if (down == "1st") { 
 			down = "2nd"; 
@@ -618,6 +629,7 @@ function downUpdate() {
 	} else {
 		down = $(this).attr("value");
 	}
+	
 	$("#downNumber").html(down);
 	$("#ytgNumber").html(ytg);
 }
@@ -625,6 +637,9 @@ function downUpdate() {
 function ytgUpdate() {
 	var addSubYTG = 0;
 	addSubYTG = $(this).attr("value");
+
+	var down = $("#downNumber").html();
+	var ytg = getYTG();
 	
 	if ($(this).attr("class") == "bttn addSubYTG") {
 		if (ytg == "Goal") {
@@ -649,14 +664,16 @@ function ytgUpdate() {
 }
 
 function ytgCustom() {
-	if ($(this).val() != "") { //prevents blank ytg
-		ytg = parseInt($(this).val());
+	if ($(this).val() != "") { // prevents blank ytg
+		var ytg = parseInt($(this).val());
+		$("#ytgNumber").html(ytg);
 	}
-	$("#downNumber").html(down);
-	$("#ytgNumber").html(ytg);
 }
 
+// expect this to be refactored away soon
 function ddDisplay() {
+	var down = $("#downNumber").html();
+	var ytg = getYTG();
 	if ($(this).attr("value") == 1) {
 		$("#textInput").val(down + " & " + ytg);
 		postStatus();
