@@ -964,6 +964,12 @@ function changeSyncSettings() {
 
 	putJson("sync_mode", json);
 }
+	
+function statusButton() {
+	$("#textInput").val($(this).attr("status"));
+	$("#textInputColor").val($(this).attr("color"));
+	postStatusWithColor();
+}
 
 $(document).ready(function() {
 	updateClockTimeout( );
@@ -1084,4 +1090,5 @@ $(document).ready(function() {
 	$("#displayDownDistance, #clearDownDistance").click(ddDisplay);
 	$("#syncSettings").find("select, input").change(changeSyncSettings);
 
+	$("#globalFlag").click(statusButton);
 });
