@@ -160,6 +160,31 @@ function updatePreviewTimeout( ) {
 	setTimeout(updatePreviewTimeout, 500);
 }
 
+function updateGameStateTimeout( ) {
+	getGameState( );
+	setTimeout(updateGameStateTimeout, 1000);
+}
+
+function getGameState( ) {
+	getJson('gameState', function(data) {
+		$("#downNumber").html(data['down']);
+		$("#ytgNumber").html(data['distanceToGo']);
+	});
+}
+
+function putGameState( ) {
+	// right now this is just down and distance,
+	// but it can be used for other global data as well.
+	var down = $("#downNumber").html();
+	var ytg = getYTG();
+
+	// put to server
+	putJson('gameState', {
+		'down': down,
+		'distanceToGo': ytg
+	});
+}
+
 jQuery.fn.buildTeamControl = function() {
 	$(this).each(function(index, elem) {
 		$(elem).html($("#teamProto").html());
@@ -632,6 +657,8 @@ function downUpdate() {
 	
 	$("#downNumber").html(down);
 	$("#ytgNumber").html(ytg);
+
+	putGameState();
 }
 
 function ytgUpdate() {
@@ -660,13 +687,16 @@ function ytgUpdate() {
 	}
 
 	$("#downNumber").html(down);
-	$("#ytgNumber").html(ytg);
+	$("#ytgNumber").html(ytg); 
+
+	putGameState();
 }
 
 function ytgCustom() {
 	if ($(this).val() != "") { // prevents blank ytg
 		var ytg = parseInt($(this).val());
 		$("#ytgNumber").html(ytg);
+		putGameState();
 	}
 }
 
@@ -938,6 +968,7 @@ function changeSyncSettings() {
 $(document).ready(function() {
 	updateClockTimeout( );
 	updatePreviewTimeout( );
+	updateGameStateTimeout( );
 	getAutosync( );
 
 	$(".teamControl").buildTeamControl();
