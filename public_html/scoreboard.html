@@ -19,26 +19,23 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Exaboard</title>
-        <link type="text/css" rel="stylesheet" href="css/jquery-ui-1.10.1.custom.min.css" />
+	<head>
+		<title>Exaboard</title>
+		<link type="text/css" rel="stylesheet" href="css/jquery-ui-1.10.1.custom.min.css" />
 		<link type="text/css" rel="stylesheet" href="css/scoreboard.css" />
-        <script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>
-        <script type="text/javascript" src="js/jquery-ui-1.10.1.custom.min.js"></script>
-        <script type="text/javascript" src="js/scoreboard.js"></script>
-    </head>
-    <body>
-        <div id="main">
+		<script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>
+		<script type="text/javascript" src="js/jquery-ui-1.10.1.custom.min.js"></script>
+		<script type="text/javascript" src="js/scoreboard.js"></script>
+	</head>
+	<body>
+		<div id="main">
 			<div id="scoreboardPreview" class="control"></div>
 
-            <!-- global state/control -->
-			
-			<!-- AWAY TEAM CONTROL -->
-            <div class="teamControlBox">
+			<div class="teamControlBox">
 				<span class="teamName" style="font-size: 50pt; color: #800000;">Harvard</span>
-                <br/>
-                <div class="teamControl" id="awayTeamControl"></div>
-            </div>
+				<br/>
+				<div class="teamControl" id="awayTeamControl"></div>
+			</div>
 
 			
 			<div id="centerPanel" style="display: inline-block; width: 420px;">
@@ -46,81 +43,103 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 					<label class="settingInputs">Sport
 						<input type="text" id="gameType" onclick="$(this).select();" />
 					</label>
+					
 					<input type="text" id="sportClassName" title="Holds class name value for each sport" style="display:none" />
-                    <label class="settingInputs">Tenths
-                            <input type="checkbox" disabled="disabled" id="tenthsToggle"></input>
-                    </label>
-                        <label class="settingInputs">Time<input type="checkbox" id="timeToggle" /></label>
-                        <label class="settingInputs">Period<input type="checkbox" id="periodToggle"></input></label>
-                        <label class="settingInputs">Period Length<input type="text" id="periodLength"></input>
-                        </label>
-                        <label class="settingInputs">Qty Periods
-                            <input type="text" id="periodQty"></input>
-                        </label>
-                        <label class="settingInputs">OT
-                            <input type="checkbox" id="otToggle"></input>
-                        </label>
-                        <label class="settingInputs">OT Time
-                            <input type="checkbox" id="otTimeToggle"></input>
-                        </label>
-                        <label class="settingInputs">OT Period Length
-                            <input type="text" id="otPeriodLength"></input>
-                        </label>
-                        <label class="settingInputs">OT Qty Periods
-                            <input type="text" id="otPeriodQty"></input>
-                        </label>
-                        <span style="display:none"><label class="settingInputs">Shootout
-                            <input type="checkbox" id="shootoutToggle"></input>
-                        </label>
-                        <label class="settingInputs">SO Rounds
-                            <input type="text" id="shootoutRounds"></input>
-                        </label>
-                        <label class="settingInputs" title="Choose whether timeouts are displayed in the scoreboard SVG">Display Timeouts
-                            <input type="checkbox" id="timeoutsDisplaySVG"></input>
-                        </label>
-                        <label class="settingInputs">Timeouts
-                            <input type="checkbox" id="timeoutsToggle"></input>
-                        </label>
-                        <label class="settingInputs">TO Reset by Period
-                            <input type="checkbox" id="timeoutsResetToggle"></input>
-                        </label>
-                        <label class="settingInputs">TO Set Period of Reset
-                            <input type="text" id="timeoutsResetPeriod"></input>
-                        </label>
-                        <label class="settingInputs">OT Timeouts
-                            <input type="checkbox" id="timeoutsOTToggle"></input>
-                        </label>
-                        <label class="settingInputs">OT TO Reset by Period
-                            <input type="checkbox" id="timeoutsOTResetToggle"></input>
-                        </label>
-                        <label class="settingInputs">OT TO Set Period of Reset
-                            <input type="text" id="timeoutsOTResetPeriod"></input>
-                        </label>
+					
+					<label class="settingInputs">Tenths
+							<input type="checkbox" disabled="disabled" id="tenthsToggle"></input>
+					</label>
+
+					<label class="settingInputs">Time<input type="checkbox" id="timeToggle" /></label>
+					
+					<label class="settingInputs">Period<input type="checkbox" id="periodToggle"></input></label>
+					
+					<label class="settingInputs">Period Length<input type="text" id="periodLength"></input></label>
+					
+					<label class="settingInputs">Qty Periods
+						<input type="text" id="periodQty"></input>
+					</label>
+
+					<label class="settingInputs">OT
+						<input type="checkbox" id="otToggle"></input>
+					</label>
+
+					<label class="settingInputs">OT Time
+						<input type="checkbox" id="otTimeToggle"></input>
+					</label>
+					
+					<label class="settingInputs">OT Period Length
+						<input type="text" id="otPeriodLength"></input>
+					</label>
+					
+					<label class="settingInputs">OT Qty Periods
+						<input type="text" id="otPeriodQty"></input>
+					</label>
+					
+					<span style="display:none">					
+						<label class="settingInputs">Shootout
+							<input type="checkbox" id="shootoutToggle"></input>
+						</label>
+						
+						<label class="settingInputs">SO Rounds
+							<input type="text" id="shootoutRounds"></input>
+						</label>
+						
+						<label class="settingInputs" title="Choose whether timeouts are displayed in the scoreboard SVG">Display Timeouts
+							<input type="checkbox" id="timeoutsDisplaySVG"></input>
+						</label>
+						
+						<label class="settingInputs">Timeouts
+							<input type="checkbox" id="timeoutsToggle"></input>
+						</label>
+						
+						<label class="settingInputs">TO Reset by Period
+							<input type="checkbox" id="timeoutsResetToggle"></input>
+						</label>
+						
+						<label class="settingInputs">TO Set Period of Reset
+							<input type="text" id="timeoutsResetPeriod"></input>
+						</label>
+						
+						<label class="settingInputs">OT Timeouts
+							<input type="checkbox" id="timeoutsOTToggle"></input>
+						</label>
+						
+						<label class="settingInputs">OT TO Reset by Period
+							<input type="checkbox" id="timeoutsOTResetToggle"></input>
+						</label>
+						
+						<label class="settingInputs">OT TO Set Period of Reset
+							<input type="text" id="timeoutsOTResetPeriod"></input>
+						</label>
+						
 						<label class="settingInputs">Penalties
-                            <input type="checkbox" id="penaltiesToggle"></input>
-                        </label>
-                        <label class="settingInputs">Single Penalty Name
-                            <input type="text" id="penaltiesSingleName"></input>
-                        </label>
+							<input type="checkbox" id="penaltiesToggle"></input>
+						</label>
+						
+						<label class="settingInputs">Single Penalty Name
+							<input type="text" id="penaltiesSingleName"></input>
+						</label>
+						
 						<label class="settingInputs">Multiple Penalty Name
-                            <input type="text" id="penaltiesMultipleName"></input>
-                        </label>
-                        <!-- Which conditions to consider (teamsize - penaltyQueueLength vs. same)
-						<label class="settingInputs">Player vs. Player
-                            <input type="checkbox" id="periodSetting"></input>
-                        </label>-->
+							<input type="text" id="penaltiesMultipleName"></input>
+						</label>
+
 						<label class="settingInputs">Team Size
-                            <input type="text" id="teamSize"></input>
-                        </label>
-                        <label class="settingInputs">Penalty Queue Max Length
-                            <input type="text" id="penaltiesQueueMaxDepth"></input>
-                        </label></span>
+							<input type="text" id="teamSize"></input>
+						</label>
+						
+						<label class="settingInputs">Penalty Queue Max Length
+							<input type="text" id="penaltiesQueueMaxDepth"></input>
+						</label>
+					</span>
 				</div>
 
 				<!-- Settings panel toggle button -->
 				<div id="toggleSettings" class="bttn" style="diplay:list-item; width: 7em;">
 					<span id="toggleSettingsText">Show <u>S</u>ettings</span>
 				</div>
+
 				<!-- Clock Control Panel -->
 				<div id="clockControl" class="control basketball broomball football hockey lacrosse soccer">
 					<span style="font-size: 36pt; font-weight:bold;" id="clock">31:33.7</span>
@@ -138,29 +157,36 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 						<div id="upTenth" class="bttn">+1/10 sec</div>
 						<div id="upSec" class="bttn">+1 sec</div>
 					</div>
+					
 					<br/>
+					
 					<div id="periodAdvance" class="bttn">Period Advance</div>
-                                        <div class="ck-bttn">
-                                            <label>
-                                                <input type="checkbox" id="syncClock"><span>Sync Clock</span></input>
-                                            </label>
-                                        </div>
-                                        <div class="ck-bttn">
-                                            <label>
-                                                <input type="checkbox" id="syncScore"><span>Sync Score</span></input>
-                                            </label>
-                                        </div>
-                                        <div class="ck-bttn">
-                                            <label>
-                                                <input type="checkbox" id="syncOther"><span>Sync Other</span></input>
-                                            </label>
-                                        </div>
+
+					<div class="ck-bttn">
+						<label>
+							<input type="checkbox" id="syncClock"><span>Sync Clock</span></input>
+						</label>
+					</div>
+					
+					<div class="ck-bttn">
+						<label>
+							<input type="checkbox" id="syncScore"><span>Sync Score</span></input>
+						</label>
+					</div>
+					
+					<div class="ck-bttn">
+						<label>
+							<input type="checkbox" id="syncOther"><span>Sync Other</span></input>
+						</label>
+					</div>
+					
 					<div class="innerBox" id="clockSet">Time
 						<input id="time_str" type="text" style="width:8em" />Period
 						<input id="period" type="text" style="width:3em" />
 						<div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px;"
 						id="setClock" class="bttn">Set Clock</div>
 					</div>
+					
 					<div class="innerBox specialFunctionBox football" id="downDistanceBox">
 						<span id="spacer" style="margin: 0 5px;">
 							<span class="downDistance" id="downNumber">1st</span>
@@ -169,18 +195,18 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 						</span>
 						<div class="bttn" id="displayDownDistance" value="1">Display</div>
 						<div class="bttn" id="clearDownDistance" value="0">Clear</div>
-						<!--<div class="bttn" id="globalFlag" status="Flag" color="yellow" style="border-color:yellow">Flag</div>-->
-            </br>
+						<div class="bttn" id="globalFlag" status="Flag" color="yellow" style="border-color:yellow">Flag</div>
+						<br />
 						
 						<div class="bttn firstAnd10" id="firstAnd10">1st &amp; 10</div>
 						<div class="bttn nextDown" id="nextDown">Next</div>
-						</br>
+						<br />
 						
 						<div class="bttn downs" id="1down" value="1st">1st</div>
 						<div class="bttn downs" id="2down" value="2nd">2nd</div>
 						<div class="bttn downs" id="3down" value="3rd">3rd</div>
 						<div class="bttn downs" id="4down" value="4th">4th</div>
-						</br>
+						<br />
 						
 						<div class="bttn addSubYTG" id="minus15YTG" value="-15">-15</div>
 						<div class="bttn addSubYTG" id="minus10YTG" value="-10">-10</div>
@@ -190,7 +216,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 						<div class="bttn addSubYTG" id="plus5YTG" value="5">+5</div>
 						<div class="bttn addSubYTG" id="plus10YTG" value="10">+10</div>
 						<div class="bttn addSubYTG" id="plus15YTG" value="15">+15</div>
-						</br>
+						<br />
 						<div class="bttn ytgSpecial" id="goalYTG" value="Goal">Goal</div>
 						<div class="bttn ytgSpecial" id="inchesYTG" value="Inches">Inches</div>
 						<span>
@@ -198,244 +224,247 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 								<input type="text" id="customYTG" value="" maxlength="2" onclick="$(this).select();" style="width:20px; margin:0 5px;">YTG</input>
 							</label>
 						</span>
-
 					</div>
-
 				</div>
 			</div>
 		
-		<!-- HOME TEAM CONTROL -->
-        <div class="teamControlBox">
-			<span class="teamName" style="font-size: 50pt; color: #D40000;">RPI</span>
-            <br/>
-            <div class="teamControl" id="homeTeamControl"></div>
-        </div>
+			<!-- HOME TEAM CONTROL -->
+			<div class="teamControlBox">
+				<span class="teamName" style="font-size: 50pt; color: #D40000;">RPI</span>
+				<br/>
+				<div class="teamControl" id="homeTeamControl"></div>
+			</div>
 		
-        <div id="announceControl" class="control">Announce
-            <br />
-            <input type="text" id="textInput" />
-		<div id="colorControl" class="control">
-		
-            <br />
-            <input style="display:none;" disabled="disabled" type="text" id="textInputColor" />
-            <br />
-            <div id="announce" class="bttn" style="width: 223px;">Announce</div>
-            <div id="status" class="bttn" style="width: 223px;">Status</div>
-            <div id="nextAnnounce" class="bttn" style="width: 464px;">Next Announce / Clear</div>
-        </div>
-		<div class="ck-bttn">
-			<label>
-				<input type="checkbox" class="statusBttn" id="transitionControl" status="up" ><span>DISPLAY (SPACE)</span>
+			<div id="announceControl" class="control">Announce
+				<br />
+				<input type="text" id="textInput" />
+				
+				<div id="colorControl" class="control">			
+					<br />
+					<input style="display:none;" disabled="disabled" type="text" id="textInputColor" />
+					<br />
+					<div id="announce" class="bttn" style="width: 223px;">Announce</div>
+					<div id="status" class="bttn" style="width: 223px;">Status</div>
+					<div id="nextAnnounce" class="bttn" style="width: 464px;">Next Announce / Clear</div>
+				</div>
 
-				</input>
-			</label>
-        </div>
-        <div style="clear:left"></div>
-     
-        <div style="display: none" id="teamProto">
-			<div id="teamSettings" class="innerBox settingsBox">
-				<label class="settingInputs">School
-					<input type="text" id="teamSelect" onclick="this.select();" ></input>
-				</label>
-				<label class="settingInputs">Abbreviation
-					<input type="text" id="name"></input>
-				</label>
-				<label class="settingInputs">Main Color
-					<input type="text" id="bgcolor"></input>
-				<!--<div class="teamColorPicker" id="teamColor1"></div>
-				<div class="teamColorPicker" id="teamColor2"></div>
-				<div class="teamColorPicker" id="teamColorWhite"></div>
-				<div class="teamColorPicker" id="teamColorBlack"></div>-->
-				</label>
+				<div class="ck-bttn">
+					<label>
+						<input type="checkbox" class="statusBttn" id="transitionControl" status="up" ><span>DISPLAY (SPACE)</span>
 
-				<label class="settingInputs">2nd Color
-					<input type="text" id="fgcolor"></input>
-				</label>
-				<!--temp hide this until it does something-->
-				<span style="display:none">
-				<label class="settingInputs">Nickname
-					<input type="text" disabled="disabled" id="nickname"></input>
-				</label>
-				<label class="settingInputs">Logo
-					<input type="text" disabled="disabled" id="logo"></input>
-				</label>
-				<input id="fontWidth" type="text" style="display:none"/>
-				</span>
-				<!--end hidden-->
+						</input>
+					</label>
+				</div>
+				<div style="clear:left"></div>
+		 
+				<div style="display: none" id="teamProto">
+					<div id="teamSettings" class="innerBox settingsBox">
+						<label class="settingInputs">School
+							<input type="text" id="teamSelect" onclick="this.select();" ></input>
+						</label>
+						
+						<label class="settingInputs">Abbreviation
+							<input type="text" id="name"></input>
+						</label>
+
+						<label class="settingInputs">Main Color
+							<input type="text" id="bgcolor"></input>
+						</label>
+
+						<label class="settingInputs">2nd Color
+							<input type="text" id="fgcolor"></input>
+						</label>
+					</div>
+
+					<div class="innerBox baseball basketball broomball football hockey lacrosse rugby soccer volleyball" id="scoreSet">Score
+						<input type="text" id="score" style="width: 5em; text-align: right" onclick="this.select();"/>
+						<div class="bttn pointsBttn plusScore lacrosse soccer hockey" value="1">Goal</div>
+						<div class="bttn pointsBttn plusScore baseball basketball football volleyball" value="1">+1</div>
+						<div class="bttn pointsBttn plusScore basketball football" value="2">+2</div>
+						<div class="bttn pointsBttn plusScore basketball football" value="3">+3</div>
+						<div class="bttn pointsBttn plusScore rugby" value="5">+5</div>
+						<div class="bttn pointsBttn plusScore football" value="6" >+6</div>
+					</div>
+
+					<div class="innerBox lacrosse" id="gbSet">Ground Balls
+						<input type="text" id="groundBalls" style="width: 5em; text-align: right" onclick="this.select();"/>
+						<div  id="gbPlusOne" class="bttn pointsBttn">+1</div>
+					</div>
+
+					<div class="innerBox baseball" id="hitsSet">Hits
+						<input type="text" id="hits" style="width: 5em; text-align: right" onclick="this.select();"/>
+						<div  id="hitsPlusOne" class="bttn pointsBttn">+1</div>
+					</div>
+
+					<div class="innerBox baseball" id="errorsSet">Errors
+						<input type="text" id="errors" style="width: 5em; text-align: right" onclick="this.select();"/>
+						<div  id="errorsPlusOne" class="bttn pointsBttn">+1</div>
+					</div>
+
+					<div class="innerBox basketball" id="foulsSet">Fouls
+						<input type="text" id="fouls" style="width: 5em; text-align: right" onclick="this.select();"/>
+						<div  id="foulsPlusOne" class="bttn pointsBttn">+1</div>
+					</div>
+
+					<div class="ck-bttn lacrosse">
+						<label>
+							<input type="checkbox" class="statusBttn" id="greenCard" status="Green Card" color="green">
+								<span>Green Card</span>
+							</input>
+						</label>
+					</div>
+
+					<div class="ck-bttn soccer lacrosse">
+						<label>
+							<input type="checkbox" class="statusBttn" id="yellowCard" status="Yellow Card" color="yellow">
+								<span>Yellow Card</span>
+							</input>
+						</label>
+					</div>
+
+					<div class="ck-bttn soccer lacrosse">
+						<label>
+							<input type="checkbox" class="statusBttn" id="redCard_" status="Red Card" color="red">
+								<span>Red Card</span>
+							</input>
+						</label>
+					</div>
+
+					<div class="ck-bttn soccer lacrosse">
+						<label>
+							<input type="checkbox" class="statusBttn" id="substitution" status="Substitution" >
+								<span>Substitution</span>
+							</input>
+						</label>
+					</div>
+
+					<div class="ck-bttn hockey">
+						<label>
+							<input type="checkbox" class="statusBttn" id="emptyNet_" status="Empty Net" >
+								<span>Empty Net</span>
+							</input>
+						</label>
+					</div>
+
+					<div class="ck-bttn hockey">
+						<label>
+							<input type="checkbox" class="statusBttn" id="delayedPenalty_" status="Delayed Penalty">
+								<span>Delayed Penalty</span>
+							</input>
+						</label>
+					</div>
+
+					<div class="ck-bttn football lacrosse">
+						<label>
+							<input type="checkbox" class="statusBttn" id="flag" status="Flag"color="yellow">
+								<span>Flag</span>
+							</input>
+						</label>
+					</div>
+
+					<div class="ck-bttn football hockey lacrosse soccer volleyball ">
+						<label>
+							<input type="checkbox" class="statusBttn" id="timeout_" status="Timeout">
+								<span>Timeout</span>
+							</input>
+						</label>
+					</div>
+
+					<div class="ck-bttn baseball basketball football hockey lacrosse soccer volleyball">
+						<label>
+							<input type="button" id="clearStatus_" class="statusBttn" status="">
+								<span>Clear</span>
+							</input>
+						</label>
+					</div>
+
+					<div class=""  style="">
+						<label>
+							<input type="text" id="status" value="">
+								<span>Status</span>
+							</input>
+						</label>
+					</div>
+
+					<div class=""  style="">
+						<label>
+							<input type="text" id="statusColor" value="">
+								<span>Color</span>
+							</input>
+						</label>
+					</div>
+
+					<div class="ck-bttn football">
+						<label>
+							<input type="checkbox" class="statusBttn" id="possession">
+								<span>Possession</span>
+							</input>
+						</label>
+					</div>
+
+					<div class="innerBox specialFunctionBox hockey lacrosse" id="penaltyBox">
+						<div class="bttn lacrosse penaltyBttn" id="30sPenalty" value="300">0:30 Penalty</div>
+						<div class="bttn lacrosse penaltyBttn" id="60sPenalty" value="600">1:00 Penalty</div>
+						<div class="bttn hockey lacrosse penaltyBttn" id="120sPenalty" value="1200">2:00 Penalty</div>
+						<div class="bttn lacrosse penaltyBttn" id="180sPenalty" value="1800">3:00 Penalty</div>
+						<div class="bttn hockey penaltyBttn" id="240sPenalty" value="2400">4:00 Penalty</div>
+						<div class="bttn hockey penaltyBttn" id="300sPenalty" value="3000">5:00 Penalty</div>
+						<div class="bttn" id="editPenalties" title="Clear All Penalties?">Edit Penalties</div>
+
+						<div class="bttn hockey lacrosse" id="clearPenalties"
+						style="border: 2px solid red;">Clear Penalties</div>
+					</div>
+
+					<div id="penalty_queue_dialog" class="dialog">
+						<div class="penalty_queue" id="pq1">
+							<label for="start">Start Time</label>
+							<input type="text" name="start" id="start" />
+							<button id="now">Now</button>
+							<ul class="penalty_list"></ul>
+						</div>
+						<div class="penalty_queue" id="pq2">
+							<label for="start">Start Time</label>
+							<input type="text" name="start" id="start" />
+							<button id="now">Now</button>
+							<ul class="penalty_list"></ul>
+						</div>
+						<ul style="display: none">
+							<li id="penaltyProto" class="penaltyData">
+								<table>
+									<tr>
+										<td>Player</td>
+										<td>
+											<input type="text" id="player" />
+										</td>
+									</tr>
+									<tr>
+										<td>Penalty</td>
+										<td>
+											<input type="text" id="penalty" />
+										</td>
+									</tr>
+									<tr>
+										<td>Time</td>
+										<td>
+											<select id="time" name="time">
+												<option class="lacrosse" id="time_300" value="300">0:30</option>
+												<option class="lacrosse" id="time_600" value="600">1:00</option>
+												<option class="hockey lacrosse" id="time_1200" value="1200">2:00</option>
+												<option class="hockey lacrosse" id="time_1200" value="1800">3:00</option>
+												<option class="hockey lacrosse" id="time_2400" value="2400">4:00</option>
+												<option class="hockey lacrosse" id="time_3000" value="3000">5:00</option>
+												<option class="hockey" id="time_6000" value="6000">10:00</option>
+											</select>
+										</td>
+									</tr>
+								</table>
+								<button id="announcePenalty">Announce</button>
+								<button id="deletePenalty">Delete</button>
+							</li>
+						</ul>
+					</div>
+				</div>
 			</div>
-            <div class="innerBox baseball basketball broomball football hockey lacrosse rugby soccer volleyball" id="scoreSet">Score
-                <input type="text" id="score" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div class="bttn pointsBttn plusScore lacrosse soccer hockey" value="1">Goal</div>
-				<div class="bttn pointsBttn plusScore baseball basketball football volleyball" value="1">+1</div>
-				<div class="bttn pointsBttn plusScore basketball football" value="2">+2</div>
-				<div class="bttn pointsBttn plusScore basketball football" value="3">+3</div>
-				<div class="bttn pointsBttn plusScore rugby" value="5">+5</div>
-				<div class="bttn pointsBttn plusScore football" value="6" >+6</div>
-
-                </div>
-			<!--<div class="innerBox broomball hockey lacrosse soccer" id="sogSet">SOG
-                <input type="text" id="shotsOnGoal" style="width: 5em; text-align: right" onclick="this.select();"/>
-            </div>-->
-            <div class="innerBox lacrosse" id="gbSet">Ground Balls
-                <input type="text" id="groundBalls" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div  id="gbPlusOne" class="bttn pointsBttn">+1</div>
-            </div>
-            <div class="innerBox baseball" id="hitsSet">Hits
-                <input type="text" id="hits" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div  id="hitsPlusOne" class="bttn pointsBttn">+1</div>
-            </div>
-            <div class="innerBox baseball" id="errorsSet">Errors
-                <input type="text" id="errors" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div  id="errorsPlusOne" class="bttn pointsBttn">+1</div>
-            </div>
-            <div class="innerBox basketball" id="foulsSet">Fouls
-                <input type="text" id="fouls" style="width: 5em; text-align: right" onclick="this.select();"/>
-                <div  id="foulsPlusOne" class="bttn pointsBttn">+1</div>
-            </div>
-			<div class="ck-bttn lacrosse">
-                <label>
-                    <input type="checkbox" class="statusBttn" id="greenCard" status="Green Card" color="green"><span>Green Card</span>
-
-                    </input>
-                </label>
-            </div>
-            <div class="ck-bttn soccer lacrosse">
-                <label>
-                    <input type="checkbox" class="statusBttn" id="yellowCard" status="Yellow Card" color="yellow"><span>Yellow Card</span>
-                    </input>
-                </label>
-            </div>
-            <div class="ck-bttn soccer lacrosse">
-                <label>
-                    <input type="checkbox" class="statusBttn" id="redCard_" status="Red Card" color="red"><span>Red Card</span>
-
-                    </input>
-                </label>
-			</div>
-            <div class="ck-bttn soccer lacrosse">
-                <label>
-                    <input type="checkbox" class="statusBttn" id="substitution" status="Substitution" ><span>Subsitution</span>
-
-                    </input>
-                </label>
-            </div>
-            <div class="ck-bttn hockey">
-                <label>
-                    <input type="checkbox" class="statusBttn" id="emptyNet_" status="Empty Net" ><span>Empty Net</span>
-
-                    </input>
-                </label>
-            </div>
-            <div class="ck-bttn hockey">
-                <label>
-                    <input type="checkbox" class="statusBttn" id="delayedPenalty_" status="Delayed Penalty"><span>Delayed Penalty</span>
-
-                    </input>
-                </label>
-            </div>
-			<div class="ck-bttn football lacrosse">
-                <label>
-                    <input type="checkbox" class="statusBttn" id="flag" status="Flag"color="yellow"><span>Flag</span>
-
-                    </input>
-                </label>
-            </div>
-            <div class="ck-bttn football hockey lacrosse soccer volleyball ">
-                <label>
-                    <input type="checkbox" class="statusBttn" id="timeout_" status="Timeout"><span>Timeout</span>
-
-                    </input>
-                </label>
-            </div>
-            <div class="ck-bttn baseball basketball football hockey lacrosse soccer volleyball">
-                <label>
-                    <input type="button" id="clearStatus_" class="statusBttn" status=""><span>Clear</span>
-
-                    </input>
-                </label>
-            </div>
-           <div class=""  style="">
-                <label>
-                    <input type="text" id="status" value=""><span>Status</span></input>
-                </label>
-            </div>
-                       <div class=""  style="">
-                <label>
-                    <input type="text" id="statusColor" value=""><span>Color</span></input>
-                </label>
-            </div>
-			<div class="ck-bttn football">
-                <label>
-                    <input type="checkbox" class="statusBttn" id="possession"><span>Possession</span>
-
-                    </input>
-                </label>
-            </div>
-            <div class="innerBox specialFunctionBox hockey lacrosse" id="penaltyBox">
-				<div class="bttn lacrosse penaltyBttn" id="30sPenalty" value="300">0:30 Penalty</div>
-				<div class="bttn lacrosse penaltyBttn" id="60sPenalty" value="600">1:00 Penalty</div>
-				<div class="bttn hockey lacrosse penaltyBttn" id="120sPenalty" value="1200">2:00 Penalty</div>
-                <div class="bttn lacrosse penaltyBttn" id="180sPenalty" value="1800">3:00 Penalty</div>
-				<div class="bttn hockey penaltyBttn" id="240sPenalty" value="2400">4:00 Penalty</div>
-                <div class="bttn hockey penaltyBttn" id="300sPenalty" value="3000">5:00 Penalty</div>
-                <div class="bttn" id="editPenalties" title="Clear All Penalties?">Edit Penalties</div>
-
-                <div class="bttn hockey lacrosse" id="clearPenalties"
-                style="border: 2px solid red;">Clear Penalties</div>
-            </div>
-            <!--<button id="lockControl">Lock Controls</button>
-            <button id="unlockControl">Unlock Controls</button>-->
-            <div id="penalty_queue_dialog" class="dialog">
-                <div class="penalty_queue" id="pq1">
-                    <label for="start">Start Time</label>
-                    <input type="text" name="start" id="start" />
-                    <button id="now">Now</button>
-                    <ul class="penalty_list"></ul>
-                </div>
-                <div class="penalty_queue" id="pq2">
-                    <label for="start">Start Time</label>
-                    <input type="text" name="start" id="start" />
-                    <button id="now">Now</button>
-                    <ul class="penalty_list"></ul>
-                </div>
-                <ul style="display: none">
-                    <li id="penaltyProto" class="penaltyData">
-                        <table>
-                            <tr>
-                                <td>Player</td>
-                                <td>
-                                    <input type="text" id="player" />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Penalty</td>
-                                <td>
-                                    <input type="text" id="penalty" />
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Time</td>
-                                <td>
-                                    <select id="time" name="time">
-										<option class="lacrosse" id="time_300" value="300">0:30</option>
-										<option class="lacrosse" id="time_600" value="600">1:00</option>
-                                        <option class="hockey lacrosse" id="time_1200" value="1200">2:00</option>
-                                        <option class="hockey lacrosse" id="time_1200" value="1800">3:00</option>
-                                        <option class="hockey lacrosse" id="time_2400" value="2400">4:00</option>
-                                        <option class="hockey lacrosse" id="time_3000" value="3000">5:00</option>
-                                        <option class="hockey" id="time_6000" value="6000">10:00</option>
-                                    </select>
-                                </td>
-                            </tr>
-                        </table>
-                        <button id="announcePenalty">Announce</button>
-                        <button id="deletePenalty">Delete</button>
-                    </li>
-                </ul>
-			</div>
-            </div>
-        </div>
-        </div>
-    </body>
-
+		</div>
+	</body>
 </html>
