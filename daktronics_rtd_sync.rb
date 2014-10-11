@@ -95,7 +95,7 @@ class DaktronicsRtdSync
         STDERR.puts "tenths: #{tenths}"
 
         if tenths >= 0 
-            app.sync_clock_time_remaining(tenths)
+            @app.sync_clock_time_remaining(tenths)
         end
     end
 
@@ -232,7 +232,7 @@ class DaktronicsRtdSync
                     if byte.ord == 0x16
                         packet = ''
                     elsif byte.ord == 0x17
-                        process_dak_packet(app, packet)
+                        process_dak_packet(packet)
                     else
                         packet << byte
                     end
