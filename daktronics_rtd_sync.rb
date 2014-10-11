@@ -92,8 +92,6 @@ class DaktronicsRtdSync
                 puts "0042100000: don't understand clock format"
         end
 
-        STDERR.puts "tenths: #{tenths}"
-
         if tenths >= 0 
             @app.sync_clock_time_remaining(tenths)
         end
@@ -102,7 +100,8 @@ class DaktronicsRtdSync
     ##
     # Parse home team score (item 108)
     def packet_0042100107(payload)
-        if (payload =~ /^\s*(\d+)$/)
+		STDERR.puts "home team score payload: #{payload}"
+        if (payload =~ /(\d+)/)
             home_score = $1.to_i  
             @app.sync_hscore(home_score)
         end
@@ -111,7 +110,8 @@ class DaktronicsRtdSync
     ##
     # Parse visiting team score (item 112)
     def packet_0042100111(payload)
-        if (payload =~ /^\s*(\d+)$/)
+		STDERR.puts "away team score payload: #{payload}"
+        if (payload =~ /(\d+)/)
             guest_score = $1.to_i  
             @app.sync_vscore(guest_score)
         end

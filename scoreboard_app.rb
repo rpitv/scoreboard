@@ -424,7 +424,7 @@ class ScoreboardApp < Patchbay
 	# Set the current home team score, if autosync is enabled.
 	# Typically used by sync feed parsers.
 	def sync_hscore(hscore)
-		if @sync_score
+		if @autosync_score
 			if hscore > @teams[1]['score'].to_i
 				command_queue << { "goal_scored_by" => "/teams/1" }
 			end
@@ -436,7 +436,7 @@ class ScoreboardApp < Patchbay
 	# Set the current guest team score, if autosync is enabled. 
 	# Typically used by sync feed parsers.
 	def sync_vscore(vscore)
-		if @sync_score
+		if @autosync_score
 			if vscore > @teams[0]['score'].to_i
 				command_queue << { "goal_scored_by" => "/teams/0" }
 			end
