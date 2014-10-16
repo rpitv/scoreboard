@@ -97,6 +97,17 @@ class DaktronicsRtdSync
 		end
 	end
 
+	## 
+	# Parse period number (item 142)
+	def packet_0042100141(payload)
+		# first 2 characters of the payload should be period number
+		# as an integer. The rest of the message has various mostly
+		# useless preformatted string representations.
+		if (payload =~ /^([ \d]{2})/)
+			@app.sync_clock_period($1.to_i)
+		end
+	end
+
 	##
 	# Parse home team score (item 108)
 	def packet_0042100107(payload)
