@@ -768,17 +768,25 @@ jQuery.fn.unserializeInputsJson = function(data) {
 
 jQuery.fn.getTeamData = function() {
 	var thiz = this; // javascript can be counter-intuitive...
+	var currentSerial = $(this).data('dataSerial');
+
 	getJson($(this).data('url'), function(data) {
-		$(thiz).unserializeInputsJson(data);
-		// important to set roster before we unserialize penalties
-		// else autocompletion might fail
-		$(thiz).data("roster", data.autocompletePlayers);
-		$(thiz).penaltyDialog().unserializePenaltiesJson(data.penalties);
-		
-		//move this out of this function
-		$(thiz).parent().css("border", "5px solid " + data.bgcolor); // Set team colors on panel
-		$(thiz).parent().find("span.teamName").css("color", data.bgcolor);
-		$(thiz).parent().find("span.teamName").html(data.name); // Set team names on panel
+		// accept new data from the server only if its serial is bigger than 
+		// what we have now, or if we don't have a serial (i.e. we haven't 
+		// loaded any data yet)
+		if (currentSerial == null || data.dataSerial > currentSerial) {
+			$(thiz).unserializeInputsJson(data);
+			// important to set roster before we unserialize penalties
+			// else autocompletion might fail
+			$(thiz).data("roster", data.autocompletePlayers);
+			$(thiz).data("dataSerial", data.dataSerial);
+			$(thiz).penaltyDialog().unserializePenaltiesJson(data.penalties);
+			
+			//move this out of this function
+			$(thiz).parent().css("border", "5px solid " + data.bgcolor); // Set team colors on panel
+			$(thiz).parent().find("span.teamName").css("color", data.bgcolor);
+			$(thiz).parent().find("span.teamName").html(data.name); // Set team names on panel
+		}
 	});
 }
 
@@ -792,9 +800,38 @@ jQuery.fn.putTeamData = function() {
 		$(this).find("#score").val(0);
 	}
 
+	// Propose a serial number of whatever the last one was, plus one.
 	var json = $(this).serializeInputsJson();
+	var newSerial = $(this).data("dataSerial") + 1;
+	$(this).data("dataSerial", newSerial);
+
+	json['dataSerial'] = newSerial;
 	json['penalties'] = $(this).penaltyDialog().serializePenaltiesJson();
-	putJson($(this).data('url'), json);
+
+	// there is an outside chance the ajax will fail if the dataSerial is less
+	// than the one on the server side. If it succeeds, then we agree with
+	// the server, so we can update our serial number. If it fails, then
+	// something must have been updated on the server side, so we will do
+	// a getTeamData and the server side state will override any local 
+	// changes
+
+	var team_obj = this; // for use in ajax closures
+	console.log("initiating PUT request for team data");
+	jQuery.ajax({
+		type: "PUT",
+		url: $(this).data('url'),
+		contentType: "application/json",
+		data: JSON.stringify(json),
+		success: function(data) {
+			// update our dataSerial
+			console.log("sent team data, received back data", data);
+		},
+		error: function(jqXHR, textStatus) {
+			// trigger update on failure to push
+			console.log("put request failed");
+			$(team_obj).getTeamData();
+		}
+	});
 }
 
 function getSettings(){

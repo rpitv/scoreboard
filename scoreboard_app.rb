@@ -160,12 +160,24 @@ class ScoreboardApp < Patchbay
 	# PUT request to a team. Used by UI to upload team state data.
 	put '/team/:id' do
 		id = params[:id].to_i
-
+		
 		if id == 0 or id == 1
-			Thread.exclusive { @teams[id].merge!(incoming_json) }
-			save_data
-			render :json => ''
+			if @teams[id]['dataSerial'] < incoming_json['dataSerial']
+				# the incoming data is based on the latest we have, so accept
+				STDERR.puts "accepting request"
+				Thread.exclusive { 
+					@teams[id].merge!(incoming_json) 
+				}
+				save_data
+				render :json => @teams[id].to_json
+			else
+				# the incoming data is based on outdated data pulled from us,
+				# so we'll reject it.
+				STDERR.puts "erroring out the request: #{@teams[id].to_json}"
+				render :json => @teams[id].to_json, :status => 409
+			end
 		else
+			STDERR.puts "invalid request"
 			render :json => '', :status => 404
 		end
 	end
