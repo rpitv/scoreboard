@@ -26,7 +26,6 @@ var overtime_length = 5*60*10;
 var schoolList = [];
 var sportList = [];
 
-
 function getText(sourceurl, callback) {
 	jQuery.ajax({
 		url: sourceurl,
@@ -162,6 +161,8 @@ function updatePreviewTimeout( ) {
 
 function updateGameStateTimeout( ) {
 	getGameState( );
+	$("#homeTeamControl").getTeamData( );
+	$("#awayTeamControl").getTeamData( );
 	setTimeout(updateGameStateTimeout, 1000);
 }
 
@@ -217,9 +218,9 @@ jQuery.fn.buildTeamControl = function() {
 
 		$(elem).find("#editPenalties").click(editPenalties);
 		
-		$(elem).find(".statusBttn").click(statusChange);
+		$(elem).find(".statusBttn").change(statusChange);
 		
-		$(elem).find("input,select").blur(function() { 
+		$(elem).find("input[type=text],select").blur(function() { 
 			$(this).team().putTeamData(); 
 		});
 
@@ -569,7 +570,9 @@ function penaltyQueueStartLastStop() {
 function deleteSinglePenalty() {
 	var pd = $(this).parents(".penaltyData");
 	var tc = pd.team();
+	tc.suppressTeamUpdates();
 	pd.remove();
+	tc.unsuppressTeamUpdates();
 	tc.putTeamData();
 }
 
@@ -603,6 +606,7 @@ function shotTaken() {
 }
 
 function statusChange() {
+	$(this).team().suppressTeamUpdates();
 	// Clear all statuses
 	if ($(this).attr("status") == "" ){
 		$(this).team().find("#status").val("");
@@ -620,6 +624,7 @@ function statusChange() {
 		$(this).team().find("#status").val($(this).team().find(":checked").attr("status"));
 		$(this).team().find("#statusColor").val($(this).team().find(":checked").attr("color"));
 	}
+	$(this).team().unsuppressTeamUpdates();
 	$(this).team().putTeamData();
 }
 
@@ -790,9 +795,35 @@ jQuery.fn.getTeamData = function() {
 	});
 }
 
+// suppressTeamUpdates
+// temporarily suppress put requests for this team
+jQuery.fn.suppressTeamUpdates = function() {
+	$(this).data("updates_suppressed", 1);
+}
+
+// unsuppressTeamUpdates
+// unsuppress put requests for this team
+jQuery.fn.unsuppressTeamUpdates = function() {
+	$(this).data("updates_suppressed", null);
+}
+
 // putTeamData
 // Synchronize team data back to the server.
 jQuery.fn.putTeamData = function() {
+	if ($(this).data("updates_suppressed") != null) {
+		console.log("putTeamData suppressed by suppressTeamUpdates");
+		return;
+	}
+
+	if ($(this).data("put_request_ongoing") != null) {
+		console.log("error, putTeamData called while request already ongoing");
+		console.log("this means a suppressTeamUpdates/unsuppressTeamUpdates");
+		console.log("is missing somewhere");
+		return;
+	}
+
+	$(this).data("put_request_ongoing", 1);
+
 	//move this elsewhere (to scoreboard template?)
 	// Check for Score/SOG being blanked
 	// If so, reset value to 0 instead
@@ -825,10 +856,12 @@ jQuery.fn.putTeamData = function() {
 		success: function(data) {
 			// update our dataSerial
 			console.log("sent team data, received back data", data);
+			$(team_obj).data("put_request_ongoing", null);
 		},
 		error: function(jqXHR, textStatus) {
 			// trigger update on failure to push
 			console.log("put request failed");
+			$(team_obj).data("put_request_ongoing", null);
 			$(team_obj).getTeamData();
 		}
 	});
