@@ -21,72 +21,72 @@ require_relative './scoreboard_helpers'
 ##
 # A template used to render the scoreboard data to SVG images.
 class ScoreboardView
-    include ViewHelpers
+	include ViewHelpers
 
 	##
 	# Creates a new view using the given SVG erb template.
-    def initialize(filename)
-        @template = Erubis::PI::Eruby.new(File.read(filename))
+	def initialize(filename)
+		@template = Erubis::PI::Eruby.new(File.read(filename))
 
-        @away_goal_flasher = LinearAnimation.new
-        @home_goal_flasher = LinearAnimation.new
-        @announce_text_dissolve = LinearAnimation.new
-        @global_dissolve = LinearAnimation.new
+		@away_goal_flasher = LinearAnimation.new
+		@home_goal_flasher = LinearAnimation.new
+		@announce_text_dissolve = LinearAnimation.new
+		@global_dissolve = LinearAnimation.new
 
-        @global_dissolve.cut_in # hack
-        @announce_text_dissolve.cut_in
+		@global_dissolve.cut_in # hack
+		@announce_text_dissolve.cut_in
 
-        @animations = [ @away_goal_flasher, @home_goal_flasher, 
-            @announce_text_dissolve, @global_dissolve ]
-    end
+		@animations = [ @away_goal_flasher, @home_goal_flasher, 
+			@announce_text_dissolve, @global_dissolve ]
+	end
 
 	##
 	# Starts a goal-flash animation on the given flasher.
-    def goal_flash(flasher)
-        n_frames = 15
-        
-        # chain together a bunch of transitions
-        flasher.in(n_frames) { 
-            flasher.out(n_frames) {
-                flasher.in(n_frames) {
-                    flasher.out(n_frames) {
-                        flasher.in(n_frames) {
-                            flasher.out(n_frames) 
-                        }
-                    }
-                }
-            }
-        }
-    end
+	def goal_flash(flasher)
+		n_frames = 15
+		
+		# chain together a bunch of transitions
+		flasher.in(n_frames) { 
+			flasher.out(n_frames) {
+				flasher.in(n_frames) {
+					flasher.out(n_frames) {
+						flasher.in(n_frames) {
+							flasher.out(n_frames) 
+						}
+					}
+				}
+			}
+		}
+	end
 
 	##
 	# Renders an SVG image using the current scoreboard data.
-    def render
+	def render
 		# Process view commands from the queue.
-        while command_queue.length > 0
-            cmd = command_queue.shift
-            if (cmd.has_key? 'down')
-                @global_dissolve.out(15)
-            elsif (cmd.has_key? 'up')
-                @global_dissolve.in(15)
-            elsif (cmd.has_key? 'announce_next')
-                @announce_text_dissolve.out(10) {
-                    announce.next
-                    @announce_text_dissolve.in(10)
-                }
-            elsif (cmd.has_key? 'goal_scored_by')
-                if cmd['goal_scored_by'] =~ /\/0$/
-                    goal_flash(@away_goal_flasher)
-                elsif cmd['goal_scored_by'] =~ /\/1$/
-                    goal_flash(@home_goal_flasher)
-                end
-            end
-        end
+		while command_queue.length > 0
+			cmd = command_queue.shift
+			if (cmd.has_key? 'down')
+				@global_dissolve.out(15)
+			elsif (cmd.has_key? 'up')
+				@global_dissolve.in(15)
+			elsif (cmd.has_key? 'announce_next')
+				@announce_text_dissolve.out(10) {
+					announce.next
+					@announce_text_dissolve.in(10)
+				}
+			elsif (cmd.has_key? 'goal_scored_by')
+				if cmd['goal_scored_by'] =~ /\/0$/
+					goal_flash(@away_goal_flasher)
+				elsif cmd['goal_scored_by'] =~ /\/1$/
+					goal_flash(@home_goal_flasher)
+				end
+			end
+		end
 
 		# Advance all animations.
-        @animations.each do |ani|
-            ani.frame_advance
-        end
+		@animations.each do |ani|
+			ani.frame_advance
+		end
 
 		# Advance the announce queue periodically.
 		if announce.is_up
@@ -100,46 +100,46 @@ class ScoreboardView
 		end
 
 		# Process the erb template.
-        render_template
-    end
+		render_template
+	end
 
 	##
 	# Returns the result of running the erb template.
 	def render_template
-        @template.result(binding)
-    end
+		@template.result(binding)
+	end
 
 	##
 	# Returns true if the global dissolve value is nonzero - i.e.
 	# the scoreboard is currently up on screen.
-    def is_up?
-        @global_dissolve.value > 0.01
-    end
+	def is_up?
+		@global_dissolve.value > 0.01
+	end
 
 	##
 	# Returns the global alpha (dissolve) value.
-    def galpha
-        (255 * @global_dissolve.value).to_i
-    end
+	def galpha
+		(255 * @global_dissolve.value).to_i
+	end
 
 	##
 	# Return the opacity to be used for the announce text.
-    def announce_text_opacity
-        @announce_text_dissolve.value
-    end
+	def announce_text_opacity
+		@announce_text_dissolve.value
+	end
 
 	##
 	# Return the opacity for the away team goal flasher layer.
-    def away_blink_opacity
-        @away_goal_flasher.value
-    end
+	def away_blink_opacity
+		@away_goal_flasher.value
+	end
 
 	##
 	# Return the opacity for the home team goal flasher layer.
-    def home_blink_opacity
-        @home_goal_flasher.value
-    end
+	def home_blink_opacity
+		@home_goal_flasher.value
+	end
 
-    attr_accessor :announce, :status, :away_team, :home_team, :clock
-    attr_accessor :command_queue
+	attr_accessor :announce, :status, :away_team, :home_team, :clock
+	attr_accessor :command_queue
 end

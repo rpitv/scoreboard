@@ -32,18 +32,18 @@ Thread.new { app.run(:Host => '::1', :Port => 3002) }
 dirty_level = 1
 
 while true
-    # prepare next SVG frame
-    data = app.view.render
+	# prepare next SVG frame
+	data = app.view.render
 
-    # build header with data length and global alpha
-    header = [ data.length, app.view.galpha, dirty_level ].pack('LCC')
+	# build header with data length and global alpha
+	header = [ data.length, app.view.galpha, dirty_level ].pack('LCC')
 
-    # wait for handshake byte from other end
-    if STDIN.read(1).nil?
-        break
-    end
+	# wait for handshake byte from other end
+	if STDIN.read(1).nil?
+		break
+	end
 
-    # send SVG data with header
-    STDOUT.write(header)
-    STDOUT.write(data)
+	# send SVG data with header
+	STDOUT.write(header)
+	STDOUT.write(data)
 end
