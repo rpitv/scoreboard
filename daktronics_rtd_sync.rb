@@ -45,77 +45,77 @@ require_relative './serial_sync_helper'
 # on app.
 class DaktronicsRtdSync
 
-    include SerialSyncHelper
+	include SerialSyncHelper
 
-    ##
-    # Initialize the RTD parser, which will report data back to +app+.
-    #
-    # +options+ is a hash of options including the following:
-    # [+'port'+']       serial port to use
-    def initialize(app, options)
-        @app = app
-        @stop_thread = false
+	##
+	# Initialize the RTD parser, which will report data back to +app+.
+	#
+	# +options+ is a hash of options including the following:
+	# [+'port'+']       serial port to use
+	def initialize(app, options)
+		@app = app
+		@stop_thread = false
 
-        @sp = open_port(options, 19200)
-        @sp.read_timeout = 500
-        @thread = Thread.new { run_thread }
-    end
+		@sp = open_port(options, 19200)
+		@sp.read_timeout = 500
+		@thread = Thread.new { run_thread }
+	end
 
-    ##
-    # Shut down the RTD parser and free the serial port
-    def shutdown
-        STDERR.puts "Daktronics RTD sync thread shutting down"
-        @stop_thread = true
-        @thread.join
-        @sp.close
-        STDERR.puts "Daktronics RTD sync thread terminated"
-    end
+	##
+	# Shut down the RTD parser and free the serial port
+	def shutdown
+		STDERR.puts "Daktronics RTD sync thread shutting down"
+		@stop_thread = true
+		@thread.join
+		@sp.close
+		STDERR.puts "Daktronics RTD sync thread terminated"
+	end
 
-    ##
-    # Return the types of data supplied by the parser
-    def capabilities
-        ['clock', 'score', 'downdist', 'playclock']
-    end
+	##
+	# Return the types of data supplied by the parser
+	def capabilities
+		['clock', 'score', 'downdist', 'playclock']
+	end
 
-    ##
-    # Parse main game clock (item 1)
-    def packet_0042100000(payload)
-        tenths = -1
+	##
+	# Parse main game clock (item 1)
+	def packet_0042100000(payload)
+		tenths = -1
 
-        # try to parse payload as time in minutes:seconds
-        # or seconds.tenths
-        if (payload =~ /^(([ \d]\d):(\d\d))/)
-                tenths = $2.to_i * 600 + $3.to_i * 10
-        elsif (payload =~ /^(([ \d]\d).(\d))/)
-                tenths = $2.to_i * 10 + $3.to_i
-        else
-                puts "0042100000: don't understand clock format"
-        end
+		# try to parse payload as time in minutes:seconds
+		# or seconds.tenths
+		if (payload =~ /^(([ \d]\d):(\d\d))/)
+				tenths = $2.to_i * 600 + $3.to_i * 10
+		elsif (payload =~ /^(([ \d]\d).(\d))/)
+				tenths = $2.to_i * 10 + $3.to_i
+		else
+				puts "0042100000: don't understand clock format"
+		end
 
-        if tenths >= 0 
-            @app.sync_clock_time_remaining(tenths)
-        end
-    end
+		if tenths >= 0 
+			@app.sync_clock_time_remaining(tenths)
+		end
+	end
 
-    ##
-    # Parse home team score (item 108)
-    def packet_0042100107(payload)
+	##
+	# Parse home team score (item 108)
+	def packet_0042100107(payload)
 		STDERR.puts "home team score payload: #{payload}"
-        if (payload =~ /(\d+)/)
-            home_score = $1.to_i  
-            @app.sync_hscore(home_score)
-        end
-    end
+		if (payload =~ /(\d+)/)
+			home_score = $1.to_i  
+			@app.sync_hscore(home_score)
+		end
+	end
 
-    ##
-    # Parse visiting team score (item 112)
-    def packet_0042100111(payload)
+	##
+	# Parse visiting team score (item 112)
+	def packet_0042100111(payload)
 		STDERR.puts "away team score payload: #{payload}"
-        if (payload =~ /(\d+)/)
-            guest_score = $1.to_i  
-            @app.sync_vscore(guest_score)
-        end
-    end
+		if (payload =~ /(\d+)/)
+			guest_score = $1.to_i  
+			@app.sync_vscore(guest_score)
+		end
+	end
 
 	##
 	# Parse ball-on message (item 219)
@@ -130,134 +130,134 @@ class DaktronicsRtdSync
 			@app.sync_distance($3.to_i)
 		end
 	end
-    
-    ##
-    # Parse football down (item 222)
+	
+	##
+	# Parse football down (item 222)
 	# These are not always sent when the down changes. Sometimes a
 	# ball-on message is sent instead (see +packet_0042100219+).
-    def packet_0042100221(payload)
-        if (payload =~ /(1st|2nd|3rd|4th)/i)
+	def packet_0042100221(payload)
+		if (payload =~ /(1st|2nd|3rd|4th)/i)
 	    STDERR.puts "#{$1} down"
-            @app.sync_down($1.downcase) 
-        end
-    end
-    
-    ##
-    # Parse yards to go (item 225)
+			@app.sync_down($1.downcase) 
+		end
+	end
+	
+	##
+	# Parse yards to go (item 225)
 	# These are not always sent when the distance to go changes. Sometimes a
 	# ball-on message is sent instead (see +packet_0042100219+).
-    def packet_0042100224(payload)
-        if (payload =~ /(\d+)/)
+	def packet_0042100224(payload)
+		if (payload =~ /(\d+)/)
 	    STDERR.puts "#{$1} to go"
-            @app.sync_distance($1.to_i)
-        end
-    end
+			@app.sync_distance($1.to_i)
+		end
+	end
 
-    ##
-    # Parse play clock (item 201)
-    #
-    # Daktronics documentation is not quite correct for this item.
-    # The documentation indicates that the play clock is in mm:ss
-    # format; however, the actual data transmitted appears to be
-    # just a number of seconds.
-    def packet_0042100200(payload)
-        if (payload =~ /(\d+)/)
-            STDERR.puts "play: #{$1}"
-        end
-    end
+	##
+	# Parse play clock (item 201)
+	#
+	# Daktronics documentation is not quite correct for this item.
+	# The documentation indicates that the play clock is in mm:ss
+	# format; however, the actual data transmitted appears to be
+	# just a number of seconds.
+	def packet_0042100200(payload)
+		if (payload =~ /(\d+)/)
+			STDERR.puts "play: #{$1}"
+		end
+	end
 
-    ##
-    # Parse home possession (item 209)
-    #
-    # Daktronics documentation appears to be incorrect for this item.
-    # The documentation suggests that this item should contain a 
-    # less-than sign to indicate home-team possession, and a blank
-    # space otherwise. But it seems that it may contain a less-than or
-    # greater-than sign depending on which team has possession.
-    def packet_0042100209(payload)
-        if payload =~ /([<>])/
-            STDERR.puts "HOME team GAINED possession (#{$1})"
-        else
-            STDERR.puts "HOME team LOST possession"
-        end
-    end
+	##
+	# Parse home possession (item 209)
+	#
+	# Daktronics documentation appears to be incorrect for this item.
+	# The documentation suggests that this item should contain a 
+	# less-than sign to indicate home-team possession, and a blank
+	# space otherwise. But it seems that it may contain a less-than or
+	# greater-than sign depending on which team has possession.
+	def packet_0042100209(payload)
+		if payload =~ /([<>])/
+			STDERR.puts "HOME team GAINED possession (#{$1})"
+		else
+			STDERR.puts "HOME team LOST possession"
+		end
+	end
 
-    ##
-    # Parse guest possession (item 215)
-    # 
-    # Daktronics documentation indicates that this field should contain
-    # a greater-than sign to indicate guest-team possession, and a blank
-    # space otherwise. However, testing with an actual console indicates
-    # that this may not be correct.
-    def packet_0042100214(payload)
-        if payload =~ /([<>])/
-            STDERR.puts "GUEST team GAINED possession (#{$1})"
-        else
-            STDERR.puts "GUEST team LOST possession"
-        end
-    end
+	##
+	# Parse guest possession (item 215)
+	# 
+	# Daktronics documentation indicates that this field should contain
+	# a greater-than sign to indicate guest-team possession, and a blank
+	# space otherwise. However, testing with an actual console indicates
+	# that this may not be correct.
+	def packet_0042100214(payload)
+		if payload =~ /([<>])/
+			STDERR.puts "GUEST team GAINED possession (#{$1})"
+		else
+			STDERR.puts "GUEST team LOST possession"
+		end
+	end
 
-    ##
-    # Process Daktronics RTD packet.
-    #
-    # This routine receives in +buf+ the string of bytes between 0x16 and 
-    # 0x17 bytes, not including those bytes. It validates the packet checksum,
-    # then calls the appropriate packet parser with the payload. If the packet
-    # is of unknown type, the item number field is printed.
-    def process_dak_packet(buf)
-        cksum_range = buf[0..-3]
-        cksum = buf[-2..-1].hex
-        our_cksum = 0
+	##
+	# Process Daktronics RTD packet.
+	#
+	# This routine receives in +buf+ the string of bytes between 0x16 and 
+	# 0x17 bytes, not including those bytes. It validates the packet checksum,
+	# then calls the appropriate packet parser with the payload. If the packet
+	# is of unknown type, the item number field is printed.
+	def process_dak_packet(buf)
+		cksum_range = buf[0..-3]
+		cksum = buf[-2..-1].hex
+		our_cksum = 0
 
-        cksum_range.each_byte do |byte|
-            our_cksum += byte
-        end
+		cksum_range.each_byte do |byte|
+			our_cksum += byte
+		end
 
-        if (cksum != our_cksum % 256)
-            STDERR.puts "warning: invalid checksum on this packet (ours #{our_cksum}, theirs #{cksum})"
-        end
+		if (cksum != our_cksum % 256)
+			STDERR.puts "warning: invalid checksum on this packet (ours #{our_cksum}, theirs #{cksum})"
+		end
 
-        address = buf[9..18]
+		address = buf[9..18]
 
-        if (address =~ /^(\d+)$/ && respond_to?("packet_#{$1}"))
-            send("packet_#{$1}", buf[20..-4])
-        else
-            STDERR.puts ""
-            STDERR.puts "--- UNKNOWN PACKET (#{address}) ENCOUNTERED ---"
-            STDERR.puts ""
-        end
-    end
+		if (address =~ /^(\d+)$/ && respond_to?("packet_#{$1}"))
+			send("packet_#{$1}", buf[20..-4])
+		else
+			STDERR.puts ""
+			STDERR.puts "--- UNKNOWN PACKET (#{address}) ENCOUNTERED ---"
+			STDERR.puts ""
+		end
+	end
 
-    ##
-    # Main parser loop. 
-    #
-    # This routine attempts to read bytes from the serial port and reassemble
-    # them into packets, looking for 0x16 and 0x17 delimiter bytes. When a 
-    # complete packet is received, it is passed to +process_dak_packet+ for
-    # further processing and parsing.
-    def run_thread
-        begin
-            STDERR.puts "Daktronics RTD sync thread starting"
-            logfile_name = Time.now.strftime("rs232_log_%Y%m%d_%H%M%S")
-            logfile = File.open(logfile_name, "w")
-            packet = ''
+	##
+	# Main parser loop. 
+	#
+	# This routine attempts to read bytes from the serial port and reassemble
+	# them into packets, looking for 0x16 and 0x17 delimiter bytes. When a 
+	# complete packet is received, it is passed to +process_dak_packet+ for
+	# further processing and parsing.
+	def run_thread
+		begin
+			STDERR.puts "Daktronics RTD sync thread starting"
+			logfile_name = Time.now.strftime("rs232_log_%Y%m%d_%H%M%S")
+			logfile = File.open(logfile_name, "w")
+			packet = ''
 
-            while not @stop_thread
-                byte = @sp.read(1)
-                logfile.write(byte)
+			while not @stop_thread
+				byte = @sp.read(1)
+				logfile.write(byte)
 
-                if byte
-                    if byte.ord == 0x16
-                        packet = ''
-                    elsif byte.ord == 0x17
-                        process_dak_packet(packet)
-                    else
-                        packet << byte
-                    end
-                end
-            end
-        rescue Exception => e
-            STDERR.puts e.inspect
-        end
-    end
+				if byte
+					if byte.ord == 0x16
+						packet = ''
+					elsif byte.ord == 0x17
+						process_dak_packet(packet)
+					else
+						packet << byte
+					end
+				end
+			end
+		rescue Exception => e
+			STDERR.puts e.inspect
+		end
+	end
 end
