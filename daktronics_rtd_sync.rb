@@ -116,9 +116,25 @@ class DaktronicsRtdSync
             @app.sync_vscore(guest_score)
         end
     end
+
+	##
+	# Parse ball-on message (item 219)
+	# These are not always sent when the down and distance change.
+	# Sometimes down (+packet_0042100221+) or distance (+packet_0042100224+)
+	# messages are sent instead.
+	def packet_0042100219(payload)
+		# first field is ball position, second is down
+		# third is distance to go
+		if (payload =~ /^([0-9 ]{2})(1ST|2ND|3RD|4TH)([0-9 ]{2})/)
+			@app.sync_down($2.downcase)
+			@app.sync_distance($3.to_i)
+		end
+	end
     
     ##
     # Parse football down (item 222)
+	# These are not always sent when the down changes. Sometimes a
+	# ball-on message is sent instead (see +packet_0042100219+).
     def packet_0042100221(payload)
         if (payload =~ /(1st|2nd|3rd|4th)/i)
 	    STDERR.puts "#{$1} down"
@@ -128,6 +144,8 @@ class DaktronicsRtdSync
     
     ##
     # Parse yards to go (item 225)
+	# These are not always sent when the distance to go changes. Sometimes a
+	# ball-on message is sent instead (see +packet_0042100219+).
     def packet_0042100224(payload)
         if (payload =~ /(\d+)/)
 	    STDERR.puts "#{$1} to go"
