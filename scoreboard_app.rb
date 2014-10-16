@@ -79,6 +79,9 @@ class ScoreboardApp < Patchbay
 		# construct a JSON-ish data structure
 		[
 			{
+				# Data serial number. Used for autosync data pulling.
+				'dataSerial' => 0,
+
 				# Team name
 				'name' => 'UNION',
 				# color value to be used for team name display.
@@ -118,6 +121,7 @@ class ScoreboardApp < Patchbay
 				'statusColor' => ''
 			},
 			{
+				'dataSerial' => 0,
 				'name' => 'RPI',
 				'fgcolor' => '#ffffff',
 				'bgcolor' => '#d40000',
@@ -429,6 +433,7 @@ class ScoreboardApp < Patchbay
 				command_queue << { "goal_scored_by" => "/teams/1" }
 			end
 			@teams[1]['score'] = hscore
+			@teams[0]['dataSerial'] += 1
 		end
 	end
 
@@ -442,6 +447,7 @@ class ScoreboardApp < Patchbay
 			end
 
 			@teams[0]['score'] = vscore
+			@teams[0]['dataSerial'] += 1
 		end
 	end
 
