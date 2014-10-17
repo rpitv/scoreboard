@@ -225,6 +225,10 @@ jQuery.fn.buildTeamControl = function() {
 		$(elem).find("#editPenalties").click(editPenalties);
 		
 		$(elem).find(".statusBttn").change(statusChange);
+
+		$(elem).find(".teamStateCheckbox").change(function() {
+			$(this).team().markDirtyTeamData();
+		});
 		
 		$(elem).find("input[type=text],select").blur(function() { 
 			$(this).team().markDirtyTeamData(); 
