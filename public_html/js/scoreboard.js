@@ -166,6 +166,12 @@ function updateGameStateTimeout( ) {
 	setTimeout(updateGameStateTimeout, 1000);
 }
 
+function putTeamDataInterval( ) {
+	$("#homeTeamControl").putTeamDataIfDirty( );
+	$("#awayTeamControl").putTeamDataIfDirty( );
+}
+
+
 function getGameState( ) {
 	getJson('gameState', function(data) {
 		$("#downNumber").html(data['down']);
@@ -221,13 +227,14 @@ jQuery.fn.buildTeamControl = function() {
 		$(elem).find(".statusBttn").change(statusChange);
 		
 		$(elem).find("input[type=text],select").blur(function() { 
-			$(this).team().putTeamData(); 
+			$(this).team().markDirtyTeamData(); 
 		});
 
 		$(elem).find(".penalty_list").sortable({ 
 			connectWith: $(elem).find(".penalty_list"),
 			stop: function() { 
-				$(this).team().putTeamData(); 
+				console.log("sortable stop putting team data");
+				$(this).team().markDirtyTeamData(); 
 			}
 		});
 		$(elem).find(".penalty_queue").build_penalty_queue();
@@ -298,7 +305,7 @@ function newPenalty(time) {
 	$(this).team().queuePenalty(penaltyDiv);
 
 	// sync team data
-	$(this).team().putTeamData();
+	$(this).team().markDirtyTeamData();
 }
 
 // queuePenalty
@@ -411,7 +418,7 @@ jQuery.fn.penaltyQueueClear = function() {
 // Set the penalty queue's start time to now.
 jQuery.fn.penaltyQueueStartNow = function() {
 	$(this).find("#start").timeval(clockState.time_elapsed);
-	$(this).team().putTeamData();
+	$(this).team().markDirtyTeamData();
 }
 
 jQuery.fn.timeval = function(tv) {
@@ -545,7 +552,7 @@ jQuery.fn.penaltyLength = function() {
 // Clear all penalties on a team.
 function clearPenalties() {
 	$(this).team().penaltyDialog().find(".penalty_queue .penaltyData").remove();
-	$(this).team().putTeamData();
+	$(this).team().markDirtyTeamData();
 }
 
 // editPenalties
@@ -570,10 +577,8 @@ function penaltyQueueStartLastStop() {
 function deleteSinglePenalty() {
 	var pd = $(this).parents(".penaltyData");
 	var tc = pd.team();
-	tc.suppressTeamUpdates();
 	pd.remove();
-	tc.unsuppressTeamUpdates();
-	tc.putTeamData();
+	tc.markDirtyTeamData();
 }
 
 // goalScored
@@ -582,7 +587,7 @@ function goalScored() {
 	$(this).team().find("#score").val(
 		intOrZero($(this).team().find("#score").val()) + 1
 	);
-	$(this).team().putTeamData();
+	$(this).team().markDirtyTeamData();
 	// trigger any kind of blinky goal animations (or whatever)
 	viewCommand({"goal_scored_by" : $(this).team().data('url')});
 }
@@ -593,7 +598,7 @@ function addPoints(points) {
 	$(this).team().find("#score").val(
 		intOrZero($(this).team().find("#score").val()) +  parseInt(points)
 	);
-	$(this).team().putTeamData();
+	$(this).team().markDirtyTeamData();
 	// trigger any kind of blinky goal animations (or whatever)
 	viewCommand({"goal_scored_by" : $(this).team().data('url')});
 }
@@ -602,11 +607,10 @@ function shotTaken() {
 	$(this).team().find("#shotsOnGoal").val(
 		intOrZero($(this).team().find("#shotsOnGoal").val()) + 1
 	);
-	$(this).team().putTeamData();
+	$(this).team().markDirtyTeamData();
 }
 
 function statusChange() {
-	$(this).team().suppressTeamUpdates();
 	// Clear all statuses
 	if ($(this).attr("status") == "" ){
 		$(this).team().find("#status").val("");
@@ -624,8 +628,7 @@ function statusChange() {
 		$(this).team().find("#status").val($(this).team().find(":checked").attr("status"));
 		$(this).team().find("#statusColor").val($(this).team().find(":checked").attr("color"));
 	}
-	$(this).team().unsuppressTeamUpdates();
-	$(this).team().putTeamData();
+	$(this).team().markDirtyTeamData();
 }
 
 function getYTG() {
@@ -724,7 +727,7 @@ function possessionChange() {
 			var other_poss = $(this).find("#possession");
 			if (other_poss.get(0) !== this_poss.get(0)) {
 				other_poss.prop('checked', false);
-				$(this).putTeamData();
+				$(this).markDirtyTeamData();
 			}
 		});
 	}
@@ -791,39 +794,36 @@ jQuery.fn.getTeamData = function() {
 			$(thiz).parent().css("border", "5px solid " + data.bgcolor); // Set team colors on panel
 			$(thiz).parent().find("span.teamName").css("color", data.bgcolor);
 			$(thiz).parent().find("span.teamName").html(data.name); // Set team names on panel
+
+			// data can't be dirty if we just pulled it
+			$(thiz).data("dirty", 0);
 		}
 	});
 }
 
-// suppressTeamUpdates
-// temporarily suppress put requests for this team
-jQuery.fn.suppressTeamUpdates = function() {
-	$(this).data("updates_suppressed", 1);
+// markDirtyTeamData
+// Flag the team data as dirty (meaning that it needs to be uploaded
+// to the server).
+jQuery.fn.markDirtyTeamData = function() {
+	$(this).data("dirty", 1);
 }
 
-// unsuppressTeamUpdates
-// unsuppress put requests for this team
-jQuery.fn.unsuppressTeamUpdates = function() {
-	$(this).data("updates_suppressed", null);
+jQuery.fn.markCleanTeamData = function() {
+	$(this).data("dirty", 0);
+}
+
+// putTeamDataIfDirty
+// If team data is dirty, put to server.
+jQuery.fn.putTeamDataIfDirty = function() {
+	if ($(this).data("dirty") != 0) {
+		$(this).putTeamData();
+		$(this).data("dirty", 0);
+	}
 }
 
 // putTeamData
 // Synchronize team data back to the server.
 jQuery.fn.putTeamData = function() {
-	if ($(this).data("updates_suppressed") != null) {
-		console.log("putTeamData suppressed by suppressTeamUpdates");
-		return;
-	}
-
-	if ($(this).data("put_request_ongoing") != null) {
-		console.log("error, putTeamData called while request already ongoing");
-		console.log("this means a suppressTeamUpdates/unsuppressTeamUpdates");
-		console.log("is missing somewhere");
-		return;
-	}
-
-	$(this).data("put_request_ongoing", 1);
-
 	//move this elsewhere (to scoreboard template?)
 	// Check for Score/SOG being blanked
 	// If so, reset value to 0 instead
@@ -856,12 +856,10 @@ jQuery.fn.putTeamData = function() {
 		success: function(data) {
 			// update our dataSerial
 			console.log("sent team data, received back data", data);
-			$(team_obj).data("put_request_ongoing", null);
 		},
 		error: function(jqXHR, textStatus) {
 			// trigger update on failure to push
 			console.log("put request failed");
-			$(team_obj).data("put_request_ongoing", null);
 			$(team_obj).getTeamData();
 		}
 	});
@@ -1045,6 +1043,10 @@ $(document).ready(function() {
 	updateClockTimeout( );
 	updatePreviewTimeout( );
 	updateGameStateTimeout( );
+
+	// try to put dirty team data every 250ms
+	setInterval(putTeamDataInterval, 250);
+
 	getAutosync( );
 
 	$(".teamControl").buildTeamControl();
