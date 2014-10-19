@@ -138,7 +138,14 @@ class DaktronicsRtdSync
 		# third is distance to go
 		if (payload =~ /^([0-9 ]{2})(1ST|2ND|3RD|4TH)([0-9 ]{2})/)
 			@app.sync_down($2.downcase)
-			@app.sync_distance($3.to_i)
+
+			# if the ball is on the same yard line as the yards to go,
+			# the distance should be "goal"
+			if ($1.to_i == $3.to_i)
+				@app.sync_distance("Goal")
+			else
+				@app.sync_distance($3.to_i)
+			end
 		end
 	end
 	
