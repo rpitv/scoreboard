@@ -1048,8 +1048,8 @@ $(document).ready(function() {
 	updatePreviewTimeout( );
 	updateGameStateTimeout( );
 
-	// try to put dirty team data every 250ms
-	setInterval(putTeamDataInterval, 250);
+	// try to put dirty team data every 50ms
+	setInterval(putTeamDataInterval, 50);
 
 	getAutosync( );
 
