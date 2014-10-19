@@ -60,6 +60,7 @@ class ScoreboardApp < Patchbay
 		@autosync_score = false
 		@autosync_other = false
 		@sync_thread = nil
+		@sport_settings = { }
 	end
 
 	attr_reader :status, :status_color
@@ -336,13 +337,13 @@ class ScoreboardApp < Patchbay
 	# Accepts a JSON object of the format found in 
 	# +public_html/js/sports.json+
 	put '/scoreboardSettings' do
-		@gameSettings = incoming_json
-		STDERR.puts @gameSettings.inspect
+		@sport_settings = incoming_json
+		STDERR.puts @sport_settings.inspect
 		
-		number_of_periods = @gameSettings['periodQty'].to_i
+		number_of_periods = @sport_settings['periodQty'].to_i
 		begin
-			period_length = GameClock.parse_clock(@gameSettings['periodLength'])
-			overtime_length = GameClock.parse_clock(@gameSettings['otPeriodLength'])
+			period_length = GameClock.parse_clock(@sport_settings['periodLength'])
+			overtime_length = GameClock.parse_clock(@sport_settings['otPeriodLength'])
 		rescue
 			render :status => 400
 			return
@@ -422,6 +423,9 @@ class ScoreboardApp < Patchbay
 		@view.status = StatusHelper.new(self)
 		@view.away_team = TeamHelper.new(@teams[0], @clock)
 		@view.home_team = TeamHelper.new(@teams[1], @clock)
+		@view.penalty_state = PenaltyStringHelper.new(
+			self, @view.home_team, @view.away_team
+		)
 		@view.clock = ClockHelper.new(@clock)
 		@view.command_queue = command_queue
 	end
@@ -435,6 +439,7 @@ class ScoreboardApp < Patchbay
 	self.files_dir = 'public_html'
 
 	attr_reader :clock, :autosync_clock, :autosync_score, :autosync_other
+	attr_reader :sport_settings
 
 	##
 	# Set the current home team score, if autosync is enabled.

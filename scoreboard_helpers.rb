@@ -84,6 +84,12 @@ class TeamHelper
 		penalties.strength
 	end
 
+	## 
+	# Returns true if the team is currently at full strength.
+	def full_strength
+		penalties.full_strength
+	end
+
 	##
 	# Returns true if this team is currently playing without a goaltender.
 	def empty_net
@@ -138,6 +144,13 @@ class PenaltyHelper
 	end
 
 	##
+	# Returns true if the team is currently at full strength.
+	def full_strength
+		# icky hack but it works until penalties get refactored further
+		strength == 5
+	end
+
+	##
 	# Return the time (in tenths of a second) until this team's 
 	# strength next changes.
 	def time_to_strength_change
@@ -176,6 +189,67 @@ protected
 		time
 	end
 
+end
+
+##
+# Helper function for generating a string describing the current 
+# penalty situation.
+class PenaltyStringHelper
+	def initialize(app, home_team, away_team)
+		@app = app
+		@home = home_team
+		@away = away_team
+	end
+
+	def string
+		# get sport class from app (eventually)
+
+		sportclass = @app.sport_settings['penaltiesClass'] || 'icehockey'
+
+		if respond_to? "#{sportclass}_penalty_string"
+			send "#{sportclass}_penalty_string"
+		else
+			""
+		end
+	end
+
+	def icehockey_penalty_string
+		hs = @home.strength + (@home.empty_net ? 1 : 0)
+		as = @away.strength + (@away.empty_net ? 1 : 0)
+
+		if @home.full_strength and @away.full_strength
+			""
+		elsif @home.strength == 5 and @away.strength == 4
+			"Power Play"
+		elsif @away.strength == 5 and @home.strength == 4
+			"Power Play"
+		elsif @home.strength == 6 and @away.strength == 4
+			"Empty Net + PP"
+		elsif @away.strength == 6 and @home.strength == 4
+			"Empty Net + PP"
+		else	
+			max = [@home.strength, @away.strength].max
+			min = [@home.strength, @away.strength].min
+			"#{max}-on-#{min}"
+		end
+	end
+
+	def lacrosse_penalty_string
+		if @home.full_strength and @away.full_strength
+			""
+		else
+			max = [@home.strength, @away.strength].max
+			min = [@home.strength, @away.strength].min
+
+			if max == min
+				"Even Strength"
+			elsif max-min == 1
+				"Man Up"
+			else
+				"#{max-min} Men Up"
+			end
+		end
+	end
 end
 
 ##
