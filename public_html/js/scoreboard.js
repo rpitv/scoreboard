@@ -208,7 +208,7 @@ jQuery.fn.buildTeamControl = function() {
 			addPoints.call(this, $(this).attr("value"));
 		}); 
 
-		$(elem).find("#shotOnGoal").click(shotTaken);
+		$(elem).find("#shotsPlusOne").click(shotTaken);
 		$(elem).find("#possession").click(possessionChange);		
 		
 		$(elem).find(".penaltyBttn").click(function() { 
