@@ -469,6 +469,26 @@ class ScoreboardApp < Patchbay
 	end
 
 	##
+	# Set the current home team shots on goal, if autosync is enabled.
+	# Typically used by sync feed parsers.
+	def sync_hshots(hshots)
+		if @autosync_other
+			@teams[1]['shotsOnGoal'] = hshots
+			@teams[1]['dataSerial'] += 1
+		end
+	end
+
+	##
+	# Set the current guest team shots on goal, if autosync is enabled.
+	# Typically used by sync feed parsers.
+	def sync_vshots(vshots)
+		if @autosync_other
+			@teams[0]['shotsOnGoal'] = vshots
+			@teams[0]['dataSerial'] += 1
+		end
+	end
+
+	##
 	# Set the current down (football), if autosync is enabled.
 	# Typically used by sync feed parsers.
 	def sync_down(down)

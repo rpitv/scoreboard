@@ -129,6 +129,22 @@ class DaktronicsRtdSync
 	end
 
 	##
+	# Parse home team shots on goal (item 422)
+	def packet_0042100421(payload)
+		if (payload =~ /^\s*(\d+)/)
+			@app.sync_hshots($1.to_i)
+		end
+	end
+
+	##
+	# Parse visiting team shots on goal (item 468)
+	def packet_0042100467(payload)
+		if (payload =~ /^\s*(\d+)/)
+			@app.sync_vshots($1.to_i)
+		end
+	end
+
+	##
 	# Parse ball-on message (item 219)
 	# These are not always sent when the down and distance change.
 	# Sometimes down (+packet_0042100221+) or distance (+packet_0042100224+)
