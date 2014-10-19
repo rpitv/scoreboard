@@ -445,7 +445,7 @@ class ScoreboardApp < Patchbay
 				command_queue << { "goal_scored_by" => "/teams/1" }
 			end
 			@teams[1]['score'] = hscore
-			@teams[0]['dataSerial'] += 1
+			@teams[1]['dataSerial'] += 1
 		end
 	end
 
