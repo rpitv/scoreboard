@@ -225,6 +225,7 @@ jQuery.fn.buildTeamControl = function() {
 		$(elem).find("#editPenalties").click(editPenalties);
 		
 		$(elem).find(".statusBttn").change(statusChange);
+		$(elem).find("#clearStatus_").click(statusClear);
 
 		$(elem).find(".teamStateCheckbox").change(function() {
 			$(this).team().markDirtyTeamData();
@@ -614,13 +615,17 @@ function shotTaken() {
 	$(this).team().markDirtyTeamData();
 }
 
-function statusChange() {
+function statusClear() {
 	// Clear all statuses
 	if ($(this).attr("status") == "" ){
 		$(this).team().find("#status").val("");
 		$(this).team().find("#statusColor").val("");
 		$(this).team().find(".statusBttn:checked").attr("checked", false);
 	}
+	$(this).team().markDirtyTeamData();
+}
+
+function statusChange() {
 	// Put up status of newly checked
 	if ($(this).is(":checked")){
 		$(this).team().find("#status").val($(this).attr("status"));
