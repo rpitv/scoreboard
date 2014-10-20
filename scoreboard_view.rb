@@ -100,7 +100,10 @@ class ScoreboardView
 		end
 
 		# Process the erb template.
-		render_template
+		@next_frame = true
+		ret = render_template
+		@next_frame = false
+		ret
 	end
 
 	##
