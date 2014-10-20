@@ -31,6 +31,7 @@ class ScoreboardApp < Patchbay
 
 		# initialize game clock
 		@clock = GameClock.new
+		@play_clock = PlayClock.new
 
 		# load initial team state
 		@DATAFILE_NAME='scoreboard_state.dat'
@@ -427,6 +428,7 @@ class ScoreboardApp < Patchbay
 			self, @view.home_team, @view.away_team
 		)
 		@view.clock = ClockHelper.new(@clock)
+		@view.play_clock = PlayClockHelper.new(@play_clock)
 		@view.command_queue = command_queue
 	end
 
@@ -539,6 +541,12 @@ class ScoreboardApp < Patchbay
 	def sync_clock_stop
 		if @autosync_clock
 			@clock.stop
+		end
+	end
+
+	def sync_play_clock(tenths)
+		if @autosync_clock
+			@play_clock.time_remaining = tenths
 		end
 	end
 

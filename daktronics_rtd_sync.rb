@@ -196,7 +196,7 @@ class DaktronicsRtdSync
 	# just a number of seconds.
 	def packet_0042100200(payload)
 		if (payload =~ /(\d+)/)
-			STDERR.puts "play: #{$1}"
+			@app.sync_play_clock($1.to_i * 10)
 		end
 	end
 

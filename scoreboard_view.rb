@@ -141,5 +141,5 @@ class ScoreboardView
 	end
 
 	attr_accessor :announce, :status, :away_team, :home_team, :clock
-	attr_accessor :penalty_state, :command_queue
+	attr_accessor :penalty_state, :command_queue, :play_clock
 end

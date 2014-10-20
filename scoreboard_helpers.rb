@@ -361,6 +361,17 @@ class ClockHelper
 	end
 end
 
+module PlayClockHelpers
+	def initialize(play_clock)
+		@play_clock = play_clock
+	end
+
+	def as_string
+		seconds = @play_clock.time_remaining / 10
+		format '%:02d', seconds	
+	end
+end
+
 ##
 # Helper functions for formatting time values.
 module TimeHelpers
