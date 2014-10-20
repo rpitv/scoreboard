@@ -25,12 +25,24 @@ class LinearAnimation
 
 	##
 	# Initializes the animation.
-	def initialize
+	def initialize(direction=IN)
 		@value = 0
 		@total_frames = 0
 		@frame = 0
-		@direction = IN
+		@direction = direction
 		@transition_done_block = nil
+	end
+
+	##
+	# Return true if the animation is fully in.
+	def fully_in?
+		@frame == @total_frames and @direction == IN
+	end
+
+	##
+	# Return true if the animation is fully out.
+	def fully_out?
+		@frame == @total_frames and @direction == OUT
 	end
 
 	##
