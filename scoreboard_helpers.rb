@@ -313,6 +313,10 @@ class StatusHelper
 		@app.status_color
 	end
 
+	def has_play_clock
+		@app.status_use_play_clock
+	end
+
 	##
 	# Return true if the status field should be displayed, false otherwise.
 	def is_up
@@ -361,14 +365,14 @@ class ClockHelper
 	end
 end
 
-module PlayClockHelpers
+class PlayClockHelper
 	def initialize(play_clock)
 		@play_clock = play_clock
 	end
 
 	def as_string
 		seconds = @play_clock.time_remaining / 10
-		format '%:02d', seconds	
+		format ':%02d', seconds	
 	end
 end
 

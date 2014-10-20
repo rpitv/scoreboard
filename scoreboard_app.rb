@@ -20,6 +20,7 @@ require_relative './eversan_serial_sync'
 require_relative './drycontact_sync'
 require_relative './scoreboard_helpers'
 require_relative './game_clock'
+require_relative './play_clock'
 
 ##
 # The scoreboard Patchbay application. 
@@ -54,6 +55,7 @@ class ScoreboardApp < Patchbay
 		@announces = []
 		@status = ''
 		@status_color = 'white'
+		@status_use_play_clock = false
 
 		@game_state = initialize_game_state
 
@@ -64,7 +66,7 @@ class ScoreboardApp < Patchbay
 		@sport_settings = { }
 	end
 
-	attr_reader :status, :status_color
+	attr_reader :status, :status_color, :status_use_play_clock
 
 	##
 	# Create default game state.
@@ -330,6 +332,7 @@ class ScoreboardApp < Patchbay
 	put '/status' do
 		@status = incoming_json['message']
 		@status_color = incoming_json['color'] || 'white'
+		@status_use_play_clock = incoming_json['enablePlayClock'] || false
 		render :json => ''
 	end
 	

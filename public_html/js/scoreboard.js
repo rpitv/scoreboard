@@ -717,16 +717,23 @@ function ytgCustom() {
 	}
 }
 
-// expect this to be refactored away soon
-function ddDisplay() {
+function doDdDisplay(withPlayClock) {
 	var down = $("#downNumber").html();
 	var ytg = getYTG();
-	if ($(this).attr("value") == 1) {
-		$("#textInput").val(down + " & " + ytg);
+	$("#textInput").val(down + " & " + ytg);
+	if (withPlayClock) {
+		postStatusWithPlayClock();
+	} else {
 		postStatus();
-	} else if ($(this).attr("value") == 0) {
-		clearStatus();
 	}
+}
+
+function ddDisplay() {
+	doDdDisplay(false);
+}
+
+function ddDisplayWithPlayClock() {
+	doDdDisplay(true);
 }
 
 function possessionChange() {
@@ -915,6 +922,10 @@ function postAnnounce() {
 
 function postStatus() {
 	putJson('status', { message : announceStatusTextInput() });
+}
+
+function postStatusWithPlayClock() {
+	putJson('status', { message: announceStatusTextInput(), enablePlayClock: true });
 }
 
 function postStatusWithColor() {
@@ -1168,7 +1179,9 @@ $(document).ready(function() {
 	$(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(downUpdate);
 	$(".bttn.ytg, .bttn.ytgSpecial, .bttn.addSubYTG").click(ytgUpdate);
 	$("#customYTG").change(ytgCustom);
-	$("#displayDownDistance, #clearDownDistance").click(ddDisplay);
+	$("#displayDownDistance").click(ddDisplay);
+	$("#displayDownDistanceWithPlayClock").click(ddDisplayWithPlayClock);
+	$("#clearDownDistance").click(clearStatus);
 	$("#syncSettings").find("select, input").change(changeSyncSettings);
 
 	$("#globalFlag").click(statusButton);
