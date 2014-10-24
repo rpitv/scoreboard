@@ -28,11 +28,7 @@ class TeamHelper
 	##
 	# Returns the team name.
 	def name
-		if @team_data['possession']
-			"\u2022" + @team_data['name']
-		else
-			@team_data['name']
-		end
+		@team_data['name']
 	end
 
 	##
