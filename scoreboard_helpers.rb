@@ -29,7 +29,7 @@ class TeamHelper
 	# Returns the team name.
 	def name
 		if @team_data['possession']
-			"\xe2\x80\xa2" + @team_data['name']
+			"\u2022" + @team_data['name']
 		else
 			@team_data['name']
 		end
