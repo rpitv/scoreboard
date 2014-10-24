@@ -28,19 +28,19 @@ class TeamHelper
 	##
 	# Returns the team name.
 	def name
-		@team_data['name']
+		@team_data.name
 	end
 
 	##
 	# Returns the foreground color for representing this team.
 	def fgcolor
-		@team_data['fgcolor']
+		@team_data.fgcolor
 	end
 
 	##
 	# Returns the background color for representing this team.
 	def bgcolor
-		@team_data['bgcolor']
+		@team_data.bgcolor
 	end
 
 	##
@@ -52,25 +52,25 @@ class TeamHelper
 	##
 	# Returns this team's current score.
 	def score
-		@team_data['score']
+		@team_data.score
 	end
 
 	##
 	# Returns the shots on goal for this team.
 	def shots
-		@team_data['shotsOnGoal']
+		@team_data.shotsOnGoal
 	end
 
 	##
 	# Returns the number of timeouts remaining for this team.
 	def timeouts
-		@team_data['timeoutsLeft'].to_i
+		@team_data.timeoutsLeft.to_i
 	end
 
 	##
 	# Returns a PenaltyHelper for accessing this team's penalty information.
 	def penalties
-		PenaltyHelper.new(@team_data['penalties'], @clock)
+		PenaltyHelper.new(@team_data.penalties, @clock)
 	end
 
 	##
@@ -89,7 +89,7 @@ class TeamHelper
 	##
 	# Returns true if this team is currently playing without a goaltender.
 	def empty_net
-		@team_data['emptyNet'] and @team_data['emptyNet'] != 'false'
+		@team_data.emptyNet
 	end
 
 	##
@@ -97,27 +97,29 @@ class TeamHelper
 	# Returns 0 otherwise.
 	# (FIXME: why is a bigger number a smaller width?)
 	def fontWidth
-		@team_data['fontWidth']
+		@team_data.fontWidth
 	end
 
 	##
 	# Returns status data associated with this team.
 	def status
-		@team_data['status']
+		@team_data.status
 	end
 
 	##
 	# Returns true if the team has possession.
 	def possession
-		@team_data['possession']
+		@team_data.possession
 	end
 
 	##
 	# Returns the color to be used for displaying the status field.
 	def status_color
-		if @team_data['statusColor'] && @team_data['statusColor'] != ''
-			@team_data['statusColor']
+		if @team_data.statusColor && @team_data.statusColor != ''
+			@team_data.statusColor
 		else
+			# this doesn't belong here! it should return nil and let the 
+			# template do x_team.status_color || 'yellow'
 			'yellow'
 		end
 	end

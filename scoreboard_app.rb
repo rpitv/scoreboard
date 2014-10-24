@@ -21,6 +21,7 @@ require_relative './drycontact_sync'
 require_relative './scoreboard_helpers'
 require_relative './game_clock'
 require_relative './play_clock'
+require_relative './team'
 
 ##
 # The scoreboard Patchbay application. 
@@ -36,20 +37,16 @@ class ScoreboardApp < Patchbay
 
 		# load initial team state
 		@DATAFILE_NAME='scoreboard_state.dat'
+		initialize_team_config
 		if File.exists?(@DATAFILE_NAME)
 			# load state from file if possible
 			begin
-				@teams = load_data
+				load_data
 			rescue
-				STDERR.puts "failed to load config, initializing it..."
-				@teams = initialize_team_config
-				save_data
+				STDERR.puts "failed to load config, wiping it..."
 			end
-		else
-			# create new team state using defaults and save to file
-			@teams = initialize_team_config
-			save_data
 		end
+		save_data
 
 		# initialize global game state items
 		@announces = []
@@ -80,72 +77,9 @@ class ScoreboardApp < Patchbay
 	##
 	# Create a default team configuration.
 	def initialize_team_config
-		# construct a JSON-ish data structure
-		[
-			{
-				# Data serial number. Used for autosync data pulling.
-				'dataSerial' => 0,
-
-				# Team name
-				'name' => 'UNION',
-				# color value to be used for team name display.
-				'fgcolor' => '#ffffff',
-				'bgcolor' => '#800000',
-				# number of points scored by this team
-				'score' => 0,
-
-				# shots on goal count (for hockey)
-				'shotsOnGoal' => 0,
-
-				# number 
-				# timeouts "left" don't include the one currently in use, if any
-				'timeoutsLeft' => 3,
-				'timeoutNowInUse' => false,
-
-				# penalty queues (for hockey)
-				# A penalty consists of player, penalty, length.
-				'penalties' => {
-					# Only two players may serve penalties at a time. These arrays
-					# represent the "stacks" of penalties thus formed.
-					'activeQueues' => [ [], [] ],
-					
-					# These numbers represent the start time of each penalty "stack".
-					# 0 = start of game.
-					'activeQueueStarts' => [ 0, 0 ]
-				},
-
-				# roster autocompletion list
-				'autocompletePlayers' => [
-				],
-
-				'emptyNet' => false,
-				'possession' => false,
-				'fontWidth' => 0,
-				'status' => '',
-				'statusColor' => ''
-			},
-			{
-				'dataSerial' => 0,
-				'name' => 'RPI',
-				'fgcolor' => '#ffffff',
-				'bgcolor' => '#d40000',
-				'score' => 0,
-				'shotsOnGoal' => 0,
-				'timeoutsLeft' => 3,
-				'timeoutNowInUse' => false,
-				'penalties' => {
-					'announcedQueue' => [],
-					'activeQueues' => [ [], [] ],
-					'activeQueueStarts' => [ 0, 0 ]
-				},
-				'autocompletePlayers' => [
-				],
-				'emptyNet' => false,
-				'possession' => false,
-				'fontWidth' => 0,
-				'status' => '',
-				'statusColor' => ''
-			}
+		@teams = [
+			Team.new('UNION', '#ffffff', '#800000'),
+			Team.new('RPI', '#ffffff', '#d40000')
 		]
 	end
 
@@ -166,7 +100,7 @@ class ScoreboardApp < Patchbay
 		id = params[:id].to_i
 		
 		if id == 0 or id == 1
-			if @teams[id]['dataSerial'] < incoming_json['dataSerial']
+			if @teams[id].dataSerial < incoming_json['dataSerial']
 				# the incoming data is based on the latest we have, so accept
 				STDERR.puts "accepting request"
 				Thread.exclusive { 
@@ -451,11 +385,11 @@ class ScoreboardApp < Patchbay
 	# Typically used by sync feed parsers.
 	def sync_hscore(hscore)
 		if @autosync_score
-			if hscore > @teams[1]['score'].to_i
+			if hscore > @teams[1].score.to_i
 				command_queue << { "goal_scored_by" => "/teams/1" }
 			end
-			@teams[1]['score'] = hscore
-			@teams[1]['dataSerial'] += 1
+			@teams[1].score = hscore
+			@teams[1].dataSerial += 1
 		end
 	end
 
@@ -464,12 +398,12 @@ class ScoreboardApp < Patchbay
 	# Typically used by sync feed parsers.
 	def sync_vscore(vscore)
 		if @autosync_score
-			if vscore > @teams[0]['score'].to_i
+			if vscore > @teams[0].score.to_i
 				command_queue << { "goal_scored_by" => "/teams/0" }
 			end
 
-			@teams[0]['score'] = vscore
-			@teams[0]['dataSerial'] += 1
+			@teams[0].score = vscore
+			@teams[0].dataSerial += 1
 		end
 	end
 
@@ -478,8 +412,8 @@ class ScoreboardApp < Patchbay
 	# Typically used by sync feed parsers.
 	def sync_hshots(hshots)
 		if @autosync_other
-			@teams[1]['shotsOnGoal'] = hshots
-			@teams[1]['dataSerial'] += 1
+			@teams[1].shotsOnGoal = hshots
+			@teams[1].dataSerial += 1
 		end
 	end
 
@@ -488,8 +422,8 @@ class ScoreboardApp < Patchbay
 	# Typically used by sync feed parsers.
 	def sync_vshots(vshots)
 		if @autosync_other
-			@teams[0]['shotsOnGoal'] = vshots
-			@teams[0]['dataSerial'] += 1
+			@teams[0].shotsOnGoal = vshots
+			@teams[0].dataSerial += 1
 		end
 	end
 
@@ -576,13 +510,14 @@ protected
 	end
 
 	##
-	# Load team state from file.
-	# This simply reads the file and returns the data. It does not 
-	# alter the current state.
+	# Load team state from file and merge with default state.
 	def load_data
-		File.open(@DATAFILE_NAME, 'r') do |f|
+		json = File.open(@DATAFILE_NAME, 'r') do |f|
 			JSON.parse f.read
 		end
+
+		@teams[0].merge!(json[0])
+		@teams[1].merge!(json[1])
 	end
 
 	##
