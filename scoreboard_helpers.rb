@@ -237,7 +237,7 @@ class PenaltyStringHelper
 			elsif @home.strength == 4 and @away.strength == 5
 				"Empty Net + PK"
 			else
-				"Empty Net + #{max}-#{min}"
+				"Empty Net + #{@home.strength}-#{@away.strength}"
 			end
 		elsif @away.empty_net and not @home.empty_net
 			# home team has an empty net
@@ -246,7 +246,7 @@ class PenaltyStringHelper
 			elsif @away.strength == 4 and @home.strength == 5
 				"Empty Net + PK"
 			else
-				"Empty Net + #{max}-#{min}"
+				"Empty Net + #{@away.strength}-#{@home.strength}"
 			end
 		else
 			# both nets are empty, this is extremely unlikely
