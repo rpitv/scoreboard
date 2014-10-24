@@ -94,6 +94,7 @@ class TeamHelper
 
 	##
 	# Returns 1 if a narrower font should be used for this team name.
+	# Returns 0 otherwise.
 	# (FIXME: why is a bigger number a smaller width?)
 	def fontWidth
 		@team_data['fontWidth']
@@ -103,6 +104,12 @@ class TeamHelper
 	# Returns status data associated with this team.
 	def status
 		@team_data['status']
+	end
+
+	##
+	# Returns true if the team has possession.
+	def possession
+		@team_data['possession']
 	end
 
 	##
