@@ -36,7 +36,7 @@ while true
 	data = app.view.render
 
 	# build header with data length and global alpha
-	header = [ data.length, app.view.galpha, dirty_level ].pack('LCC')
+	header = [ data.bytesize, app.view.galpha, dirty_level ].pack('LCC')
 
 	# wait for handshake byte from other end
 	if STDIN.read(1).nil?
