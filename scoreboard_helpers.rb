@@ -201,9 +201,10 @@ class PenaltyStringHelper
 		@away = away_team
 	end
 
+	##
+	# Return a string describing the penalty situation, as appropriate
+	# for the app's currently selected sport.
 	def string
-		# get sport class from app (eventually)
-
 		sportclass = @app.sport_settings['penaltiesClass'] || 'icehockey'
 
 		if respond_to? "#{sportclass}_penalty_string"
@@ -213,27 +214,50 @@ class PenaltyStringHelper
 		end
 	end
 
+	##
+	# Return a string describing the penalty situation in ice-hockey terms.
 	def icehockey_penalty_string
-		hs = @home.strength + (@home.empty_net ? 1 : 0)
-		as = @away.strength + (@away.empty_net ? 1 : 0)
+		min, max = [@home.strength, @away.strength].minmax
 
-		if @home.full_strength and @away.full_strength
-			""
-		elsif @home.strength == 5 and @away.strength == 4
-			"Power Play"
-		elsif @away.strength == 5 and @home.strength == 4
-			"Power Play"
-		elsif @home.strength == 6 and @away.strength == 4
-			"Empty Net + PP"
-		elsif @away.strength == 6 and @home.strength == 4
-			"Empty Net + PP"
-		else	
-			max = [@home.strength, @away.strength].max
-			min = [@home.strength, @away.strength].min
-			"#{max}-on-#{min}"
+		if not @home.empty_net and not @away.empty_net
+			# cases with no empty net involved
+			if @home.full_strength and @away.full_strength
+				""
+			elsif @home.strength == 5 and @away.strength == 4
+				"Power Play"
+			elsif @away.strength == 5 and @home.strength == 4
+				"Power Play"
+			else	
+				"#{max}-on-#{min}"
+			end
+		elsif @home.empty_net and not @away.empty_net
+			# home team has an empty net
+			if @home.strength == 5 and @away.strength == 4
+				"Empty Net + PP"
+			elsif @home.strength == 4 and @away.strength == 5
+				"Empty Net + PK"
+			else
+				"Empty Net + #{max}-#{min}"
+			end
+		elsif @away.empty_net and not @home.empty_net
+			# home team has an empty net
+			if @away.strength == 5 and @home.strength == 4
+				"Empty Net + PP"
+			elsif @away.strength == 4 and @home.strength == 5
+				"Empty Net + PK"
+			else
+				"Empty Net + #{max}-#{min}"
+			end
+		else
+			# both nets are empty, this is extremely unlikely
+			# just punt and print out something showing the numerical 
+			# situation
+			"#{max+1}-on-#{min+1}"
 		end
 	end
 
+	##
+	# Return a string describing the penalty situation in lacrosse terms.
 	def lacrosse_penalty_string
 		if @home.full_strength and @away.full_strength
 			""
