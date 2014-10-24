@@ -1021,6 +1021,7 @@ function generateSportList() {
 						var currentSport = $("#sportClassName").val();
 						$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").fadeOut();
 						$('.' + currentSport).fadeIn();
+						$("#resetOnChangeDialog").dialog('open');
 						document.title = ('Exaboard - ' + $("#gameType").val());
 					}
 				});
@@ -1057,6 +1058,11 @@ function statusButton() {
 	$("#textInput").val($(this).attr("status"));
 	$("#textInputColor").val($(this).attr("color"));
 	postStatusWithColor();
+}
+
+function resetTeamData() {
+	putJson("reset_teams", {});
+	$("#resetOnChangeDialog").dialog('close');
 }
 
 $(document).ready(function() {
@@ -1185,4 +1191,6 @@ $(document).ready(function() {
 	$("#syncSettings").find("select, input").change(changeSyncSettings);
 
 	$("#globalFlag").click(statusButton);
+	$("#resetTeamData").click(resetTeamData);
+	$("#closeResetOnChangeDialog").click(function() { $("#resetOnChangeDialog").dialog('close'); });
 });

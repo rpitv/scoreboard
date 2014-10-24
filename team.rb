@@ -22,12 +22,13 @@ class Team
 		@name = name
 		@fgcolor = fgcolor
 		@bgcolor = bgcolor
+		@dataSerial = 0
 
 		set_defaults
 	end
 	
 	def set_defaults
-		@dataSerial = 0
+		@dataSerial += 1
 		@score = 0
 		@shotsOnGoal = 0
 

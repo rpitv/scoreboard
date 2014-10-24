@@ -132,6 +132,14 @@ class ScoreboardApp < Patchbay
 	end
 
 	##
+	# PUT request that resets team states to default.
+	put '/reset_teams' do
+		@teams[0].set_defaults
+		@teams[1].set_defaults
+		render :json => {}.to_json
+	end
+
+	##
 	# PUT to clock state. Accepts a JSON object with time_str and period
 	# properties and sets game clock.
 	put '/clock' do
