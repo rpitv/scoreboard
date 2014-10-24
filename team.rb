@@ -57,15 +57,8 @@ class Team
 
 	def merge!(hash)
 		hash.each_pair do |key, value|
-			# only allow a variable to be set if it's one we already have
-			# this doesn't protect against all security threats, but...
-			# THIS APP IS DESIGNED TO BE RUN ON TRUSTED NETWORKS ONLY!
 			key = "@" + key
-			if (instance_variable_defined?(key))
-				instance_variable_set key, value
-			else
-				STDERR.puts "warning: tried to set unknown variable #{key}"
-			end
+			instance_variable_set key, value
 		end
 	end
 
