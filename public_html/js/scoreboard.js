@@ -22,6 +22,7 @@
 var autocompletePenalties = [];
 var clockState = { };
 var lastStopTimeElapsed = 0;
+var last_clock_value;
 var overtime_length = 5*60*10;
 var schoolList = [];
 var sportList = [];
@@ -130,6 +131,14 @@ function updateClock( ) {
 		var tenthsRemaining = data.period_remaining;
 		var period = data.period;
 		var isRunning = data.running;
+
+		if (last_clock_value != null && last_clock_value != tenthsRemaining) {
+			/* the clock is moving, so clear any timeouts */
+			$("#homeTeamControl").clearTimeout( );
+			$("#awayTeamControl").clearTimeout( );
+		}
+
+		last_clock_value = tenthsRemaining;
 
 		var clockField = $("#clockControl").find("#clock");
 		var periodField = $("#clockControl").find("#period");
@@ -875,6 +884,16 @@ jQuery.fn.putTeamData = function() {
 			$(team_obj).getTeamData();
 		}
 	});
+}
+
+jQuery.fn.clearTimeout = function() {
+	var old_value = $(this).find("#timeout_").prop("checked");
+	if (old_value) {
+		/* if it was checked, clear the check box */
+		$(this).find("#timeout_").prop("checked", false);
+		/* then fire event handler to fix up status fields */
+		$(this).find("#timeout_").change();
+	}
 }
 
 function getSettings(){
