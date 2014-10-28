@@ -1202,10 +1202,10 @@ $(document).ready(function() {
 	$("#customYTG").change(ytgCustom);
 	$("#displayDownDistance").click(ddDisplay);
 	$("#displayDownDistanceWithPlayClock").click(ddDisplayWithPlayClock);
-	$("#clearDownDistance").click(clearStatus);
+	$(".clearStatusBttn").click(clearStatus);
 	$("#syncSettings").find("select, input").change(changeSyncSettings);
 
-	$("#globalFlag").click(statusButton);
+	$(".statusBttn").click(statusButton);
 	$("#resetTeamData").click(resetTeamData);
 	$("#closeResetOnChangeDialog").click(function() { $("#resetOnChangeDialog").dialog('close'); });
 });
