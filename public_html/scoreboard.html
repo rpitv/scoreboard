@@ -171,41 +171,40 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 					</div>
 					
 					<div id="clockMenu">
-						<div id="dnSec" class="bttn editClock">&minus;1 sec</div>
-						<div id="dnTenth" class="bttn editClock">&minus;1/10 sec</div>
+						<div id="dnSec" class="bttn">&minus;1 sec</div>
+						<div id="dnTenth" class="bttn">&minus;1/10 sec</div>
 						<div id="toggleClock" class="bttn" style="border: 2px solid lime;">Start/Stop</div>
-						<div id="upTenth" class="bttn editClock">+1/10 sec</div>
-						<div id="upSec" class="bttn editClock">+1 sec</div>
+						<div id="upTenth" class="bttn">+1/10 sec</div>
+						<div id="upSec" class="bttn">+1 sec</div>
 					</div>
 					
 					<br/>
 					
-					<div>Sync</div>
+					<div id="periodAdvance" class="bttn">Period Advance</div>
 
 					<div class="ck-bttn">
 						<label>
-							<input type="checkbox" id="syncClock"><span>Clock</span></input>
+							<input type="checkbox" id="syncClock"><span>Sync Clock</span></input>
 						</label>
 					</div>
 					
 					<div class="ck-bttn">
 						<label>
-							<input type="checkbox" id="syncScore"><span>Score</span></input>
+							<input type="checkbox" id="syncScore"><span>Sync Score</span></input>
 						</label>
 					</div>
 					
 					<div class="ck-bttn">
 						<label>
-							<input type="checkbox" id="syncOther"><span>Other</span></input>
+							<input type="checkbox" id="syncOther"><span>Sync Other</span></input>
 						</label>
 					</div>
 					
-					<div class="innerBox editClock" id="clockSet">Time
-						<input id="time_str" type="text" style="width:5em" />Period
-						<input id="period" type="text" style="width:2em" />
-						<div style="margin: 0; padding-top: 1px; padding-bottom: 1px;"
+					<div class="innerBox" id="clockSet">Time
+						<input id="time_str" type="text" style="width:8em" />Period
+						<input id="period" type="text" style="width:3em" />
+						<div style="margin: 0; float: right; padding-top: 1px; padding-bottom: 1px;"
 						id="setClock" class="bttn">Set Clock</div>
-						<div style="margin: 0; padding-top: 1px; padding-bottom: 1px;" id="periodAdvance" class="bttn">Period Advance</div>
 					</div>
 					
 					<div class="innerBox specialFunctionBox football" id="downDistanceBox">

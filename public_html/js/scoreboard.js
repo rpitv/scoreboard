@@ -975,10 +975,6 @@ function changeAutosync() {
 		'score' : $('#syncScore').is(':checked'),
 		'other' : $('#syncOther').is(':checked')
 	});
-	($('#syncClock').is(':checked')) ? 
-		$('.editClock').css('visibility', 'hidden')
-		:
-		$('.editClock').css('visibility', 'visible');
 }
 
 function getAutosync() {
