@@ -782,11 +782,7 @@ jQuery.fn.unserializeInputsJson = function(data) {
 	for (var prop in data) {
 		$(this).find("input#" + prop + ":text,select").val(data[prop]);
 		$(this).find("select#" + prop).val(data[prop]);
-		if (data[prop]) {
-			$(this).find("input#" + prop + ":checkbox").attr('checked','checked');
-		} else {
-			$(this).find("input#" + prop + ":checkbox").removeAttr('checked');
-		}
+		$(this).find("input#" + prop + ":checkbox").prop('checked', data[prop])
 	}
 }
 
