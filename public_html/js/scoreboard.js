@@ -185,6 +185,9 @@ function getGameState( ) {
 	getJson('gameState', function(data) {
 		$("#downNumber").html(data['down']);
 		$("#ytgNumber").html(data['distanceToGo']);
+
+		/* this assumes no one will ever try a field goal from more than 60 */
+		$("#fieldGoalDistance").html(data['ballPosition'] + 10);
 	});
 }
 
@@ -745,6 +748,25 @@ function ddDisplayWithPlayClock() {
 	doDdDisplay(true);
 }
 
+function doFieldGoalDisplay(withPlayClock) {
+	var distance = $("#fieldGoalDistance").html();
+	if (withPlayClock) {
+		$("#textInput").val(distance + " yd FG Att");
+		postStatusWithPlayClock();
+	} else {
+		$("#textInput").val(distance + " yd FG Attempt");
+		postStatus();
+	}
+}
+
+function fieldGoalDisplay( ) {
+	doFieldGoalDisplay(false);
+}
+
+function fieldGoalDisplayWithPlayClock() {
+	doFieldGoalDisplay(true);
+}
+
 function possessionChange() {
 	var this_poss = $(this).team().find("#possession");
 	if (this_poss.is(':checked')) {
@@ -1202,6 +1224,8 @@ $(document).ready(function() {
 	$("#customYTG").change(ytgCustom);
 	$("#displayDownDistance").click(ddDisplay);
 	$("#displayDownDistanceWithPlayClock").click(ddDisplayWithPlayClock);
+	$("#displayFieldGoalAttempt").click(fieldGoalDisplay);
+	$("#displayFieldGoalAttemptWithClock").click(fieldGoalDisplayWithPlayClock);
 	$(".clearStatusBttn").click(clearStatus);
 	$("#syncSettings").find("select, input").change(changeSyncSettings);
 
