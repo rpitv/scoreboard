@@ -1256,7 +1256,7 @@ $(document).ready(function() {
 	$(".clearStatusBttn").click(clearStatus);
 	$("#syncSettings").find("select, input").change(changeSyncSettings);
 
-	$(".statusBttn").click(statusButton);
+	$(".globalStatusBttn").click(statusButton);
 	$("#resetTeamData").click(resetTeamData);
 	$("#closeResetOnChangeDialog").click(function() { $("#resetOnChangeDialog").dialog('close'); });
 });
