@@ -153,14 +153,19 @@ class DaktronicsRtdSync
 		# first field is ball position, second is down
 		# third is distance to go
 		if (payload =~ /^([0-9 ]{2})(1ST|2ND|3RD|4TH)([0-9 ]{2})/)
-			@app.sync_down($2.downcase)
+			ballpos = $1.to_i
+			down = $2.downcase
+			to_go = $3.to_i
+
+			@app.sync_down(down)
+			@app.sync_ball_position(ballpos)
 
 			# if the ball is on the same yard line as the yards to go,
 			# the distance should be "goal"
-			if ($1.to_i == $3.to_i)
+			if (ballpos == to_go)
 				@app.sync_distance("Goal")
 			else
-				@app.sync_distance($3.to_i)
+				@app.sync_distance(to_go)
 			end
 		end
 	end

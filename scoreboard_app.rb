@@ -70,7 +70,8 @@ class ScoreboardApp < Patchbay
 	def initialize_game_state
 		{
 			'down' => '1st',
-			'distanceToGo' => 10
+			'distanceToGo' => 10,
+			'ballPosition' => 50
 		}
 	end
 
@@ -456,6 +457,15 @@ class ScoreboardApp < Patchbay
 	def sync_distance(distance)
 		if @autosync_other
 			@game_state['distanceToGo'] = distance
+		end
+	end
+
+	##
+	# Set the ball position (for football) if autosync is enabled.
+	# Typically used by sync feed parsers.
+	def sync_ball_position(ball_pos)
+		if @autosync_other
+			@game_state['ballPosition'] = ball_pos
 		end
 	end
 
