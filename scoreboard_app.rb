@@ -221,6 +221,28 @@ class ScoreboardApp < Patchbay
 	end
 
 	##
+	# Get current play clock.
+	# Returns a JSON object with the following properties.
+	#
+	# [+time_remaining+]	Time remaining on play clock in 1/10 sec units.
+	get '/play_clock' do
+		render :json => @play_clock.to_json
+	end
+
+	##
+	# Get all clocks.
+	# Returns a JSON object with the following properties.
+	#
+	# [+game_clock+]	Game clock, with all properties returned by /clock.
+	# [+play_clock+]	Play clock, with all properties returned by /play_clock.
+	get '/clocks' do
+		render :json => {
+			'game_clock' => @clock,
+			'play_clock' => @play_clock
+		}.to_json
+	end
+
+	##
 	# Get current autosync settings.
 	# Returns a JSON object with the following properties.
 	#

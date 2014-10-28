@@ -124,37 +124,64 @@ function formatTime(tenthsClock) {
 	return result;
 }
 
+function formatTimeNoTenths(tenthsClock) {
+	var seconds = Math.floor(tenthsClock / 10);
+	var minutes = Math.floor(seconds / 60);
+	var result = "";
+
+	seconds = seconds % 60;
+
+	if (minutes > 0) {
+		result += minutes;
+	}
+	result += ":";
+	if (seconds < 10) {
+		result += "0";
+	}
+	result += seconds;
+	return result;
+}
+
+function updateMainClock(data) {
+	clockState = data;
+
+	var tenthsRemaining = data.period_remaining;
+	var period = data.period;
+	var isRunning = data.running;
+
+	if (last_clock_value != null && last_clock_value != tenthsRemaining) {
+		/* the clock is moving, so clear any timeouts */
+		$("#homeTeamControl").clearTimeout( );
+		$("#awayTeamControl").clearTimeout( );
+	}
+
+	last_clock_value = tenthsRemaining;
+
+	var clockField = $("#clockControl").find("#clock");
+	var periodField = $("#clockControl").find("#period");
+
+	if (isRunning) {
+		clockField.addClass("clock_running");
+		clockField.removeClass("clock_stopped");
+		$("#toggleClock").css("border","2px solid #f00");
+	} else {
+		clockField.addClass("clock_stopped");
+		clockField.removeClass("clock_running");
+		$("#toggleClock").css("border","2px solid #0f0");
+	}
+
+	clockField.text(formatTime(tenthsRemaining));
+	periodField.text(period);
+}
+
+function updatePlayClock(data) {
+	$("#playClock").text(formatTimeNoTenths(data['time_remaining']));	
+}
+
 function updateClock( ) {
-	getJson('clock', function(data) {
-		clockState = data;
-
-		var tenthsRemaining = data.period_remaining;
-		var period = data.period;
-		var isRunning = data.running;
-
-		if (last_clock_value != null && last_clock_value != tenthsRemaining) {
-			/* the clock is moving, so clear any timeouts */
-			$("#homeTeamControl").clearTimeout( );
-			$("#awayTeamControl").clearTimeout( );
-		}
-
-		last_clock_value = tenthsRemaining;
-
-		var clockField = $("#clockControl").find("#clock");
-		var periodField = $("#clockControl").find("#period");
-
-		if (isRunning) {
-			clockField.addClass("clock_running");
-			clockField.removeClass("clock_stopped");
-			$("#toggleClock").css("border","2px solid #f00");
-		} else {
-			clockField.addClass("clock_stopped");
-			clockField.removeClass("clock_running");
-			$("#toggleClock").css("border","2px solid #0f0");
-		}
-
-		clockField.text(formatTime(tenthsRemaining));
-		periodField.text(period);
+	getJson('clocks', function(data) {
+		updateMainClock(data['game_clock']);
+		updatePlayClock(data['play_clock']);
 	});
 }
 

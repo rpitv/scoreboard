@@ -33,4 +33,10 @@ class PlayClock
 	def time_remaining=(tenths)
 		@tenths = tenths
 	end
+
+	def to_json(*args)
+		{
+			'time_remaining' => @tenths
+		}.to_json
+	end
 end
