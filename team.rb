@@ -57,13 +57,27 @@ class Team
 
 	def merge!(hash)
 		hash.each_pair do |key, value|
-			key = "@" + key
-			instance_variable_set key, value
+			if respond_to? "#{key}="
+				send "#{key}=", value
+			else
+				key = "@" + key
+				instance_variable_set key, value
+			end
 		end
 	end
+
 
 	attr_accessor :name, :fgcolor, :bgcolor, :dataSerial
 	attr_accessor :score, :shotsOnGoal, :timeoutsLeft, :timeoutNowInUse
 	attr_accessor :penalties, :autocompletePlayers, :emptyNet
 	attr_accessor :possession, :fontWidth, :status, :statusColor
+
+	# override the default accessors for these and force them to be numeric
+	def score=(score)
+		@score = score.to_i
+	end
+
+	def shotsOnGoal=(shots)
+		@shotsOnGoal = shots.to_i
+	end
 end
