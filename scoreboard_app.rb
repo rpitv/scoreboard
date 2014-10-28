@@ -84,6 +84,17 @@ class ScoreboardApp < Patchbay
 	end
 
 	##
+	# Get all the data in one request.
+	get '/data.json' do
+		render :json => {
+			'home' => @teams[1],
+			'away' => @teams[0],
+			'clock' => @clock,
+			'gameState' => @game_state
+		}.to_json
+	end
+
+	##
 	# PUT to game state. Used by UI to upload game state data.
 	put '/gameState' do
 		@game_state.merge!(incoming_json)
