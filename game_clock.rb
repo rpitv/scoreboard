@@ -35,15 +35,17 @@ class GameClock
 	# Object representing clock-related game rules. Keeps track of period
 	# length and number, as well as overtime length. Immutable once created.
 	class Settings
-		def initialize(period_length, overtime_length, num_periods)
+		def initialize(period_length, overtime_length, num_periods, num_overtimes)
 			@period_length = period_length
 			@num_periods = num_periods
 			@overtime_length = overtime_length
+			@num_overtimes = num_overtimes
 		end
 
 		attr_reader :period_length
 		attr_reader :overtime_length
 		attr_reader :num_periods
+		attr_reader :num_overtimes
 	end
 
 	##
@@ -58,6 +60,7 @@ class GameClock
 		@period_length = 20*60*10
 		@overtime_length = 5*60*10
 		@num_periods = 3
+		@num_overtimes = 1
 		
 	end
 	
@@ -81,6 +84,7 @@ class GameClock
 		@period_length = preset.period_length
 		@overtime_length = preset.overtime_length
 		@num_periods = preset.num_periods
+		@num_overtimes = preset.num_overtimes
 		
 		self.period_remaining = current_time_remaining
 	end
@@ -140,6 +144,7 @@ class GameClock
 	attr_reader :period
 	attr_reader :num_periods
 	attr_reader :overtime_length
+	attr_reader :num_overtimes
 
 	##
 	# Start running the clock.

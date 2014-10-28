@@ -22,6 +22,7 @@ require_relative './scoreboard_helpers'
 require_relative './game_clock'
 require_relative './play_clock'
 require_relative './team'
+require_relative './period_descriptor'
 
 ##
 # The scoreboard Patchbay application. 
@@ -91,7 +92,11 @@ class ScoreboardApp < Patchbay
 			'home' => @teams[1],
 			'away' => @teams[0],
 			'clock' => @clock,
-			'gameState' => @game_state
+			'gameState' => @game_state,
+			# this provides a string that describes the current period
+			'periodDescription' => PeriodDescriptor.new(
+				@clock, @teams[0], @teams[1], @sport_settings
+			)
 		}.to_json
 	end
 
@@ -316,6 +321,14 @@ class ScoreboardApp < Patchbay
 		STDERR.puts @sport_settings.inspect
 		
 		number_of_periods = @sport_settings['periodQty'].to_i
+		number_of_overtimes = @sport_settings['otPeriodQty']
+		if number_of_overtimes =~ /^\d+/
+			number_of_overtimes = number_of_overtimes.to_i
+		else
+			# non-numeric number of overtimes = infinite overtime
+			number_of_overtimes = 9999
+		end
+
 		begin
 			period_length = GameClock.parse_clock(@sport_settings['periodLength'])
 			overtime_length = GameClock.parse_clock(@sport_settings['otPeriodLength'])
@@ -324,7 +337,9 @@ class ScoreboardApp < Patchbay
 			return
 		end
 		
-		new_clock_settings = GameClock::Settings.new(period_length, overtime_length, number_of_periods)
+		new_clock_settings = GameClock::Settings.new(
+			period_length, overtime_length, number_of_periods, number_of_overtimes
+		)
 		@clock.load_settings(new_clock_settings)
 		
 		STDERR.puts "number_of_periods=#{number_of_periods}"
