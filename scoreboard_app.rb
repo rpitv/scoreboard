@@ -205,12 +205,7 @@ class ScoreboardApp < Patchbay
 	# [+period+]	Current period number.
 	# [+time_elapsed]	Amount of time elapsed since start of game.
 	get '/clock' do
-		render :json => {
-			'running' => @clock.running?,
-			'period_remaining' => @clock.period_remaining,
-			'period' => @clock.period,
-			'time_elapsed' => @clock.time_elapsed
-		}.to_json
+		render :json => @clock.to_json
 	end
 
 	##

@@ -197,6 +197,15 @@ class GameClock
 			fail "invalid clock value"
 		end
 	end
+
+	def to_json(*args)
+		{
+			'running' => running?,
+			'period_remaining' => period_remaining,
+			'period' => period,
+			'time_elapsed' => time_elapsed,
+		}.to_json
+	end
 end
 
 
