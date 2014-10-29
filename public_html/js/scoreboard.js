@@ -214,7 +214,7 @@ function getGameState( ) {
 		$("#ytgNumber").html(data['distanceToGo']);
 
 		/* this assumes no one will ever try a field goal from more than 60 */
-		$("#fieldGoalDistance").html(data['ballPosition'] + 10);
+		$("#fieldGoalDistance").val(data['ballPosition'] + 10);
 	});
 }
 
@@ -776,7 +776,7 @@ function ddDisplayWithPlayClock() {
 }
 
 function doFieldGoalDisplay(withPlayClock) {
-	var distance = $("#fieldGoalDistance").html();
+	var distance = $("#fieldGoalDistance").val();
 	if (withPlayClock) {
 		$("#textInput").val(distance + " yd FG Att");
 		postStatusWithPlayClock();
@@ -1228,7 +1228,7 @@ $(document).ready(function() {
 	//sets to a specific gametype
 	//this will be rectified in future when getSettings() is working
 	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").hide();
-	$(".hockey").show();
+	$(".football").show();
 
 	$("#toggleClock").click(toggleClock);
 	$("#upSec").click( function() { adjustClock.call(this, 1000); } );

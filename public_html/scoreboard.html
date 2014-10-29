@@ -214,7 +214,8 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 						<input id="time_str" type="text" style="width:5em" />Period
 						<input id="period" type="text" style="width:2em" />
 						<div style="margin: 0;padding-top: 1px; padding-bottom: 1px;"
-						id="setClock" class="bttn">Set Clock</div><div id="periodAdvance" class="bttn" style="margin: 0;padding-top: 1px; padding-bottom: 1px;">Period Advance</div>
+						id="setClock" class="bttn">Set Clock</div>
+						<div id="periodAdvance" class="bttn" style="margin: 0;padding-top: 1px; padding-bottom: 1px;">Period Adv</div>
 					</div>
 
 					<div class="innerBox specialFunctionBox hockey" id="hockeyButtonsBox">
@@ -261,8 +262,11 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 							</label>
 						</span>
 						<br />
-						<span class="downDistance" id="fieldGoalDistance">50</span>
-						<span class="downDistance">yd</span>
+						<span>
+							<label>
+								<input type="text" id="fieldGoalDistance" value="" maxlength="2" onclick="$(this).select();" style="width:20px; margin:0 5px;">yd</input>
+							</label>
+						</span>
 						<div class="bttn" id="displayFieldGoalAttempt">Field Goal Attempt</div>
 						<div class="bttn" id="displayFieldGoalAttemptWithClock">FG + Play Clock</div>
 					</div>
@@ -514,7 +518,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
 			<div id="resetOnChangeDialog" class="dialog">
 				<h3>You have changed sports. OK to clear game data?</h3>
-				<p>Score, penalties, shots, etc. will be cleared. This doesn't affect team names or colors.</p>
+				<p>Score, penalties, shots, etc. will be cleared. This doesn't affect team settings.</p>
 				<div class="bttn" id="resetTeamData">Clear</div>
 				<div class="bttn" id="closeResetOnChangeDialog">Don't Clear</div>
 			</div>
