@@ -1,3 +1,4 @@
+#!/usr/bin/env ruby
 # Copyright 2011, 2014 Exavideo LLC.
 # 
 # This file is part of Exaboard.
@@ -27,23 +28,39 @@ require_relative './scoreboard_app'
 app = ScoreboardApp.new
 app.view = ScoreboardView.new('assets/rpitv_scoreboard.svg.erb')
 Thin::Logging.silent = true
-Thread.new { app.run(:Host => '::1', :Port => 3002) }
+Thread.new { app.run(:Host => '::1', :Port => 3002, :signals => false) }
 
 dirty_level = 1
+
+run_with_keyer = true
+
+if ARGV.delete('-n')
+	run_with_keyer = false
+end
 
 while true
 	# prepare next SVG frame
 	data = app.view.render
 
-	# build header with data length and global alpha
-	header = [ data.bytesize, app.view.galpha, dirty_level ].pack('LCC')
+	if run_with_keyer
+		# build header with data length and global alpha
+		header = [ 
+			data.bytesize, 
+			app.view.galpha, 
+			dirty_level 
+		].pack('LCC')
 
-	# wait for handshake byte from other end
-	if STDIN.read(1).nil?
-		break
+		# wait for handshake byte from other end
+		if STDIN.read(1).nil?
+			break
+		end
+
+		# send SVG data with header
+		STDOUT.write(header)
+		STDOUT.write(data)
+	else
+		# just render about once every 30 seconds so that animations
+		# work sort of correctly if we are running without the keyer
+		sleep(1/30.0)
 	end
-
-	# send SVG data with header
-	STDOUT.write(header)
-	STDOUT.write(data)
 end
