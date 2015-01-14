@@ -58,6 +58,7 @@ while true
 		# send SVG data with header
 		STDOUT.write(header)
 		STDOUT.write(data)
+        STDOUT.flush
 	else
 		# just render about once every 30 seconds so that animations
 		# work sort of correctly if we are running without the keyer
