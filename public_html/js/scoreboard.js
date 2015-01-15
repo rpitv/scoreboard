@@ -1129,6 +1129,15 @@ function resetTeamData() {
 	$("#resetOnChangeDialog").dialog('close');
 }
 
+function borderColor(){
+	$('.statusBttn, .globalStatusBttn').each(function (){
+		$(this).closest('div').each(function(){
+			var newBorderColor = '2px solid ' + $(this).find('input').attr('color');
+			$(this).css('border', newBorderColor);
+		})
+	});
+}
+
 $(document).ready(function() {
 	updateClockTimeout( );
 	updatePreviewTimeout( );
@@ -1138,7 +1147,7 @@ $(document).ready(function() {
 	setInterval(putTeamDataInterval, 50);
 
 	getAutosync( );
-
+	
 	$(".teamControl").buildTeamControl();
 	// set up team URLs and load initial data
 	$("#awayTeamControl").data('url','team/0');
@@ -1150,10 +1159,9 @@ $(document).ready(function() {
 		modal: true,
 		resizable: false,
 	});
-	
+
 	$("#gameSettings").change(putSettings);
 	transitionScoreboard.call(this);
-
 
 	// bind enter to clock toggle
 	$(document).keydown(function(e){
@@ -1170,6 +1178,8 @@ $(document).ready(function() {
 		}
 	});
 
+	borderColor();
+	
 	// causes checkboxes to lose focus after clicked to avoid binding conflicts.
 	$(":checkbox").change(function(){$(this).blur();});
 	
@@ -1228,7 +1238,7 @@ $(document).ready(function() {
 	//sets to a specific gametype
 	//this will be rectified in future when getSettings() is working
 	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").hide();
-	$(".football").show();
+	$(".hockey").show();
 
 	$("#toggleClock").click(toggleClock);
 	$("#upSec").click( function() { adjustClock.call(this, 1000); } );
