@@ -1262,7 +1262,7 @@ $(document).ready(function() {
 	$("#dnTenth").click( function() { adjustClock.call(this, -100); } );
 	$("#periodAdvance").click(periodAdvance);
 	$("#setClock").click(setClock);
-	$("#syncClock,#syncScore,#syncOther").change(changeAutosync);
+	$(".syncSetting").change(changeAutosync);
 	
 	$("#globalAnnounceBttn").click(postGlobalAnnounce);
 	$("#globalStatusBttn").click(postGlobalStatus);
