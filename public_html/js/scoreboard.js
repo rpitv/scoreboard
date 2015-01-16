@@ -1129,7 +1129,7 @@ function resetTeamData() {
 	$("#resetOnChangeDialog").dialog('close');
 }
 
-function borderColor(){
+function statusBttnColor(){
 	$('.statusBttn, .globalStatusBttn').each(function (){
 		$(this).closest('div').each(function(){
 			var newBorderColor = '2px solid ' + $(this).find('input').attr('color');
@@ -1138,32 +1138,12 @@ function borderColor(){
 	});
 }
 
-$(document).ready(function() {
-	updateClockTimeout( );
-	updatePreviewTimeout( );
-	updateGameStateTimeout( );
-
-	// try to put dirty team data every 50ms
-	setInterval(putTeamDataInterval, 50);
-
-	getAutosync( );
-	
-	$(".teamControl").buildTeamControl();
-	// set up team URLs and load initial data
-	$("#awayTeamControl").data('url','team/0');
-	$("#awayTeamControl").getTeamData();
-	$("#homeTeamControl").data('url','team/1');
-	$("#homeTeamControl").getTeamData();
-	$(".dialog").dialog({
-		autoOpen: false,
-		modal: true,
-		resizable: false,
+function keyBinding(){
+	// causes checkboxes to lose focus after clicked to avoid binding conflicts.
+	$(":checkbox").change(function(){
+		$(this).blur();
 	});
-
-	$("#gameSettings").change(putSettings);
-	transitionScoreboard.call(this);
-
-	// bind enter to clock toggle
+	
 	$(document).keydown(function(e){
 		if (e.keyCode == 13 && $(document.activeElement).filter("input").length != 1) {
 			toggleClock();
@@ -1177,17 +1157,10 @@ $(document).ready(function() {
 			showHideSettings();
 		}
 	});
+}
 
-	borderColor();
-	
-	// causes checkboxes to lose focus after clicked to avoid binding conflicts.
-	$(":checkbox").change(function(){$(this).blur();});
-	
-	// TOGGLE GAME/TEAM SETTINGS
-	$("#toggleSettings").click(showHideSettings);
-	
-	// GENERATE LIST OF SCHOOLS FOR AUTOCOMPLETE FROM JSON
-	jQuery.getJSON("js/teamlist.json", function(teamlist) {
+function autocompleteSchools(){
+	$.getJSON("js/teamlist.json", function(teamlist) {
 		$.each(teamlist.teams, function(k, v) {
 			schoolList[k] = v.name;
 		});
@@ -1228,10 +1201,44 @@ $(document).ready(function() {
 					});
 				});
 				$("#homeTeamData").find("#name, #bgcolor, #fgcolor, #nickname, #logo, #teamSelect").trigger("blur");
-					
 			}
 		});
-	});	
+	});
+}
+
+$(document).ready(function() {
+	updateClockTimeout( );
+	updatePreviewTimeout( );
+	updateGameStateTimeout( );
+
+	// try to put dirty team data every 50ms
+	setInterval(putTeamDataInterval, 50);
+
+	getAutosync( );
+	
+	$(".teamControl").buildTeamControl();
+	// set up team URLs and load initial data
+	$("#awayTeamControl").data('url','team/0');
+	$("#awayTeamControl").getTeamData();
+	$("#homeTeamControl").data('url','team/1');
+	$("#homeTeamControl").getTeamData();
+	$(".dialog").dialog({
+		autoOpen: false,
+		modal: true,
+		resizable: false,
+	});
+
+	$("#gameSettings").change(putSettings);
+	transitionScoreboard.call(this);
+
+	keyBinding();
+	statusBttnColor();
+	
+	// TOGGLE GAME/TEAM SETTINGS
+	$("#toggleSettings").click(showHideSettings);
+	
+	// GENERATE LIST OF SCHOOLS FOR AUTOCOMPLETE FROM JSON
+	autocompleteSchools();
 	
 	$("#gameType").click(generateSportList);
 	
