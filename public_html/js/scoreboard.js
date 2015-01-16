@@ -263,8 +263,8 @@ jQuery.fn.buildTeamControl = function() {
 
 		$(elem).find("#editPenalties").click(editPenalties);
 		
-		$(elem).find(".statusBttn").change(statusChange);
-		$(elem).find("#clearStatus_").click(statusClear);
+		$(elem).find(".statusBttn").change(teamStatusChange);
+		$(elem).find("#clearTeamStatus").click(teamStatusClear);
 
 		$(elem).find(".teamStateCheckbox").change(function() {
 			$(this).team().markDirtyTeamData();
@@ -654,7 +654,7 @@ function shotTaken() {
 	$(this).team().markDirtyTeamData();
 }
 
-function statusClear() {
+function teamStatusClear() {
 	// Clear all statuses
 	if ($(this).attr("status") == "" ){
 		$(this).team().find("#status").val("");
@@ -664,11 +664,11 @@ function statusClear() {
 	$(this).team().markDirtyTeamData();
 }
 
-function statusChange() {
+function teamStatusChange() {
 	// Put up status of newly checked
 	if ($(this).is(":checked")){
 		$(this).team().find("#status").val($(this).attr("status"));
-				$(this).team().find("#statusColor").val($(this).attr("color"));
+		$(this).team().find("#statusColor").val($(this).attr("color"));
 	
 	// on uncheck, look for other checked statuses from both teams
 	} else {
@@ -973,18 +973,18 @@ function transitionScoreboard() {
 }
 
 function announceStatusTextInput() {
-	return $("#announceControl #textInput").val();
+	return $("#textInput").val();
 }
 
 function announceStatusColor() {
-	return $("#announceControl #textInputColor").val();
+	return $("#textInputColor").val();
 }
 
-function postAnnounce() {
+function postGlobalAnnounce() {
 	postJson('announce', { message : announceStatusTextInput() });	 
 }
 
-function postStatus() {
+function postGlobalStatus() {
 	putJson('status', { message : announceStatusTextInput() });
 }
 
@@ -996,7 +996,7 @@ function postStatusWithColor() {
 	putJson('status', { message : announceStatusTextInput(), color : announceStatusColor() });
 }
 
-function clearStatus() {
+function clearGlobalStatus() {
 	putJson('status', { message : "" });
 	$("#textInput").val("");
 }
@@ -1013,7 +1013,7 @@ function scoreboardDown() {
 	viewCommand({'down':1});
 }
 
-function nextAnnounce() {
+function globalNextAnnounce() {
 	viewCommand({'announce_next':1});
 }
 
@@ -1118,7 +1118,7 @@ function changeSyncSettings() {
 	putJson("sync_mode", json);
 }
 	
-function statusButton() {
+function setGlobalStatus() {
 	$("#textInput").val($(this).attr("status"));
 	$("#textInputColor").val($(this).attr("color"));
 	postStatusWithColor();
@@ -1249,10 +1249,10 @@ $(document).ready(function() {
 	$("#setClock").click(setClock);
 	$("#syncClock,#syncScore,#syncOther").change(changeAutosync);
 	
-	$("#announceControl #announce").click(postAnnounce);
-	$("#announceControl #status").click(postStatus);
-	$("#announceControl #clearStatus").click(clearStatus);
-	$("#announceControl #nextAnnounce").click(nextAnnounce);
+	$("#globalAnnounceBttn").click(postGlobalAnnounce);
+	$("#globalStatusBttn").click(postGlobalStatus);
+	$("#clearGlobalStatusBttn").click(clearGlobalStatus);
+	$("#globalNextAnnounceBttn").click(globalNextAnnounce);
 
 	$("#transitionControl").click(transitionScoreboard);
 	
@@ -1263,10 +1263,9 @@ $(document).ready(function() {
 	$("#displayDownDistanceWithPlayClock").click(ddDisplayWithPlayClock);
 	$("#displayFieldGoalAttempt").click(fieldGoalDisplay);
 	$("#displayFieldGoalAttemptWithClock").click(fieldGoalDisplayWithPlayClock);
-	$(".clearStatusBttn").click(clearStatus);
 	$("#syncSettings").find("select, input").change(changeSyncSettings);
 
-	$(".globalStatusBttn").click(statusButton);
+	$(".globalStatusBttn").click(setGlobalStatus);
 	$("#resetTeamData").click(resetTeamData);
 	$("#closeResetOnChangeDialog").click(function() { $("#resetOnChangeDialog").dialog('close'); });
 });
