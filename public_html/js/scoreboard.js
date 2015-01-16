@@ -270,7 +270,8 @@ jQuery.fn.buildTeamControl = function() {
 			$(this).team().markDirtyTeamData();
 		});
 		
-		$(elem).find("input[type=text],select").blur(function() { 
+		$(elem).find("input[type=text],select").blur(function() {
+			//updateTeamUI();
 			$(this).team().markDirtyTeamData(); 
 		});
 
@@ -859,15 +860,11 @@ jQuery.fn.getTeamData = function() {
 			$(thiz).data("roster", data.autocompletePlayers);
 			$(thiz).data("dataSerial", data.dataSerial);
 			$(thiz).penaltyDialog().unserializePenaltiesJson(data.penalties);
-			
-			//move this out of this function
-			$(thiz).parent().css("border", "5px solid " + data.bgcolor); // Set team colors on panel
-			$(thiz).parent().find("span.teamName").css("color", data.bgcolor);
-			$(thiz).parent().find("span.teamName").html(data.name); // Set team names on panel
 
 			// data can't be dirty if we just pulled it
 			$(thiz).data("dirty", 0);
 		}
+		updateTeamUI();
 	});
 }
 
@@ -1139,7 +1136,7 @@ function statusBttnColor(){
 }
 
 function keyBinding(){
-	// causes checkboxes to lose focus after clicked to avoid binding conflicts.
+	// causes checkboxes(statusBttns) to lose focus after clicked to avoid binding conflicts.
 	$(":checkbox").change(function(){
 		$(this).blur();
 	});
@@ -1180,7 +1177,7 @@ function autocompleteSchools(){
 						}
 					});
 				});
-				$("#awayTeamData").find("#name, #bgcolor, #fgcolor, #nickname, #logo, #teamSelect").trigger("blur");
+				$("#awayTeamControl").find("#name, #bgcolor, #fgcolor, #nickname, #logo, #teamSelect").trigger("blur");
 					
 			}
 		});
@@ -1200,10 +1197,24 @@ function autocompleteSchools(){
 						}
 					});
 				});
-				$("#homeTeamData").find("#name, #bgcolor, #fgcolor, #nickname, #logo, #teamSelect").trigger("blur");
+				$("#homeTeamControl").find("#name, #bgcolor, #fgcolor, #nickname, #logo, #teamSelect").trigger("blur");
 			}
 		});
 	});
+}
+
+function updateTeamUI(){
+
+	$('.teamControlBox').each(function(){
+		var color = $(this).find('#bgcolor').val()
+		var newBorderColor = '5px solid ' + color;
+		
+		$(this).css('border', newBorderColor);
+		$(this).find('span.teamName').html($(this).find('#name').val()).css('color',color);
+	})
+	//$(thiz).parent().css("border", "5px solid " + data.bgcolor); // Set team colors on panel
+//$(thiz).parent().find("span.teamName").css("color", data.bgcolor);
+	//$(thiz).parent().find("span.teamName").html(data.name); // Set team names on panel
 }
 
 $(document).ready(function() {
@@ -1230,13 +1241,10 @@ $(document).ready(function() {
 
 	$("#gameSettings").change(putSettings);
 	transitionScoreboard.call(this);
-
+	
 	keyBinding();
 	statusBttnColor();
-	
-	// TOGGLE GAME/TEAM SETTINGS
 	$("#toggleSettings").click(showHideSettings);
-	
 	// GENERATE LIST OF SCHOOLS FOR AUTOCOMPLETE FROM JSON
 	autocompleteSchools();
 	
