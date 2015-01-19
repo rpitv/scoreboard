@@ -1114,11 +1114,28 @@ function changeSyncSettings() {
 
 	putJson("sync_mode", json);
 }
-	
-function setGlobalStatus() {
-	$("#textInput").val($(this).attr("status"));
-	$("#textInputColor").val($(this).attr("color"));
+
+function globalStatusChange(){
+	if ($(this).is(":checked")){
+		$("#textInput").val($(this).attr("status"));
+		$("#textInputColor").val($(this).attr("color"));
+	} else {
+		//clears the global status
+		$("#textInput").val("");
+		
+		//finds all status buttons grouped together
+		//finds if any are checked; first one found becomes new status
+		$("#textInput").val($(this).closest('div').siblings().find(':checked').attr("status"));
+		$("#textInputColor").val($(this).closest('div').siblings().find(':checked').attr("color"));
+	}
 	postStatusWithColor();
+}
+
+function globalStatusClear(){
+	if($(this).attr('status') == ''){
+		$('#textInput, #textInputColor').val('');
+		$(this).closest('div').siblings().find('.globalStatusBttn:checked').attr('checked', false);
+	}
 }
 
 function resetTeamData() {
@@ -1266,9 +1283,10 @@ $(document).ready(function() {
 	
 	$("#globalAnnounceBttn").click(postGlobalAnnounce);
 	$("#globalStatusBttn").click(postGlobalStatus);
-	$("#clearGlobalStatusBttn").click(clearGlobalStatus);
 	$("#globalNextAnnounceBttn").click(globalNextAnnounce);
-
+	$("#globalStatusClear").click(globalStatusClear);
+	$(".globalStatusBttn").click(globalStatusChange);
+	
 	$("#transitionControl").click(transitionScoreboard);
 	
 	$(".bttn.downs, .bttn.nextDown, .bttn.firstAnd10").click(downUpdate);
@@ -1280,7 +1298,7 @@ $(document).ready(function() {
 	$("#displayFieldGoalAttemptWithClock").click(fieldGoalDisplayWithPlayClock);
 	$("#syncSettings").find("select, input").change(changeSyncSettings);
 
-	$(".globalStatusBttn").click(setGlobalStatus);
+
 	$("#resetTeamData").click(resetTeamData);
 	$("#closeResetOnChangeDialog").click(function() { $("#resetOnChangeDialog").dialog('close'); });
 });

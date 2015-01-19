@@ -218,12 +218,6 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 						<div id="periodAdvance" class="bttn" style="margin: 0;padding-top: 1px; padding-bottom: 1px;">Period Adv</div>
 					</div>
 
-					<div class="innerBox specialFunctionBox hockey football" id="globalStatusesBox">
-						<div class="bttn globalStatusBttn hockey football" id="officialReview" status="Official Review" color="yellow" style="border-color:yellow">Official Review</div>
-						<div class="bttn globalStatusBttn football" id="globalFlag" status="Flag" color="yellow" style="border-color:yellow">Flag</div>
-						<div class="bttn clearStatusBttn hockey football" id="clearGlobalStatusBttn" value="0">Clear</div>
-					</div>
-					
 					<div class="innerBox specialFunctionBox football" id="downDistanceBox">
 						<span id="spacer" style="margin: 0 5px;">
 							<span class="downDistance" id="downNumber">1st</span>
@@ -271,6 +265,31 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 						<div class="bttn" id="displayFieldGoalAttempt">Field Goal Attempt</div>
 						<div class="bttn" id="displayFieldGoalAttemptWithClock">FG + Play Clock</div>
 					</div>
+
+					<div class="innerBox specialFunctionBox hockey football" id="globalStatusesBox">
+						<div class="ck-bttn football">
+							<label>
+								<input type="checkbox" class="globalStatusBttn" id="globalFlag" status="Flag" color='yellow' >
+									<span>Flag</span>
+								</input>
+							</label>
+						</div>
+						<div class="ck-bttn football hockey">
+							<label>
+								<input type="checkbox" class="globalStatusBttn" id="globalOfficialReview" status="Official Review" color='yellow' >
+									<span>Official Review</span>
+								</input>
+							</label>
+						</div>
+						<div class="ck-bttn baseball basketball football hockey lacrosse soccer volleyball">
+							<label>
+								<input type="button" id="globalStatusClear" class="globalStatusBttn" status="">
+									<span>Clear</span>
+								</input>
+							</label>
+						</div>
+
+					</div>
 				</div>
 			</div>
 		
@@ -287,7 +306,7 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 				
 				<div id="colorControl" class="control">			
 					<br />
-					<input style="display:none;" disabled="disabled" type="text" id="textInputColor" />
+					<input style="" disabled="disabled" type="text" id="textInputColor" />
 					<br />
 					<div id="globalAnnounceBttn" class="bttn" style="width: 223px;">Announce</div>
 					<div id="globalStatusBttn" class="bttn" style="width: 223px;">Status</div>
