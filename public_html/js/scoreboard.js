@@ -1051,12 +1051,6 @@ function showHideSettings() {
 
 	if ($("#toggleSettingsText").html() == "Hide <u>S</u>ettings") {
 		$("#toggleSettingsText").html("Show <u>S</u>ettings");
-		// Reload Team Data
-		//This needs to be handled outside of this function
-		$("#awayTeamControl").data('url','team/0');
-		$("#awayTeamControl").getTeamData();
-		$("#homeTeamControl").data('url','team/1');
-		$("#homeTeamControl").getTeamData();
 	} else {
 		$("#toggleSettingsText").html("Hide <u>S</u>ettings");
 	}
