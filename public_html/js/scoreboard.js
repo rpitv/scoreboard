@@ -14,7 +14,7 @@
  * GNU General Public License for more details.
  * 
  * You should have received a copy of the GNU General Public License
- * along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Exaboard. If not, see <http://www.gnu.org/licenses/>.
  */
 
 
@@ -1168,47 +1168,31 @@ function keyBinding(){
 }
 
 function autocompleteSchools(){
+	//generate list of schools from JSON
+	var schoolList = [];
 	$.getJSON("js/teamlist.json", function(teamlist) {
 		$.each(teamlist.teams, function(k, v) {
 			schoolList[k] = v.name;
 		});
-
-		$("#awayTeamControl").find("#teamSelect").val("").autocomplete({ 
+	});
+	$("#awayTeamControl,#homeTeamControl").each(function(){
+		var thiz = this;
+		$(this).find("#teamSelect").val("").autocomplete({ 
 			autoFocus:true,
 			source: schoolList,
 			select: function(event, ui){
 				 $.getJSON('js/teamlist.json', function(list) {
 					$.each(list.teams, function(k, v) {
 						if (v.name == ui.item.value){
-							$("#awayTeamControl").find("#name").val(v.abbreviation);
-							$("#awayTeamControl").find("#bgcolor").val(v.color1);
-							$("#awayTeamControl").find("#fgcolor").val(v.color1);
-							$("#awayTeamControl").find("#nickname").val(v.nickname);
-							$("#awayTeamControl").find("#logo").val(v.logo);
+							$(thiz).find("#name").val(v.abbreviation);
+							$(thiz).find("#bgcolor").val(v.color1);
+							$(thiz).find("#fgcolor").val(v.color1);
+							$(thiz).find("#nickname").val(v.nickname);
+							$(thiz).find("#logo").val(v.logo);
 						}
 					});
 				});
-				$("#awayTeamControl").find("#name, #bgcolor, #fgcolor, #nickname, #logo, #teamSelect").trigger("blur");
-					
-			}
-		});
-
-		$("#homeTeamControl").find("#teamSelect").val("").autocomplete({ 
-			autoFocus:true,
-			source: schoolList,
-			select: function(event, ui){
-				 $.getJSON('js/teamlist.json', function(list) {
-					$.each(list.teams, function(k, v) {
-						if (v.name == ui.item.value){
-							$("#homeTeamControl").find("#name").val(v.abbreviation);
-							$("#homeTeamControl").find("#bgcolor").val(v.color1);
-							$("#homeTeamControl").find("#fgcolor").val(v.color1);
-							$("#homeTeamControl").find("#nickname").val(v.nickname);
-							$("#homeTeamControl").find("#logo").val(v.logo);
-						}
-					});
-				});
-				$("#homeTeamControl").find("#name, #bgcolor, #fgcolor, #nickname, #logo, #teamSelect").trigger("blur");
+				$(this).team().markDirtyTeamData();
 			}
 		});
 	});
