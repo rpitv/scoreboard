@@ -263,6 +263,7 @@ jQuery.fn.buildTeamControl = function() {
 
 		$(elem).find("#editPenalties").click(editPenalties);
 		
+		$(elem).find('.primaryColor,.secondaryColor').click(setTeamColorFromPicker);
 		$(elem).find(".statusBttn").change(teamStatusChange);
 		$(elem).find("#clearTeamStatus").click(teamStatusClear);
 
@@ -1189,6 +1190,7 @@ function autocompleteSchools(){
 							$(thiz).find("#fgcolor").val(v.color1);
 							$(thiz).find("#nickname").val(v.nickname);
 							$(thiz).find("#logo").val(v.logo);
+							teamColorPicker();
 						}
 					});
 				});
@@ -1198,18 +1200,48 @@ function autocompleteSchools(){
 	});
 }
 
+function teamColorPicker(){
+	console.log('teamColorPicker');
+	$('#homeTeamControl,#awayTeamControl').each(function(){
+		var school = $(this).find('#teamSelect').val();
+		var thiz = this;
+		console.log(school);
+		$.getJSON('js/teamlist.json', function(list){
+			$.each(list.teams, function(k,v){
+				if (v.name == school){
+					//in the future, the color choices should be more dynamic and depend on how
+					//many colors the team list has, but for now this works as a proof of concept
+					var color1 = v.color1;
+					var color2 = v.color2;
+					var color3 = '#000000';
+					var color4 = '#ffffff';
+					$(thiz).find('.firstColor').css('background', color1).attr('color', color1);
+					$(thiz).find('.secondColor').css('background', color2).attr('color', color2);
+					$(thiz).find('.thirdColor').css('background', color3).attr('color', color3);
+					$(thiz).find('.fourthColor').css('background', color4).attr('color', color4);
+					}
+			})
+		})
+	});
+}
+
+function setTeamColorFromPicker(){
+	if ($(this).attr('color') == ''){
+		return;
+	}else{
+		$(this).siblings('input').val($(this).attr('color')).blur();
+	}
+}
+
 function updateTeamUI(){
 
 	$('.teamControlBox').each(function(){
-		var color = $(this).find('#bgcolor').val()
-		var newBorderColor = '5px solid ' + color;
+		var mainColor = $(this).find('#bgcolor').val();
+		var newBorderColor = '5px solid ' + mainColor;
 		
 		$(this).css('border', newBorderColor);
-		$(this).find('span.teamName').html($(this).find('#name').val()).css('color',color);
+		$(this).find('span.teamName').html($(this).find('#name').val()).css('color',mainColor);
 	})
-	//$(thiz).parent().css("border", "5px solid " + data.bgcolor); // Set team colors on panel
-//$(thiz).parent().find("span.teamName").css("color", data.bgcolor);
-	//$(thiz).parent().find("span.teamName").html(data.name); // Set team names on panel
 }
 
 $(document).ready(function() {
@@ -1242,6 +1274,8 @@ $(document).ready(function() {
 	$("#toggleSettings").click(showHideSettings);
 	// GENERATE LIST OF SCHOOLS FOR AUTOCOMPLETE FROM JSON
 	autocompleteSchools();
+	
+	setTimeout(function(){teamColorPicker()}, 1000);
 	
 	$("#gameType").click(generateSportList);
 	

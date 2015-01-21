@@ -224,3 +224,17 @@ body {
     border:1px solid #fff;
 	display: inline-block;
 }
+
+span.primaryColor, span.secondaryColor{
+	position:relative;
+	top:3px;
+	display:inline-block;
+	width:14px;
+	height:14px;
+	margin: 2px 0 0 0;
+	border: 1px solid #ccc;
+}
+span.primaryColor:hover, span.secondaryColor:hover{
+	cursor:pointer;
+	border: 1px solid #ffffff;
+}
