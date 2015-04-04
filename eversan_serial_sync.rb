@@ -108,7 +108,7 @@ class EversanSerialSync
 					if digits.include?(ch)
 						digit_string += ch
 					else
-						parse_digit_string(digit_string, app)
+						parse_digit_string(digit_string)
 						digit_string = ''
 					end
 				end
