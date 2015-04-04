@@ -440,8 +440,12 @@ class ScoreboardApp < Patchbay
 			if hscore > @teams[1].score.to_i
 				command_queue << { "goal_scored_by" => "/teams/1" }
 			end
-			@teams[1].score = hscore
-			@teams[1].dataSerial += 1
+
+			# don't update dataSerial unless something actually changes
+			if hscore != @teams[1].score.to_i
+				@teams[1].score = hscore
+				@teams[1].dataSerial += 1
+			end
 		end
 	end
 
@@ -454,8 +458,10 @@ class ScoreboardApp < Patchbay
 				command_queue << { "goal_scored_by" => "/teams/0" }
 			end
 
-			@teams[0].score = vscore
-			@teams[0].dataSerial += 1
+			if vscore != @teams[0].score.to_i
+				@teams[0].score = vscore
+				@teams[0].dataSerial += 1
+			end
 		end
 	end
 
