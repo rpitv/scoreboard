@@ -1,0 +1,7 @@
+This plugs into exacore's keyer (http://github.com/exavideo/exacore).
+Get that installed, then:
+
+gem install erubis
+gem install serialport
+
+Then you should be good to go.
