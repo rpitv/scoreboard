@@ -765,7 +765,7 @@ function doDdDisplay(withPlayClock) {
 	if (withPlayClock) {
 		postStatusWithPlayClock();
 	} else {
-		postStatus();
+		postGlobalStatus();
 	}
 }
 
@@ -784,7 +784,7 @@ function doFieldGoalDisplay(withPlayClock) {
 		postStatusWithPlayClock();
 	} else {
 		$("#textInput").val(distance + " yd FG Attempt");
-		postStatus();
+		postGlobalStatus();
 	}
 }
 
