@@ -28,7 +28,7 @@ require_relative './scoreboard_app'
 app = ScoreboardApp.new
 app.view = ScoreboardView.new('assets/rpitv_scoreboard.svg.erb')
 Thin::Logging.silent = true
-Thread.new { app.run(:Host => '::1', :Port => 3002, :signals => false) }
+Thread.new { app.run(:Host => 'localhost', :Port => 3002, :signals => false) }
 
 dirty_level = 1
 
