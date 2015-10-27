@@ -769,6 +769,11 @@ function doDdDisplay(withPlayClock) {
 	}
 }
 
+function clearStatus( ) {
+	$("#textInput").val("");
+	postGlobalStatus();
+}
+
 function ddDisplay() {
 	doDdDisplay(false);
 }
@@ -1306,6 +1311,7 @@ $(document).ready(function() {
 	$("#customYTG").change(ytgCustom);
 	$("#displayDownDistance").click(ddDisplay);
 	$("#displayDownDistanceWithPlayClock").click(ddDisplayWithPlayClock);
+	$("#clearDownDistance").click(clearStatus);
 	$("#displayFieldGoalAttempt").click(fieldGoalDisplay);
 	$("#displayFieldGoalAttemptWithClock").click(fieldGoalDisplayWithPlayClock);
 	$("#syncSettings").find("select, input").change(changeSyncSettings);
