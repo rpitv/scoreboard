@@ -254,6 +254,10 @@ jQuery.fn.buildTeamControl = function() {
 			newPenalty.call(this, $(this).attr("value"));
 		});
 
+		$(elem).find(".doubleMinorBttn").click(function() {
+			newDoubleMinorPenalty.call(this);
+		});
+
 		$(elem).find("#clearPenalties").click(clearPenalties);
 		
 		$(this).team()
@@ -332,10 +336,7 @@ jQuery.fn.newPenaltyDiv = function() {
 	return penaltyDiv;
 }
 	
-
-// newPenalty
-// add a penalty to the team's penalty queue
-function newPenalty(time) {
+jQuery.fn.newPenaltyObject = function(time) {
 	var penaltyDiv = $(this).team().newPenaltyDiv();
 
 	// set up penalty time correctly (creative selector abuse)
@@ -347,10 +348,26 @@ function newPenalty(time) {
 	$(this).team().find('#penaltyPlayer').val('')
 	$(this).team().find('#penaltyPenalty').val('')
 
+	return penaltyDiv;
+}
+
+// newPenalty
+// add a penalty to the team's penalty queue
+function newPenalty(time) {
+	var penaltyDiv = $(this).team().newPenaltyObject(time);
+
 	// add to the shorter of the two penalty queues
 	$(this).team().queuePenalty(penaltyDiv);
 
 	// sync team data
+	$(this).team().markDirtyTeamData();
+}
+
+function newDoubleMinorPenalty() {
+	var penaltyDiv1 = $(this).team().newPenaltyObject(1200);	
+	var penaltyDiv2 = $(this).team().newPenaltyObject(1200);	
+
+	$(this).team().queuePenalty([penaltyDiv1, penaltyDiv2]);
 	$(this).team().markDirtyTeamData();
 }
 
@@ -381,7 +398,13 @@ jQuery.fn.queuePenalty = function(penalty_div) {
 		$(queue).penaltyQueueStartNow();
 	}
 
-	$(queue).find(".penalty_list").append(penalty_div);
+	if (penalty_div instanceof Array) {
+		for (var i = 0; i < penalty_div.length; i++) {
+			$(queue).find(".penalty_list").append(penalty_div[i]);
+		}
+	} else {
+		$(queue).find(".penalty_list").append(penalty_div);
+	}
 }
 
 jQuery.fn.penaltyQueueFlush = function( ) {
