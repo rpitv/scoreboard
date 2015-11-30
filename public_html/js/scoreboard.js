@@ -255,7 +255,7 @@ jQuery.fn.buildTeamControl = function() {
 		});
 
 		$(elem).find(".doubleMinorBttn").click(function() {
-			newDoubleMinorPenalty.call(this);
+			newDoubleMinorPenalty.call(this, $(this).attr('value'));
 		});
 
 		$(elem).find("#clearPenalties").click(clearPenalties);
@@ -363,9 +363,9 @@ function newPenalty(time) {
 	$(this).team().markDirtyTeamData();
 }
 
-function newDoubleMinorPenalty() {
-	var penaltyDiv1 = $(this).team().newPenaltyObject(1200);	
-	var penaltyDiv2 = $(this).team().newPenaltyObject(1200);	
+function newDoubleMinorPenalty(time) {
+	var penaltyDiv1 = $(this).team().newPenaltyObject(time);	
+	var penaltyDiv2 = $(this).team().newPenaltyObject(time);	
 
 	$(this).team().queuePenalty([penaltyDiv1, penaltyDiv2]);
 	$(this).team().markDirtyTeamData();
