@@ -1268,7 +1268,8 @@ function updateTeamUI(){
 		var newBorderColor = '5px solid ' + mainColor;
 		
 		$(this).css('border', newBorderColor);
-		$(this).find('span.teamName').html($(this).find('#name').val()).css('color',mainColor);
+		$(this).find('.teamName').html($(this).find('#name').val())
+		$(this).find('.teamName, .homeAwayTeamIndicator').css('color',mainColor);
 	})
 }
 
