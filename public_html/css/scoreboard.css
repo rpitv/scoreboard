@@ -238,3 +238,7 @@ span.primaryColor:hover, span.secondaryColor:hover{
 	cursor:pointer;
 	border: 1px solid #ffffff;
 }
+input[type='text']:focus{
+	background: #ff9;
+	outline: 2px solid #c60;
+}

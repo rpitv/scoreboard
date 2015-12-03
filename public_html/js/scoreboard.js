@@ -26,6 +26,7 @@ var last_clock_value;
 var overtime_length = 5*60*10;
 var schoolList = [];
 var sportList = [];
+var blurTimeout;
 
 function getText(sourceurl, callback) {
 	jQuery.ajax({
@@ -1273,6 +1274,15 @@ function updateTeamUI(){
 	})
 }
 
+//auto-blur after set time to avoid keybinding issues and mistaken input
+function blurTextInput(){
+	clearTimeout(blurTimeout); //resets any existing timeouts
+	blurTimeout = setTimeout(function(){
+		$(':text').blur();
+	}, 15000);
+}
+
+
 $(document).ready(function() {
 	updateClockTimeout( );
 	updatePreviewTimeout( );
@@ -1295,19 +1305,21 @@ $(document).ready(function() {
 		resizable: false,
 	});
 
+	$('input:text').on('input focus', null, null, blurTextInput);
+	
 	$("#gameSettings").change(putSettings);
 	transitionScoreboard.call(this);
-	
+
 	keyBinding();
 	statusBttnColor();
 	$("#toggleSettings").click(showHideSettings);
 	// GENERATE LIST OF SCHOOLS FOR AUTOCOMPLETE FROM JSON
 	autocompleteSchools();
-	
+
 	setTimeout(function(){teamColorPicker()}, 1000);
-	
+
 	$("#gameType").click(generateSportList);
-	
+
 	//sets to a specific gametype
 	//this will be rectified in future when getSettings() is working
 	$(".baseball, .basketball, .broomball, .football, .hockey, .lacrosse, .rugby, .soccer, .volleyball").hide();
