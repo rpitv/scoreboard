@@ -27,7 +27,7 @@
 		"timeoutsResetPeriod":"",
 		"timeoutsResetToggle":false,
 		"timeoutsToggle":false,
-		"penaltiesList": [
+		"penalties": [
 			"",
 			"",
 			""
@@ -60,7 +60,7 @@
 		"timeoutsResetPeriod":"",
 		"timeoutsResetToggle":false,
 		"timeoutsToggle":false,
-		"penaltiesList": [
+		"penalties": [
 			"Boarding",
 			"Butt-ending",
 			"Charging",
@@ -123,7 +123,7 @@
 		"timeoutsResetPeriod":"",
 		"timeoutsResetToggle":false,
 		"timeoutsToggle":true,
-		"penaltiesList": [
+		"penalties": [
 
 		]
 	},
@@ -154,7 +154,7 @@
 		"timeoutsResetPeriod":"1",
 		"timeoutsResetToggle":true,
 		"timeoutsToggle":true,
-		"penaltiesList": [
+		"penalties": [
 		]
 	},
 		{
@@ -184,7 +184,7 @@
 		"timeoutsResetPeriod":"1",
 		"timeoutsResetToggle":true,
 		"timeoutsToggle":true,
-		"penaltiesList": [
+		"penalties": [
 		]
 	},
 		{
@@ -214,7 +214,26 @@
 		"timeoutsResetPeriod":"",
 		"timeoutsResetToggle":false,
 		"timeoutsToggle":false,
-		"penaltiesList": [
+		"penalties": [
+			"Targeting",
+			"Unsportmanlike Conduct",
+			"Unnecessary Roughness",
+			"Body Checking",
+			"Slashing",
+			"Tripping",
+			"Illegal Crosse",
+			"Illegal Equipment",
+			"Cross-Check",
+			"Fighting",
+			"Goalkeeper Interference",
+			"Holding",
+			"Illegal Screen",
+			"Illegal Procedure",
+			"Delay of Game",
+			"Interference",
+			"Offside",
+			"Pushing",
+			"Stalling"
 		]
 	}
 ]

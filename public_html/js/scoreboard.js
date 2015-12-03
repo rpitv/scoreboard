@@ -1108,6 +1108,12 @@ function generateSportList() {
 						$('.' + currentSport).fadeIn();
 						$("#resetOnChangeDialog").dialog('open');
 						document.title = ('Exaboard - ' + $("#gameType").val());
+						autocompletePenalties.length = 0;	//clear penalties before adding new
+						$.each(v.penalties, function(k,v){
+							autocompletePenalties.push(v);
+						});
+						console.log(autocompletePenalties);
+
 					}
 				});
 			});
