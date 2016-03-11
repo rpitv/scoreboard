@@ -1196,7 +1196,12 @@ function keyBinding(){
 		if (e.keyCode == 32 && $(document.activeElement).filter("input").length != 1) {
 			$("#transitionControl").trigger("click");
 		}
-		
+		if (e.keyCode == 38 && $(document.activeElement).filter("input").length != 1) {
+			adjustClock.call(this, 100);
+		}
+		if (e.keyCode == 40 && $(document.activeElement).filter("input").length != 1) {
+			adjustClock.call(this, -100);
+		}
 		if (e.keyCode == 83 && $(document.activeElement).filter("input").length != 1) {
 			showHideSettings();
 		}
