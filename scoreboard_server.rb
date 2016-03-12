@@ -38,9 +38,18 @@ if ARGV.delete('-n')
 	run_with_keyer = false
 end
 
+if ARGV.delete('-s')
+	# write to SVG stream
+	output_file = File.open("scoreboard.svgseq", "w")
+end
+
 while true
 	# prepare next SVG frame
 	data = app.view.render
+
+	if output_file
+		output_file.write(data)
+	end
 
 	if run_with_keyer
 		# build header with data length and global alpha
@@ -62,6 +71,6 @@ while true
 	else
 		# just render about once every 30 seconds so that animations
 		# work sort of correctly if we are running without the keyer
-		sleep(1/30.0)
+		sleep(1001.0/30000.0)
 	end
 end
