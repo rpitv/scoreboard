@@ -27,7 +27,7 @@ module SerialSyncHelper
 	# in the options.
 	def open_port(options, default_baud)
 		port = options['port'] || '/dev/ttyS0'
-		baud = options['baud'] || default_baud
+		baud = options['baud'].to_i || default_baud
 
 		# check if we really have (something resembling) a serial port
 		isatty = false
