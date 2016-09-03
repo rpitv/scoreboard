@@ -1,21 +1,22 @@
 # Copyright 2011, 2014 Exavideo LLC.
-# 
+#
 # This file is part of Exaboard.
-# 
+#
 # Exaboard is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Exaboard is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
 require_relative './serial_sync_helper'
+require 'hexdump'
 
 ##
 # This class implements a parser for the Daktronics RTD protocol.
@@ -24,27 +25,26 @@ require_relative './serial_sync_helper'
 # Each packet begins with a 0x16 byte and ends with a 2-byte checksum
 # followed by a 0x17 byte. This data is transmitted serially, 19200 bps
 # 8N1, over RS232 and current loop interfaces from the Daktronics console.
-# The checksum is simply the modulo-256 sum of all bytes, starting with the 
+# The checksum is simply the modulo-256 sum of all bytes, starting with the
 # first byte following the 0x16 byte and ending with the last byte before
 # the checksum itself. The checksum is transmitted as two ASCII hexadecimal
 # digits instead of a single byte.
-# 
-# Bytes 9 through 18 of the payload are a string that uniquely identifies
-# the data item being transmitted. This is typically 00421xxxxx
-# where xxxxx is the "item number" listed in the All Sport 5000 Series
-# Enhanced RTD Reference Manual published by Daktronics Inc., MINUS ONE.
-# This document, Daktronics document number ED12483, may be found at 
-# http://www.daktronics.com/Web%20Documents/Customer-Service-Manuals/ED-12483.pdf
+#
+# Bytes 9 through 18 of the payload are a string that identifies the address
+# of the first byte transmitted. This is typically 00421xxxxx where xxxxx
+# is the "item number" listed in the All Sport 5000 Series Enhanced RTD
+# Reference Manual published by Daktronics Inc., MINUS ONE. This document,
+# Daktronics document number ED12483, may be found at
+# http://www.daktronics.com/Web%20Documents/Customer-Service-Manuals/ED-12483.pdf.
 #
 # This parser operates in three stages. The top level breaks the serial stream
-# apart into packets, which are processed by process_dak_packet(). 
-# process_dak_packet() validates the checksum, then looks for a 
-# +packet_xxxxxxxxxx_ method, where xxxxxxxxxx is the data item identifier 
-# string from bytes 9-18 of the packet. These functions are responsible for 
-# interpreting the packet payload and calling the appropriate sync function
-# on app.
+# apart into packets, which are processed by process_dak_packet().
+# process_dak_packet() validates the checksum, then beginning at the start
+# address in the packet, calls the handler for each address. The handlers
+# are defined in a hash in process_dak_packet. These functions are responsible
+# for interpreting each portion of the payload and calling the appropriate
+# sync functions in @app.
 class DaktronicsRtdSync
-
 	include SerialSyncHelper
 
 	##
@@ -79,167 +79,59 @@ class DaktronicsRtdSync
 
 	##
 	# Parse main game clock (item 1)
-	def packet_0042100000(payload)
+	def sync_game_clock(payload)
 		tenths = -1
 
 		# try to parse payload as time in minutes:seconds
 		# or seconds.tenths
 		if (payload =~ /^(([ \d]\d):(\d\d))/)
-				tenths = $2.to_i * 600 + $3.to_i * 10
+			tenths = $2.to_i * 600 + $3.to_i * 10
 		elsif (payload =~ /^(([ \d]\d).(\d))/)
-				tenths = $2.to_i * 10 + $3.to_i
+			tenths = $2.to_i * 10 + $3.to_i
 		else
-				puts "0042100000: don't understand clock format"
+			puts "DaktronicsRtdSync: unrecognized clock format"
 		end
 
-		if tenths >= 0 
+		if tenths >= 0
 			@app.sync_clock_time_remaining(tenths)
 		end
 	end
 
-	## 
-	# Parse period number (item 142)
-	def packet_0042100141(payload)
-		# first 2 characters of the payload should be period number
-		# as an integer. The rest of the message has various mostly
-		# useless preformatted string representations.
-		if (payload =~ /^([ \d]{2})/)
-			@app.sync_clock_period($1.to_i)
-		end
-	end
-
 	##
-	# Parse home team score (item 108)
-	def packet_0042100107(payload)
-		STDERR.puts "home team score payload: #{payload}"
-		if (payload =~ /(\d+)/)
-			home_score = $1.to_i  
-			@app.sync_hscore(home_score)
-		end
-	end
-
-	##
-	# Parse visiting team score (item 112)
-	def packet_0042100111(payload)
-		STDERR.puts "away team score payload: #{payload}"
-		if (payload =~ /(\d+)/)
-			guest_score = $1.to_i  
-			@app.sync_vscore(guest_score)
-		end
-	end
-
-	##
-	# Parse home team shots on goal (item 422)
-	def packet_0042100421(payload)
+	# This is used for all fields that are plain integer values, including
+	# home team score (item 108) (method = :sync_hscore)
+	# visiting team score (item 112) (method = :sync_vscore)
+	# home and visiting team shots on goal (422 and 468)
+	# (method = :sync_hshots, :sync_vshots)
+	# period (142) (method = :sync_clock_period)
+	def sync_integer(payload, method)
 		if (payload =~ /^\s*(\d+)/)
-			@app.sync_hshots($1.to_i)
+			value = $1.to_i
+			@app.send(method, value)
 		end
 	end
 
-	##
-	# Parse visiting team shots on goal (item 468)
-	def packet_0042100467(payload)
-		if (payload =~ /^\s*(\d+)/)
-			@app.sync_vshots($1.to_i)
-		end
+	def sync_string(payload, method)
+		@app.send(method, payload)
 	end
 
-	##
-	# Parse ball-on message (item 219)
-	# These are not always sent when the down and distance change.
-	# Sometimes down (+packet_0042100221+) or distance (+packet_0042100224+)
-	# messages are sent instead.
-	def packet_0042100219(payload)
-		# first field is ball position, second is down
-		# third is distance to go
-		if (payload =~ /^([0-9 ]{2})(1ST|2ND|3RD|4TH)([0-9 ]{2})/)
-			ballpos = $1.to_i
-			down = $2.downcase
-			to_go = $3.to_i
-
-			@app.sync_down(down)
-			@app.sync_ball_position(ballpos)
-
-			# if the ball is on the same yard line as the yards to go,
-			# the distance should be "goal"
-			if (ballpos == to_go)
-				@app.sync_distance("Goal")
-			else
-				@app.sync_distance(to_go)
-			end
-		end
-	end
-	
-	##
-	# Parse football down (item 222)
-	# These are not always sent when the down changes. Sometimes a
-	# ball-on message is sent instead (see +packet_0042100219+).
-	def packet_0042100221(payload)
-		if (payload =~ /(1st|2nd|3rd|4th)/i)
-	    STDERR.puts "#{$1} down"
-			@app.sync_down($1.downcase) 
-		end
-	end
-	
-	##
-	# Parse yards to go (item 225)
-	# These are not always sent when the distance to go changes. Sometimes a
-	# ball-on message is sent instead (see +packet_0042100219+).
-	def packet_0042100224(payload)
-		if (payload =~ /(\d+)/)
-	    STDERR.puts "#{$1} to go"
-			@app.sync_distance($1.to_i)
-		end
-	end
-
-	##
-	# Parse play clock (item 201)
-	#
-	# Daktronics documentation is not quite correct for this item.
-	# The documentation indicates that the play clock is in mm:ss
-	# format; however, the actual data transmitted appears to be
-	# just a number of seconds.
-	def packet_0042100200(payload)
-		if (payload =~ /(\d+)/)
-			@app.sync_play_clock($1.to_i * 10)
-		end
-	end
-
-	##
-	# Parse home possession (item 209)
-	#
-	# Daktronics documentation appears to be incorrect for this item.
-	# The documentation suggests that this item should contain a 
-	# less-than sign to indicate home-team possession, and a blank
-	# space otherwise. But it seems that it may contain a less-than or
-	# greater-than sign depending on which team has possession.
-	def packet_0042100209(payload)
+	def sync_possession(payload, team)
 		if payload =~ /([<>])/
-			STDERR.puts "HOME team GAINED possession (#{$1})"
+			@app.sync_possession(team, true)
 		else
-			STDERR.puts "HOME team LOST possession"
+			@app.sync_possession(team, false)
 		end
 	end
 
-	##
-	# Parse guest possession (item 215)
-	# 
-	# Daktronics documentation indicates that this field should contain
-	# a greater-than sign to indicate guest-team possession, and a blank
-	# space otherwise. However, testing with an actual console indicates
-	# that this may not be correct.
-	def packet_0042100214(payload)
-		if payload =~ /([<>])/
-			STDERR.puts "GUEST team GAINED possession (#{$1})"
-		else
-			STDERR.puts "GUEST team LOST possession"
-		end
+	def dump_payload(payload, comment)
+		puts "#{comment} payload:"
+		Hexdump.dump(payload, :width => 16)
 	end
 
 	##
 	# Process Daktronics RTD packet.
 	#
-	# This routine receives in +buf+ the string of bytes between 0x16 and 
+	# This routine receives in +buf+ the string of bytes between 0x16 and
 	# 0x17 bytes, not including those bytes. It validates the packet checksum,
 	# then calls the appropriate packet parser with the payload. If the packet
 	# is of unknown type, the item number field is printed.
@@ -256,22 +148,58 @@ class DaktronicsRtdSync
 			STDERR.puts "warning: invalid checksum on this packet (ours #{our_cksum}, theirs #{cksum})"
 		end
 
-		address = buf[9..18]
+		payload = buf[20..-4]
+		start_address = buf[9..18]
 
-		if (address =~ /^(\d+)$/ && respond_to?("packet_#{$1}"))
-			send("packet_#{$1}", buf[20..-4])
-		else
-			STDERR.puts ""
-			STDERR.puts "--- UNKNOWN PACKET (#{address}) ENCOUNTERED ---"
-			STDERR.puts ""
+		# Map addresses to handlers.
+		# Each address maps to an array. First item is the number of
+		# bytes needed. Second is the handler function to call.
+		# Rest of array is additional args to pass to the handler.
+		handler_map = {
+			42100000 => [ 5, :sync_game_clock ],
+			42100107 => [ 4, :sync_integer, :sync_hscore ],
+			42100111 => [ 4, :sync_integer, :sync_vscore ],
+			42100421 => [ 3, :sync_integer, :sync_hshots ],
+			42100467 => [ 3, :sync_integer, :sync_vshots ],
+			42100141 => [ 2, :sync_integer, :sync_clock_period ],
+			42100200 => [ 8, :sync_integer, :sync_play_clock_seconds ],
+			#42100200 => [ 8, :dump_payload, "play clock" ],
+			42100209 => [ 1, :sync_possession, 1 ],
+			42100214 => [ 1, :sync_possession, 0 ],
+			42100219 => [ 2, :sync_integer, :sync_ball_position ],
+			42100221 => [ 3, :sync_string, :sync_down ],
+			42100224 => [ 2, :sync_integer, :sync_distance ],
+		}
+
+		if (start_address =~ /^(\d+)$/)
+			start_address = start_address.to_i
+			end_address = start_address + payload.length - 1
+
+			(start_address..end_address).each do |pos|
+				bytes_left = end_address - pos + 1
+				handler = handler_map[pos]
+				if handler
+					#STDERR.puts "this packet has address #{pos}"
+				else
+					#STDERR.puts "this packet has UNHANDLED address #{pos}"
+				end
+				if (handler && bytes_left >= handler[0])
+					s = pos - start_address
+					e = s + handler[0] - 1
+					send(
+						handler[1], payload[s..e],
+						*handler[2..-1]
+					)
+				end
+			end
 		end
 	end
 
 	##
-	# Main parser loop. 
+	# Main parser loop.
 	#
 	# This routine attempts to read bytes from the serial port and reassemble
-	# them into packets, looking for 0x16 and 0x17 delimiter bytes. When a 
+	# them into packets, looking for 0x16 and 0x17 delimiter bytes. When a
 	# complete packet is received, it is passed to +process_dak_packet+ for
 	# further processing and parsing.
 	def run_thread

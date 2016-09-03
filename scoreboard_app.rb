@@ -1,17 +1,17 @@
 # Copyright 2011, 2014 Exavideo LLC.
-# 
+#
 # This file is part of Exaboard.
-# 
+#
 # Exaboard is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Exaboard is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -25,7 +25,7 @@ require_relative './team'
 require_relative './period_descriptor'
 
 ##
-# The scoreboard Patchbay application. 
+# The scoreboard Patchbay application.
 # Responsible for all HTTP request handling.
 # Also serves as the location for game state data.
 class ScoreboardApp < Patchbay
@@ -115,13 +115,13 @@ class ScoreboardApp < Patchbay
 	# PUT request to a team. Used by UI to upload team state data.
 	put '/team/:id' do
 		id = params[:id].to_i
-		
+
 		if id == 0 or id == 1
 			if @teams[id].dataSerial < incoming_json['dataSerial']
 				# the incoming data is based on the latest we have, so accept
 				STDERR.puts "accepting request"
-				Thread.exclusive { 
-					@teams[id].merge!(incoming_json) 
+				Thread.exclusive {
+					@teams[id].merge!(incoming_json)
 				}
 				save_data
 				render :json => @teams[id].to_json
@@ -251,7 +251,7 @@ class ScoreboardApp < Patchbay
 	# Get current autosync settings.
 	# Returns a JSON object with the following properties.
 	#
-	# [+clock+]		True if clock data is being synchronized to external 
+	# [+clock+]		True if clock data is being synchronized to external
 	#				data feed.
 	# [+score+]		As above, for score data.
 	# [+other+]		As above, for all other types of data.
@@ -267,7 +267,7 @@ class ScoreboardApp < Patchbay
 	# Set autosync settings.
 	# Accepts a JSON object with the following properties.
 	#
-	# [+clock+]		True if clock data should be synchronized to external 
+	# [+clock+]		True if clock data should be synchronized to external
 	#				data feed.
 	# [+score+]		As above, for score data.
 	# [+other+]		As above, for all other types of data.
@@ -304,22 +304,22 @@ class ScoreboardApp < Patchbay
 
 	##
 	# Set game status string.
-	# Accepts a JSON object with a +message+ property. 
+	# Accepts a JSON object with a +message+ property.
 	put '/status' do
 		@status = incoming_json['message']
 		@status_color = incoming_json['color'] || 'white'
 		@status_use_play_clock = incoming_json['enablePlayClock'] || false
 		render :json => ''
 	end
-	
+
 	##
 	# Set scoreboard settings.
-	# Accepts a JSON object of the format found in 
+	# Accepts a JSON object of the format found in
 	# +public_html/js/sports.json+
 	put '/scoreboardSettings' do
 		@sport_settings = incoming_json
 		STDERR.puts @sport_settings.inspect
-		
+
 		number_of_periods = @sport_settings['periodQty'].to_i
 		number_of_overtimes = @sport_settings['otPeriodQty']
 		if number_of_overtimes =~ /^\d+/
@@ -336,12 +336,12 @@ class ScoreboardApp < Patchbay
 			render :status => 400
 			return
 		end
-		
+
 		new_clock_settings = GameClock::Settings.new(
 			period_length, overtime_length, number_of_periods, number_of_overtimes
 		)
 		@clock.load_settings(new_clock_settings)
-		
+
 		STDERR.puts "number_of_periods=#{number_of_periods}"
 		render :json => ''
 	end
@@ -450,7 +450,7 @@ class ScoreboardApp < Patchbay
 	end
 
 	##
-	# Set the current guest team score, if autosync is enabled. 
+	# Set the current guest team score, if autosync is enabled.
 	# Typically used by sync feed parsers.
 	def sync_vscore(vscore)
 		if @autosync_score
@@ -513,7 +513,7 @@ class ScoreboardApp < Patchbay
 	end
 
 	##
-	# Set the current time remaining if autosync is enabled. 
+	# Set the current time remaining if autosync is enabled.
 	# Typically used by sync feed parsers.
 	def sync_clock_time_remaining(tenths)
 		if @autosync_clock
@@ -522,14 +522,14 @@ class ScoreboardApp < Patchbay
 	end
 
 	##
-	# Set the current time period if autosync is enabled. 
+	# Set the current time period if autosync is enabled.
 	# Typically used by sync feed parsers.
 	def sync_clock_period(period)
 		if @autosync_clock
 			@clock.reset_time(@clock.period_remaining, period)
 		end
 	end
-	
+
 	##
 	# Start the clock, if autosync is enabled.
 	# Typically used by sync feed parsers.
@@ -554,6 +554,32 @@ class ScoreboardApp < Patchbay
 		end
 	end
 
+	def sync_play_clock_seconds(seconds)
+		if @autosync_clock
+			@play_clock.time_remaining = seconds * 10
+		end
+	end
+
+	##
+	# Set possession to the given team (0 or 1; nil clears both teams)
+	def sync_possession(team, state)
+		if @autosync_other
+			if team
+				@teams[team].possession = state
+				@teams[team].dataSerial += 1
+				if state
+					@teams[1-team].possession = false
+					@teams[1-team].dataSerial += 1
+				end
+			else
+				@teams[0]['possession'] = false
+				@teams[1]['possession'] = false
+				@teams[0].dataSerial += 1
+				@teams[1].dataSerial += 1
+			end
+		end
+	end
+
 protected
 	##
 	# Parse HTTP request body JSON into a Ruby object
@@ -568,7 +594,7 @@ protected
 	end
 
 	##
-	# Save current team states to file. This does not yet save the clock 
+	# Save current team states to file. This does not yet save the clock
 	# or any other settings.
 	def save_data
 		File.open(@DATAFILE_NAME, 'w') do |f|
