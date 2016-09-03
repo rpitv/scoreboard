@@ -1,17 +1,17 @@
 # Copyright 2014 Exavideo LLC.
-# 
+#
 # This file is part of Exaboard.
-# 
+#
 # Exaboard is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Exaboard is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -26,7 +26,7 @@ class Team
 
 		set_defaults
 	end
-	
+
 	def set_defaults
 		@dataSerial += 1
 		@score = 0
@@ -38,6 +38,7 @@ class Team
 			'activeQueues' => [ [], [] ],
 			'activeQueueStarts' => [0, 0],
 		}
+		@syncedPenalties = nil
 		@autocompletePlayers = []
 		@emptyNet = false
 		@possession = false
@@ -49,7 +50,9 @@ class Team
 	def to_json(state=nil, depth=0)
 		json_hash = {}
 		instance_variables.each do |varname|
-			json_hash[varname[1..-1] ] = instance_variable_get(varname)
+			if (varname != '@syncedPenalties')
+				json_hash[varname[1..-1] ] = instance_variable_get(varname)
+			end
 		end
 
 		json_hash.to_json
@@ -71,6 +74,7 @@ class Team
 	attr_accessor :score, :shotsOnGoal, :timeoutsLeft, :timeoutNowInUse
 	attr_accessor :penalties, :autocompletePlayers, :emptyNet
 	attr_accessor :possession, :fontWidth, :status, :statusColor
+	attr_accessor :syncedPenalties
 
 	# override the default accessors for these and force them to be numeric
 	def score=(score)

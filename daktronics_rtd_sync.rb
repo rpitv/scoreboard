@@ -44,6 +44,10 @@ require 'hexdump'
 # are defined in a hash in process_dak_packet. These functions are responsible
 # for interpreting each portion of the payload and calling the appropriate
 # sync functions in @app.
+
+SyncedPenaltyData = Struct.new(:strength, :time_to_strength_change)
+PenaltySlot = Struct.new(:player, :timeRemaining)
+
 class DaktronicsRtdSync
 	include SerialSyncHelper
 
@@ -59,6 +63,11 @@ class DaktronicsRtdSync
 		@sp = open_port(options, 19200)
 		@sp.read_timeout = 500
 		@thread = Thread.new { run_thread }
+
+		@penalty_slots = [
+			[nil, nil, nil, nil, nil, nil],
+			[nil, nil, nil, nil, nil, nil]
+		]
 	end
 
 	##
@@ -115,6 +124,8 @@ class DaktronicsRtdSync
 		@app.send(method, payload)
 	end
 
+	##
+	# Sync ball possession (items 210 and 215)
 	def sync_possession(payload, team)
 		if payload =~ /([<>])/
 			@app.sync_possession(team, true)
@@ -126,6 +137,62 @@ class DaktronicsRtdSync
 	def dump_payload(payload, comment)
 		puts "#{comment} payload:"
 		Hexdump.dump(payload, :width => 16)
+	end
+
+	##
+	# Parse penalty data (items 226 to 338)
+	def penalty_slot(payload, team, slot)
+		# update the penalty slots
+		if payload[0..1] == '  '
+			@penalty_slots[team][slot] = nil
+		else
+
+			@penalty_slots[team][slot] ||= PenaltySlot.new
+			slot = @penalty_slots[team][slot]
+
+			slot.player = payload[0..1].strip
+			minutes = payload[2..3].strip.to_i
+			seconds = payload[5..6].strip.to_i
+			seconds = seconds + 60 * minutes
+			slot.timeRemaining = seconds * 10
+		end
+
+		sync_penalty_data(team)
+	end
+
+	##
+	# Send the synchronized penalty data to the scoreboard app.
+	def sync_penalty_data(team)
+		# Assemble the penalties into queues.
+		slots = @penalty_slots[team]
+		queues = [0, 0]
+		queue_players = { }
+		team_name = (team == 0) ? "AWAY" : "HOME"
+		slots.each do |slot|
+			if slot
+				pq = queue_players[slot.player]
+				if pq
+					queues[pq] += slot.timeRemaining
+				else
+					min_queue = queues.index(queues.min)
+					queues[min_queue] += slot.timeRemaining
+					queue_players[slot.player] = min_queue
+				end
+			end
+		end
+
+		# the number of players this team is down is the number of
+		# queues with non-zero length
+		strength_deficit = queues.count { |x| x != 0 }
+
+		# the time until the situation changes is the time until
+		# the shortest non-zero queue runs down
+		time_remaining = queues.reject { |x| x == 0 }.min || 0
+
+		penalty_data = SyncedPenaltyData.new
+		penalty_data.strength = 5 - strength_deficit
+		penalty_data.time_to_strength_change = time_remaining
+		@app.sync_penalties(team, penalty_data)
 	end
 
 	##
@@ -169,6 +236,18 @@ class DaktronicsRtdSync
 			42100219 => [ 2, :sync_integer, :sync_ball_position ],
 			42100221 => [ 3, :sync_string, :sync_down ],
 			42100224 => [ 2, :sync_integer, :sync_distance ],
+			42100225 => [ 10, :penalty_slot, 1, 0 ],
+			42100235 => [ 10, :penalty_slot, 1, 1 ],
+			42100245 => [ 10, :penalty_slot, 1, 2 ],
+			42100255 => [ 10, :penalty_slot, 1, 3 ],
+			42100265 => [ 10, :penalty_slot, 1, 4 ],
+			42100275 => [ 10, :penalty_slot, 1, 5 ],
+			42100285 => [ 10, :penalty_slot, 0, 0 ],
+			42100295 => [ 10, :penalty_slot, 0, 1 ],
+			42100305 => [ 10, :penalty_slot, 0, 2 ],
+			42100315 => [ 10, :penalty_slot, 0, 3 ],
+			42100325 => [ 10, :penalty_slot, 0, 4 ],
+			42100335 => [ 10, :penalty_slot, 0, 5 ]
 		}
 
 		if (start_address =~ /^(\d+)$/)

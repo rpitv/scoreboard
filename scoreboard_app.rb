@@ -411,8 +411,8 @@ class ScoreboardApp < Patchbay
 		@view = view
 		@view.announce = AnnounceHelper.new(@announces)
 		@view.status = StatusHelper.new(self)
-		@view.away_team = TeamHelper.new(@teams[0], @clock)
-		@view.home_team = TeamHelper.new(@teams[1], @clock)
+		@view.away_team = TeamHelper.new(self, @teams[0], @clock)
+		@view.home_team = TeamHelper.new(self, @teams[1], @clock)
 		@view.penalty_state = PenaltyStringHelper.new(
 			self, @view.home_team, @view.away_team
 		)
@@ -578,6 +578,16 @@ class ScoreboardApp < Patchbay
 				@teams[1].dataSerial += 1
 			end
 		end
+	end
+
+	##
+	# Sync penalty data for a given team.
+	# penalty_data needs to provide methods strength and
+	# time_to_strength_change.
+	def sync_penalties(team, penalty_data)
+		@teams[team].syncedPenalties = penalty_data
+		# note we don't need to update dataSerial because
+		# syncedPenalties don't get serialized to JSON
 	end
 
 protected

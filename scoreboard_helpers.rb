@@ -1,17 +1,17 @@
 # Copyright 2011, 2014 Exavideo LLC.
-# 
+#
 # This file is part of Exaboard.
-# 
+#
 # Exaboard is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # Exaboard is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -20,7 +20,8 @@
 class TeamHelper
 	attr_accessor :flag
 
-	def initialize(team_data, clock)
+	def initialize(app, team_data, clock)
+		@app = app
 		@team_data = team_data
 		@clock = clock
 	end
@@ -48,7 +49,7 @@ class TeamHelper
 	def color
 		bgcolor
 	end
-	
+
 	##
 	# Returns this team's current score.
 	def score
@@ -70,17 +71,17 @@ class TeamHelper
 	##
 	# Returns a PenaltyHelper for accessing this team's penalty information.
 	def penalties
-		PenaltyHelper.new(@team_data.penalties, @clock)
+		PenaltyHelper.new(@app, @team_data, @clock)
 	end
 
 	##
-	# Returns the team's current numerical strength, in sports with 
+	# Returns the team's current numerical strength, in sports with
 	# time penalties.
 	def strength
 		penalties.strength
 	end
 
-	## 
+	##
 	# Returns true if the team is currently at full strength.
 	def full_strength
 		penalties.full_strength
@@ -118,7 +119,7 @@ class TeamHelper
 		if @team_data.statusColor && @team_data.statusColor != ''
 			@team_data.statusColor
 		else
-			# this doesn't belong here! it should return nil and let the 
+			# this doesn't belong here! it should return nil and let the
 			# template do x_team.status_color || 'yellow'
 			'yellow'
 		end
@@ -128,14 +129,20 @@ end
 ##
 # Helper functions for accessing penalty information from templates.
 class PenaltyHelper
-	def initialize(penalty_data, clock)
-		@penalty_data = penalty_data
+	def initialize(app, team_data, clock)
+		@app = app
+		@penalty_data = team_data.penalties
+		@team_data = team_data
 		@clock = clock
 	end
 
 	##
 	# Return the team's current numerical strength.
 	def strength
+		if @team_data.syncedPenalties && @app.autosync_other
+			return @team_data.syncedPenalties.strength
+		end
+
 		s = 5
 		@penalty_data['activeQueues'].each_with_index do |queue, i|
 			qstart = @penalty_data['activeQueueStarts'][i].to_i
@@ -156,9 +163,13 @@ class PenaltyHelper
 	end
 
 	##
-	# Return the time (in tenths of a second) until this team's 
+	# Return the time (in tenths of a second) until this team's
 	# strength next changes.
 	def time_to_strength_change
+		if @team_data.syncedPenalties && @app.autosync_other
+			return @team_data.syncedPenalties.time_to_strength_change
+		end
+
 		result = -1
 
 		@penalty_data['activeQueues'].each_with_index do |queue, i|
@@ -172,7 +183,7 @@ class PenaltyHelper
 
 			if time_remaining_on_queue > 0
 				if time_remaining_on_queue < result or result == -1
-					result = time_remaining_on_queue 
+					result = time_remaining_on_queue
 				end
 			end
 		end
@@ -190,14 +201,14 @@ protected
 		q.each do |penalty|
 			time += penalty['time'].to_i
 		end
-		
+
 		time
 	end
 
 end
 
 ##
-# Helper function for generating a string describing the current 
+# Helper function for generating a string describing the current
 # penalty situation.
 class PenaltyStringHelper
 	def initialize(app, home_team, away_team)
@@ -232,7 +243,7 @@ class PenaltyStringHelper
 				"Power Play"
 			elsif @away.strength == 5 and @home.strength == 4
 				"Power Play"
-			else	
+			else
 				"#{max}-on-#{min}"
 			end
 		elsif @home.empty_net and not @away.empty_net
@@ -255,7 +266,7 @@ class PenaltyStringHelper
 			end
 		else
 			# both nets are empty, this is extremely unlikely
-			# just punt and print out something showing the numerical 
+			# just punt and print out something showing the numerical
 			# situation
 			"#{max+1}-on-#{min+1}"
 		end
@@ -286,7 +297,7 @@ end
 class AnnounceHelper
 	def initialize(announce_array)
 		@announce = announce_array
-		@announce_handled = false 
+		@announce_handled = false
 		@frames = 0
 	end
 
@@ -349,7 +360,7 @@ class StatusHelper
 	##
 	# Return true if the status field should be displayed, false otherwise.
 	def is_up
-		@app.status != '' 
+		@app.status != ''
 	end
 end
 
@@ -401,7 +412,7 @@ class PlayClockHelper
 
 	def as_string
 		seconds = @play_clock.time_remaining / 10
-		format ':%02d', seconds	
+		format ':%02d', seconds
 	end
 end
 
@@ -434,7 +445,7 @@ module TimeHelpers
 	def format_time_with_tenths_conditional(time)
 		tenths = time % 10
 		seconds = time / 10
-		
+
 		minutes = seconds / 60
 		seconds = seconds % 60
 
