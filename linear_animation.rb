@@ -46,6 +46,18 @@ class LinearAnimation
 	end
 
 	##
+	# Return true if the animation is in or heading in.
+	def in?
+		@direction == IN
+	end
+
+	##
+	# Return true if the animation is out or heading out.
+	def out?
+		@direction == OUT
+	end
+
+	##
 	# Moves the animation to the next frame.
 	def frame_advance
 		if @total_frames > 0
