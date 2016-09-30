@@ -50,7 +50,7 @@ class Team
 	def to_json(state=nil, depth=0)
 		json_hash = {}
 		instance_variables.each do |varname|
-			if (varname != '@syncedPenalties')
+			if (varname != :@syncedPenalties)
 				json_hash[varname[1..-1] ] = instance_variable_get(varname)
 			end
 		end
