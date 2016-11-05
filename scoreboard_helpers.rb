@@ -226,7 +226,9 @@ class PenaltyStringHelper
 		if respond_to? "#{sportclass}_penalty_string"
 			send "#{sportclass}_penalty_string"
 		else
-			""
+			STDERR.puts "SCOREBOARD WARNING: invalid penalty class #{sportclass.inspect}"
+			STDERR.puts "SCOREBOARD WARNING: defaulted to icehockey"
+			icehockey_penalty_string
 		end
 	end
 
