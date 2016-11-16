@@ -193,13 +193,7 @@ body {
 }
 .settingsBox{
     border: 3px solid orange;
-	display:none;
-}
-.settingInputs{
-    display:block;
-}
-.settingInputs input{
-    align:center;
+	display: none;
 }
 #teamSettings input[type="text"], #gameSettings input[type="text"] {
     text-align:right;

@@ -1,4 +1,5 @@
 <!--
+<!--
 Copyright 2013 Exavideo LLC.
 
 This file is part of Exaboard.
@@ -41,65 +42,88 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 			
 			<div id="centerPanel" style="display: inline-block; width: 420px;">
 				<div id="syncSettings" class="innerBox settingsBox">
-					<label class="settingInputs">
-						Sync Mode
+					<div>
+						<label for="syncMode" class="settingInputs">Sync Mode</label>
 						<select id="syncMode" name="type">
 							<option value="None">None</option>
 							<option value="DaktronicsRtdSync">Daktronics RTD Serial</option>
 							<option value="EversanSerialSync">Eversan Serial</option>
 							<option value="DrycontactSync">Dry Contact</option>
 						</select>
-					</label>
+					</div>
 
-					<label class="settingInputs">
-						Port <input type="text" id="syncPort" name="port" />
-					</label>
+					<div>
+						<label for="syncPort" class="settingInputs">Port</label>
+						<input type="text" id="syncPort" name="port" />
+					</div>
 
-					<label class="settingInputs">
-						Baud <input type="text" id="syncBaud" name="baud" />
-					</label>
+					<div>
+						<label for="syncBaud" class="settingInputs">Baud</label>
+						<input type="text" id="syncBaud" name="baud" />
+					</div>
+
 				</div>
 				<div id="gameSettings" class="innerBox settingsBox">
-					<label class="settingInputs">Sport
+					<div>
+						<label for="gameType" class="settingInputs">Sport</label>
 						<input type="text" id="gameType" onclick="$(this).select();" />
-					</label>
-					
-					<input type="text" id="sportClassName" title="Holds class name value for each sport" style="display:none" />
+					</div>
+
+					<div>
+						<input type="text" id="sportClassName" title="Holds class name value for each sport" style="display:none" />
+					</div>
+
 					<input type="text" id="penaltiesClass" style="display:none" />
-					
-					<label class="settingInputs">Tenths
-							<input type="checkbox" disabled="disabled" id="tenthsToggle"></input>
-					</label>
 
-					<label class="settingInputs">Time<input type="checkbox" id="timeToggle" /></label>
-					
-					<label class="settingInputs">Period<input type="checkbox" id="periodToggle"></input></label>
-					
-					<label class="settingInputs">Period Length<input type="text" id="periodLength"></input></label>
-					
-					<label class="settingInputs">Qty Periods
-						<input type="text" id="periodQty"></input>
-					</label>
+					<div>
+						<label for="tenthsToggle" class="settingInputs">Tenths</label>
+						<input type="checkbox" disabled="disabled" id="tenthsToggle" />
+					</div>
 
-					<label class="settingInputs">OT
-						<input type="checkbox" id="otToggle"></input>
-					</label>
+					<div>
+						<label for="timeToggle" class="settingInputs">Time</label>
+						<input type="checkbox" id="timeToggle" />
+					</div>
 
-					<label class="settingInputs">OT Time
-						<input type="checkbox" id="otTimeToggle"></input>
-					</label>
-					
-					<label class="settingInputs">OT Period Length
-						<input type="text" id="otPeriodLength"></input>
-					</label>
-					
-					<label class="settingInputs">OT Qty Periods
-						<input type="text" id="otPeriodQty"></input>
-					</label>
+					<div>
+						<label for="periodToggle" class="settingInputs">Period</label>
+						<input type="checkbox" id="periodToggle" />
+					</div>
 
-					<label class="settingInputs">Sudden Death
-						<input type="checkbox" id="otSuddenDeath"></input>
-					</label>
+					<div>
+						<label for="peridLength" class="settingInputs">Period Length</label>
+						<input type="text" id="periodLength" />
+					</div>
+
+					<div>
+						<label for="periodQty" class="settingInputs">Qty Periods</label>
+						<input type="text" id="periodQty" />
+					</div>
+
+					<div>
+						<label for="otToggle" class="settingInputs">OT</label>
+						<input type="checkbox" id="otToggle" />
+					</div>
+
+					<div>
+						<label for="otTimeToggle" class="settingInputs">OT Time</lable>
+						<input type="checkbox" id="otTimeToggle" />
+					</div>
+
+					<div>
+						<label class="settingInputs">OT Period Length</label>
+						<input type="text" id="otPeriodLength" />
+					</div>
+
+					<div>
+						<label class="settingInputs">OT Qty Periods</label>
+						<input type="text" id="otPeriodQty" />
+					</div>
+
+					<div>
+						<label class="settingInputs">Sudden Death</label>
+						<input type="checkbox" id="otSuddenDeath" />
+					</div>
 					
 					<span style="display:none">					
 						<label class="settingInputs">Shootout
@@ -326,32 +350,34 @@ along with Exaboard.  If not, see <http://www.gnu.org/licenses/>.
 		 
 				<div style="display: none" id="teamProto">
 					<div id="teamSettings" class="innerBox settingsBox">
-						<label class="settingInputs">School
-							<input type="text" id="teamSelect" onclick="this.select();" ></input>
-						</label>
-						
-						<label class="settingInputs">Abbreviation
-							<input type="text" id="name"></input>
-						</label>
 
-						<label class="settingInputs">Main Color
-							<input type="text" id="bgcolor"></input>
+						<div>
+							<label class="settingInputs">School</label>
+							<input type="text" id="teamSelect" onclick="this.select();" />
+						</div>
+
+						<div>
+							<label class="settingInputs">Abbreviation
+							<input type="text" id="name" />
+						</div>
+
+						<div>
+							<label class="settingInputs">Main Color</label>
+							<input type="text" id="bgcolor" />
 							<span id='a1' class='teamColorOption primaryColor firstColor' ></span>
 							<span class='teamColorOption primaryColor secondColor'></span>
 							<span class='teamColorOption primaryColor thirdColor'></span>
 							<span class='teamColorOption primaryColor fourthColor'></span>
-						</label>
-						
-						
+						</div>
 
-						
-						<label class="settingInputs">2nd Color
-							<input type="text" id="fgcolor"></input>
+						<div>
+							<label class="settingInputs">2nd Color</label>
+							<input type="text" id="fgcolor" />
 							<span class='teamColorOption secondaryColor firstColor' ></span>
 							<span class='teamColorOption secondaryColor secondColor'></span>
 							<span class='teamColorOption secondaryColor thirdColor'></span>
 							<span class='teamColorOption secondaryColor fourthColor'></span>
-						</label>
+						</div>
 					</div>
 
 					<div class="innerBox baseball basketball broomball football hockey lacrosse rugby soccer volleyball" id="scoreSet">Score
